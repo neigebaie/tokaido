@@ -1,13 +1,12 @@
 // Tokaido by neigebaie (C) 2021
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL.h>
+#include "helper.h"
 
 void SDL_ExitWithError(const char *message);
 
 int main(int argc, char const *argv[])
 {
-	SDL_Window *window = NULL;
+	button();
+	/*SDL_Window *window = NULL;
 	SDL_Renderer *renderer = NULL;
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -48,14 +47,37 @@ int main(int argc, char const *argv[])
 	SDL_RenderPresent(renderer);
 
 	// SDL_ExitWithError("Test de la fonction d'erreur.");
-	SDL_Delay(5 * 1000); // juste un délai pour pouvoir voir la fenêtre.
+
+	SDL_bool program_launched = SDL_TRUE;
+
+	while (program_launched)
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type) {
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym) {
+						case SDLK_RETURN:
+							printf("Vous avez appuyé sur Entrer\n");
+							break;
+					}
+					break;
+				case SDL_QUIT:
+					program_launched = SDL_FALSE;
+					break;
+				default:
+					break;
+			}
+		}
+	}
 
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 
-	return EXIT_SUCCESS;
+	return EXIT_SUCCESS;*/
 }
 
 void SDL_ExitWithError(const char *message)
