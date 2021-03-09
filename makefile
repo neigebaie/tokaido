@@ -11,6 +11,6 @@ TARGETS = tokaido
 
 all: $(TARGETS)
 
-tokaido: src/helper.c src/button.c src/main.c
+tokaido: src/utility.c src/main.c
 	@cc $(CFLAGS) -o $@ $+ $(LDFLAGS)
 	$(call colorecho,"$@ success. ./\"$@\" to execute.")
