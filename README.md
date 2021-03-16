@@ -15,6 +15,7 @@ Adaptation du jeu de société Tokaido en langage C avec l'aide de la SDL (versi
 | SDL_image 2.0  |  https://www.libsdl.org/projects/SDL_image/ |
 | SDL_ttf 2.0  |  https://www.libsdl.org/projects/SDL_ttf/ |
 
+### Linux
 Pour compiler le projet, il suffit simplement d'utiliser la commande `make` et le tour est joué !
 ```bash
 make

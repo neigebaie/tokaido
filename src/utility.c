@@ -1,8 +1,18 @@
 #include "utility.h"
 
+// Argh, global variables...
 SDL_Window   	*window    = NULL;
 SDL_Renderer 	*renderer  = NULL;
 TTF_Font 			*font      = NULL;
+
+char title[100];
+int freq;
+int curr_count;
+int last_count;
+float delta_time;
+float update_time;
+float time_passed;
+int fps;
 
 void init(void)
 {
@@ -29,23 +39,74 @@ void init(void)
 	SDL_FreeSurface(icon);
 
 	// Création du renderer (SDL_Renderer)
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE); // SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); // SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 
 	if (renderer == NULL)
 		exit_with_error("Création du Renderer échouée");
 
 	// Initialisation SDL_TTF
 	TTF_Init();
-	font = TTF_OpenFont("ressources/fonts/Buried K9.ttf", 40);
+	font = TTF_OpenFont("ressources/fonts/Buried K9.ttf", 80);
 	if (font == NULL)
 		exit_with_error("\ressources/fonts/Buried K9.ttf\" n'a pas pu être chargé");
 }
 
+void shuffle(int *array, size_t n)
+{
+    if (n > 1)
+    {
+        size_t i;
+        for (i = 0; i < n - 1; i++)
+        {
+          size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+          int t = array[j];
+          array[j] = array[i];
+          array[i] = t;
+        }
+    }
+}
+
+void init_fps_counter() {
+    curr_count = SDL_GetPerformanceCounter();
+    last_count = 0;
+    update_time = 0;
+}
+
+void update_fps_counter() {
+    last_count = curr_count;
+    curr_count = SDL_GetPerformanceCounter();
+    freq = SDL_GetPerformanceFrequency();
+    delta_time = (float)(curr_count - last_count) / (float)freq;
+    fps = (int)(1.f / delta_time);
+    update_time += delta_time;
+
+
+    if (update_time >= 1.f) {
+        time_passed += update_time;
+        sprintf(title, "Tokaido by neigebaie      Time:  %.2f  -  FPS:  %d", time_passed, fps);
+        SDL_SetWindowTitle(window, title);
+        update_time -= 1.f;
+    }
+}
+
+SDL_Texture * load_texture(const char *path)
+{
+	SDL_Surface *surface = NULL;
+	SDL_Texture *texture = NULL;
+	surface = IMG_Load(path);
+	if (surface == NULL)
+		exit_with_error("Création de surface échouée");
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+	if (texture == NULL)
+		exit_with_error("Création de texture échouée");
+	SDL_FreeSurface(surface);
+	return texture;
+}
 
 void exit_with_error(const char *message)
 {
 	// Affiche un message d'erreur et quitte le programme
-	SDL_Log("\e[31m ERREUR 🥺 : %s > %s\e[37m\n", message, SDL_GetError());
+	printf("\e[31m ERREUR 🥺 : %s > %s\e[37m\n", message, SDL_GetError());
 	exit(EXIT_FAILURE);
 }
 
