@@ -39,7 +39,7 @@ void init(void)
 	SDL_FreeSurface(icon);
 
 	// Création du renderer (SDL_Renderer)
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); // SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); // | SDL_RENDERER_PRESENTVSYNC
 
 	if (renderer == NULL)
 		exit_with_error("Création du Renderer échouée");
@@ -66,13 +66,15 @@ void shuffle(int *array, size_t n)
     }
 }
 
-void init_fps_counter() {
+void init_fps_counter()
+{
     curr_count = SDL_GetPerformanceCounter();
     last_count = 0;
     update_time = 0;
 }
 
-void update_fps_counter() {
+void update_fps_counter()
+{
     last_count = curr_count;
     curr_count = SDL_GetPerformanceCounter();
     freq = SDL_GetPerformanceFrequency();
@@ -81,12 +83,24 @@ void update_fps_counter() {
     update_time += delta_time;
 
 
-    if (update_time >= 1.f) {
+    if (update_time >= 1.f)
+		{
         time_passed += update_time;
         sprintf(title, "Tokaido by neigebaie      Time:  %.2f  -  FPS:  %d", time_passed, fps);
         SDL_SetWindowTitle(window, title);
         update_time -= 1.f;
     }
+}
+
+void limit_fps(unsigned int limit)
+{
+    unsigned int ticks = SDL_GetTicks();
+		if (limit < ticks)
+			return;
+		else if (limit > ticks + FPS_LIMIT)
+			SDL_Delay(FPS_LIMIT);
+		else
+			SDL_Delay(limit - ticks);
 }
 
 SDL_Texture * load_texture(const char *path)

@@ -2,6 +2,7 @@
 #include "utility.h"
 #include "gui.h"
 #include "board.h"
+#include "input.h"
 
 int main(int argc, const char *argv[])
 {
@@ -11,7 +12,8 @@ int main(int argc, const char *argv[])
 
 	// load_textures();
 	load_ressources();
-	// create_main_menu();
+	// save_ressources("ressources.dat");
+	create_main_menu();
 	init_board();
 	// Textures
 	SDL_Point mousePos;
@@ -24,7 +26,14 @@ int main(int argc, const char *argv[])
 	SDL_bool program_launched = SDL_TRUE;
 	SDL_bool menu = SDL_TRUE;
 	SDL_bool update = SDL_TRUE;
+
+	SDL_bool saisie = SDL_FALSE;
+
+	Textbox textbox = init_textbox();
+
 	int stage = 0;
+	int scroll = 0;
+	unsigned int frameLimit = SDL_GetTicks() + FPS_LIMIT;
 
 	while (program_launched)
 	{
@@ -36,24 +45,41 @@ int main(int argc, const char *argv[])
 		{
 			switch (event.type)
 			{
-				case SDL_MOUSEMOTION:
-					update = SDL_TRUE;
-				case SDL_KEYDOWN:
+				case SDL_KEYUP:
 					switch (event.key.keysym.sym)
 					{
-						/*
 						case SDLK_LEFT:
-							gui.boardRect.x += 15;
-							update = SDL_TRUE;
+							scroll = 0;
 							break;
 						case SDLK_RIGHT:
-							gui.boardRect.x -= 15;
-							update = SDL_TRUE;
+							scroll = 0;
 							break;
-						*/
+					}
+					break;
+				case SDL_KEYDOWN:
+					if (saisie) {
+						input_str(event, textbox);
+						textbox.texture = create_texture_from_str(textbox.text, 0, 13, 0);
+						textbox.rect = centered_rect(textbox.texture, gui.titleRect, 1);
+						if (!textbox.length)
+							saisie = SDL_FALSE;
+						break;
+					}
+					switch (event.key.keysym.sym)
+					{
 						case SDLK_RETURN:
-							// gui.partieTex = create_texture_from_str("Chargement des ressources...", 255, 200, 200);
-							// gui.partieRect = centered_rect(gui.partieTex, gui.windowRect, 0.8);
+							if (!menu)
+								random_move();
+							else
+								textbox = init_textbox();
+								debug_textbox(textbox);
+								saisie = SDL_TRUE;
+							break;
+						case SDLK_LEFT:
+							scroll = 1;
+							break;
+						case SDLK_RIGHT:
+							scroll = -1;
 							break;
 						case SDLK_q:
 						case SDLK_ESCAPE:
@@ -66,23 +92,24 @@ int main(int argc, const char *argv[])
 					{
 						if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[0]))
 						{
-							printf("\e[31m [INFO] : Le bouton 0 a été cliqué ! ✨\n");
+							printf("\e[31m [INFO] : Le bouton Solo a été cliqué ! ✨\e[37m\n");
 							menu = SDL_FALSE;
 						}
 						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[1]))
 						{
-							printf("\e[31m [INFO] : Le bouton 1 a été cliqué ! ✨\n");
+							printf("\e[32m [INFO] : Le bouton Multi a été cliqué ! ✨\e[37m\n");
 						}
 						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[2]))
 						{
-							printf("\e[31m [INFO] : Le bouton 2 a été cliqué ! ✨\n");
+							printf("\e[33m [INFO] : Le bouton Archives a été cliqué ! ✨\e[37m\n");
 						}
 						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[3]))
 						{
-							printf("\e[31m [INFO] : Le bouton 3 a été cliqué ! ✨\n");
+							printf("\e[34m [INFO] : Le bouton Options a été cliqué ! ✨\e[37m\n");
 						}
 						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[4]))
 						{
+							printf("\e[35m [INFO] : Le bouton Quitter a été cliqué ! ✨\e[37m\n");
 							program_launched = SDL_FALSE;
 						}
 					}
@@ -95,15 +122,17 @@ int main(int argc, const char *argv[])
 			}
 		}
 
+		board.camera.origin += scroll * 10;
+
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_RenderClear(renderer);
+		// draw_board();
+		// draw_test();
 		if (menu)
 		{
-
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			SDL_RenderClear(renderer);
-			// draw_test();
-
-			SDL_RenderCopy(renderer, gui.title, NULL, &gui.titleRect);
-
+			// SDL_RenderCopy(renderer, gui.title, NULL, &gui.titleRect);
+			SDL_RenderCopy(renderer, textbox.texture, NULL, &textbox.rect);
 			for (int i = 0; i < 5; i++) {
 				if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[i]))
 					SDL_SetTextureColorMod(gui.button, 200, 200, 200);
@@ -111,32 +140,10 @@ int main(int argc, const char *argv[])
 				SDL_RenderCopy(renderer, gui.mMenuTex[i], NULL, &gui.mMenuTextRect[i]);
 				SDL_SetTextureColorMod(gui.button, 255, 255, 255);
 			}
-			/*
-			if (SDL_PointInRect(&mousePos, &gui.buttonRect))
-				SDL_SetTextureColorMod(gui.button, 200, 200, 200);
-			SDL_RenderCopy(renderer, gui.button, NULL, &gui.buttonRect);
-			SDL_SetTextureColorMod(gui.button, 255, 255, 255);
-			if (SDL_PointInRect(&mousePos, &gui.buttonRect1))
-				SDL_SetTextureColorMod(gui.button, 200, 200, 200);
-			SDL_RenderCopy(renderer, gui.button, NULL, &gui.buttonRect1);
-			SDL_SetTextureColorMod(gui.button, 255, 255, 255);
-			if (SDL_PointInRect(&mousePos, &gui.buttonRect2))
-				SDL_SetTextureColorMod(gui.button, 200, 200, 200);
-			SDL_RenderCopy(renderer, gui.button, NULL, &gui.buttonRect2);
-			SDL_SetTextureColorMod(gui.button, 255, 255, 255);
-			SDL_RenderCopy(renderer, gui.jouerTex, NULL, &gui.jouerRect);
-			SDL_RenderCopy(renderer, gui.jouerOTex, NULL, &gui.jouerORect);
-			SDL_RenderCopy(renderer, gui.quitTex, NULL, &gui.quitRect);
-			*/
-			// draw_squares(13);
-			// update = SDL_FALSE;
 		}
-		else if (update)
+		else
 		{
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			SDL_RenderClear(renderer);
-			// SDL_RenderCopy(renderer, gui.board, NULL, &gui.boardRect);
-			// update = SDL_FALSE;
+			draw_board();
 		}
 
 		mouseRect.x = mousePos.x;
@@ -144,7 +151,8 @@ int main(int argc, const char *argv[])
 		SDL_RenderCopy(renderer, gui.cursor, NULL, &mouseRect); // cursor toujours au dessus
 
 		SDL_RenderPresent(renderer);
-		// SDL_Delay(11);
+		frameLimit = SDL_GetTicks() + FPS_LIMIT;
+		limit_fps(frameLimit);
 	}
 
 	exit_with_success();

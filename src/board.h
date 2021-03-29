@@ -9,7 +9,7 @@
 #include "utility.h"
 
 // ressources
-#define SQUARES 9
+#define SQUARES 10
 #define FOODS 14
 #define ITEMS 24
 #define ITEM_CATS 4
@@ -21,19 +21,22 @@
 
 typedef struct
 {
-	SDL_Rect rect;
 	char name[100];					// nom de la case
+	SDL_Rect rect;
+	SDL_Color color;
 } SquareRes;
 
 typedef struct
 {
 	char name[100];					// nom du repas
+	SDL_Rect rect;
 	int price;
 } FoodRes;
 
 typedef struct
 {
 	char name[100];					// nom du souvenir
+	SDL_Rect rect;
 	int price;
 	int category;
 } ItemRes;
@@ -41,12 +44,14 @@ typedef struct
 typedef struct
 {
 	char name[100];					// nom de la categorie de souvenir
+	SDL_Rect rect;
 	int startCoins;
 } TravelerRes;
 
 typedef struct
 {
 	char name[100];					// nom de la categorie de souvenir
+	SDL_Rect rect;
 	int giveItem;						// Artisan				→	x:quantity
 	int givePanCard;				// Guide					→	0:nothing  1:rice  2:mount  3:sea
 	int giveBundleTk;				// Samouraï				→	x:quantity
@@ -84,6 +89,7 @@ typedef struct
 	SDL_bool isHuman;				// joueur IA ou humain
 
 	int position;						// position du joueur sur le plateau
+	int roadDist;						// éloignement de la route
 
 	int bundleToken;				// points de victoire accumulés (jeton balûchon)
 	int coins;							// pièces possédées
@@ -111,28 +117,42 @@ typedef struct
 	int capacity;						// Nb de joueurs pouvant être sur la case
 } Square;
 
+typedef struct
+{
+	int origin;
+	float scale;
+} Camera;
 
 typedef struct
 {
-	int playerCount;									// nb de joueurs sur le plateau
-	Player players[BOARD_PLAYERS];		// Liste des joueurs
+	Camera camera;
 
-	int squareCount;
+	Player players[BOARD_PLAYERS];		// Liste des joueurs
+	int playerCount;									// nb de joueurs sur le plateau
+
 	Square squares[BOARD_SQUARES];
+	int squareCount;
 
 	int turn;													// Index du joueur qui joue ce tour
 } Board;
 
 extern Board board;
+extern Ressources ressources;
 
 void load_squares(const char* path, Square *squares);
+
+Board load_board(const char* path);
 void save_board(Board board, const char* path);
+
 void init_board(void);
 
 void load_ressources(void);
 
+int whos_turn_is_it(void);
+void random_move(void);
+
 void draw_bg(void);
-void draw_board(Board board);
+void draw_board(void);
 void draw_squares(int squareCount, Square squares[]);
 
 void draw_test(void);
