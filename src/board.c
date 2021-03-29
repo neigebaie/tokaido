@@ -312,6 +312,39 @@ void random_move()
 	return;
 }
 
+void square_action ()
+{
+	switch (board.squares[ board.players[whos_turn_is_it()]])
+	{
+	 case 0 :
+	 		inn(&board);
+	 		break ;
+	case 1 :
+	 	 	shop(&board);
+	 	 	break ;
+	case 2 :
+			hotspring(&board);
+			break ;
+	case 3 :
+			temple();
+			break ;
+  case 4 :
+			encounter(&board);
+			break;
+	case 5 :
+			farm(&board) ;
+			break;
+	case 6 :
+			pano_ric(&board) ;
+			break;
+	case 7 :
+			pano_mon(&board);
+			break;
+	case 8 :
+			pano_sea(&board)
+			break ;
+	}
+}
 /*
 Liste des fonctions à créer :
  - move_player(Player player, int position)

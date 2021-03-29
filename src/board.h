@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "utility.h"
+#include "square_action.h"
 
 // ressources
 #define SQUARES 10
