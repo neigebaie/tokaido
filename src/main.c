@@ -29,7 +29,7 @@ int main(int argc, const char *argv[])
 
 	SDL_bool saisie = SDL_FALSE;
 
-	Textbox textbox = init_textbox();
+	Textbox* textbox = init_textbox();
 
 	int stage = 0;
 	int scroll = 0;
@@ -59,9 +59,10 @@ int main(int argc, const char *argv[])
 				case SDL_KEYDOWN:
 					if (saisie) {
 						input_str(event, textbox);
-						textbox.texture = create_texture_from_str(textbox.text, 0, 13, 0);
-						textbox.rect = centered_rect(textbox.texture, gui.titleRect, 1);
-						if (!textbox.length)
+						textbox->texture = create_texture_from_str(textbox->text, 0, 13, 0);
+						textbox->rect = centered_rect(textbox->texture, gui.titleRect, 1);
+						debug_textbox(textbox);
+						if (!textbox->length)
 							saisie = SDL_FALSE;
 						break;
 					}
@@ -71,7 +72,7 @@ int main(int argc, const char *argv[])
 							if (!menu)
 								random_move();
 							else
-								textbox = init_textbox();
+								reset_textbox(textbox);
 								debug_textbox(textbox);
 								saisie = SDL_TRUE;
 							break;
@@ -132,7 +133,7 @@ int main(int argc, const char *argv[])
 		if (menu)
 		{
 			// SDL_RenderCopy(renderer, gui.title, NULL, &gui.titleRect);
-			SDL_RenderCopy(renderer, textbox.texture, NULL, &textbox.rect);
+			SDL_RenderCopy(renderer, textbox->texture, NULL, &textbox->rect);
 			for (int i = 0; i < 5; i++) {
 				if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[i]))
 					SDL_SetTextureColorMod(gui.button, 200, 200, 200);

@@ -10,14 +10,15 @@
 
 typedef struct {
 	SDL_Texture *texture;
-	SDL_Rect *rect;
-	char text[TEXT_SIZE];
+	SDL_Rect rect;
+	char* text;
 	SDL_bool caps;
 	int length;
 } Textbox;
 
 void input_str(SDL_Event event, Textbox *textbox);
 Textbox* init_textbox(void);
+void reset_textbox(Textbox *textbox);
 void debug_textbox(Textbox *textbox);
 
 #endif
