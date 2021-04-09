@@ -1,20 +1,20 @@
 #include "square_action.h"
 
-// srand(time(NULL));
+//srand(time(NULL));
 
 void inn (Player* player)
 {
 
 }
 
-void shop (Player* player)
+void shop ()
 {
 
 }
 
-void hotspring (Player* player)
+void hotspring (Player* player,int hotToken)
 {
-
+  player->bundleToken += hotToken ;
 }
 
 void temple (Player* player)
@@ -27,26 +27,9 @@ void farm (Player* player)
   player->coins +=3 ;
 }
 
-void encounter (Player* player)
+void encounter (int choices)
 {
-  int type ;
-  int choices[ENCOUNTERS];
-  int choiceNb = 4;
-  choices[0] = 0;
-  choices[1] = 4;
-  choices[2] = 5;
-  choices[3] = 6;
-  for (int i = choiceNb; i < ENCOUNTERS; i++)
-  {
-    // if (!pano_complete)
-		if (1)
-    {
-      choices[choiceNb] = i;
-      choiceNb++;
-    }
-  }
-shuffle(choices, choiceNb);
-    switch (choices[0])
+    switch (choices)
     {
       case 0 :                                    //Items a faire
 
