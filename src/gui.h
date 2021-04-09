@@ -4,6 +4,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "utility.h"
+
 typedef struct
 {
 		SDL_Texture  *cursor;

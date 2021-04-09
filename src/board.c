@@ -312,36 +312,37 @@ void random_move()
 	return;
 }
 
-void square_action ()
+void square_action2()
 {
-	switch (board.squares[ board.players[whos_turn_is_it()]])
+	Player player = board.players[whos_turn_is_it()];
+	switch (whos_turn_is_it())
 	{
 	 case 0 :
-	 		inn(&board);
+	 		inn(&player);
 	 		break ;
 	case 1 :
-	 	 	shop(&board);
+	 	 	shop(&player);
 	 	 	break ;
 	case 2 :
-			hotspring(&board);
+			hotspring(&player);
 			break ;
 	case 3 :
-			temple();
+			temple(&player);
 			break ;
   case 4 :
-			encounter(&board);
+			encounter(&player);
 			break;
 	case 5 :
-			farm(&board) ;
+			farm(&player) ;
 			break;
 	case 6 :
-			pano_ric(&board) ;
+			pano_ric(&player) ;
 			break;
 	case 7 :
-			pano_mon(&board);
+			pano_mon(&player);
 			break;
 	case 8 :
-			pano_sea(&board)
+			pano_sea(&player);
 			break ;
 	}
 }
