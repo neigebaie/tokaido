@@ -75,3 +75,13 @@ void create_main_menu(void)
 		gui.mMenuTextRect[i] = centered_rect(gui.mMenuTex[i], gui.mMenuBtRect[i], 0.5);
 	}
 }
+
+void create_login_menu(void)
+{
+	printf("test\n");
+}
+
+void draw_login(void)
+{
+	printf("\n");
+}

@@ -65,19 +65,17 @@ shuffle(choices, choiceNb);
       break ;
 
       case 4 :
-        player->templeCoins +=3 ;
+        player->templeCoins += 3;
       break ;
 
       case 5 :
-        player->coins +=3 ;
+        player->coins +=3;
       break ;
 
       case 6 :
-        player->bundleToken +=3 ;
+        player->bundleToken +=3;
       break ;
-
     }
-
 }
 
 void pano_mon (Player* player)

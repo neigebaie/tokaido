@@ -1,8 +1,14 @@
 // Tokaido by neigebaie (C) 2021
 #include "utility.h"
 #include "gui.h"
+#include "game.h"
 #include "board.h"
 #include "input.h"
+
+#define MENU_MAIN     0
+#define MENU_LOGIN    1
+#define MENU_SETTINGS 2
+#define MENU_BOARD    3
 
 int main(int argc, const char *argv[])
 {
@@ -24,7 +30,7 @@ int main(int argc, const char *argv[])
 	mouseRect.h /= 2;
 
 	SDL_bool program_launched = SDL_TRUE;
-	SDL_bool menu = SDL_TRUE;
+	SDL_bool menu = MENU_MAIN;
 	SDL_bool update = SDL_TRUE;
 
 	SDL_bool saisie = SDL_FALSE;
@@ -69,7 +75,7 @@ int main(int argc, const char *argv[])
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_RETURN:
-							if (!menu)
+							if (menu != MENU_MAIN)
 								random_move();
 							else
 								reset_textbox(textbox);
@@ -91,27 +97,32 @@ int main(int argc, const char *argv[])
 				case SDL_MOUSEBUTTONDOWN:
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
-						if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[0]))
+						switch (menu)
 						{
-							printf("\e[31m [INFO] : Le bouton Solo a été cliqué ! ✨\e[37m\n");
-							menu = SDL_FALSE;
-						}
-						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[1]))
-						{
-							printf("\e[32m [INFO] : Le bouton Multi a été cliqué ! ✨\e[37m\n");
-						}
-						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[2]))
-						{
-							printf("\e[33m [INFO] : Le bouton Archives a été cliqué ! ✨\e[37m\n");
-						}
-						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[3]))
-						{
-							printf("\e[34m [INFO] : Le bouton Options a été cliqué ! ✨\e[37m\n");
-						}
-						else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[4]))
-						{
-							printf("\e[35m [INFO] : Le bouton Quitter a été cliqué ! ✨\e[37m\n");
-							program_launched = SDL_FALSE;
+							case MENU_MAIN:
+								if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[0]))
+								{
+									printf("\e[31m [INFO] : Le bouton Solo a été cliqué ! ✨\e[37m\n");
+									menu = MENU_BOARD;
+								}
+								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[1]))
+								{
+									printf("\e[32m [INFO] : Le bouton Multi a été cliqué ! ✨\e[37m\n");
+								}
+								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[2]))
+								{
+									printf("\e[33m [INFO] : Le bouton Archives a été cliqué ! ✨\e[37m\n");
+								}
+								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[3]))
+								{
+									printf("\e[34m [INFO] : Le bouton Options a été cliqué ! ✨\e[37m\n");
+								}
+								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[4]))
+								{
+									printf("\e[35m [INFO] : Le bouton Quitter a été cliqué ! ✨\e[37m\n");
+									program_launched = SDL_FALSE;
+								}
+								break;
 						}
 					}
 					break;
@@ -130,21 +141,25 @@ int main(int argc, const char *argv[])
 		SDL_RenderClear(renderer);
 		// draw_board();
 		// draw_test();
-		if (menu)
+		switch (menu)
 		{
-			// SDL_RenderCopy(renderer, gui.title, NULL, &gui.titleRect);
-			SDL_RenderCopy(renderer, textbox->texture, NULL, &textbox->rect);
-			for (int i = 0; i < 5; i++) {
-				if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[i]))
-					SDL_SetTextureColorMod(gui.button, 200, 200, 200);
-				SDL_RenderCopy(renderer, gui.button, NULL, &gui.mMenuBtRect[i]);
-				SDL_RenderCopy(renderer, gui.mMenuTex[i], NULL, &gui.mMenuTextRect[i]);
-				SDL_SetTextureColorMod(gui.button, 255, 255, 255);
-			}
-		}
-		else
-		{
-			draw_board();
+			case MENU_MAIN:
+				// SDL_RenderCopy(renderer, gui.title, NULL, &gui.titleRect);
+				SDL_RenderCopy(renderer, textbox->texture, NULL, &textbox->rect);
+				for (int i = 0; i < 5; i++) {
+					if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[i]))
+						SDL_SetTextureColorMod(gui.button, 200, 200, 200);
+					SDL_RenderCopy(renderer, gui.button, NULL, &gui.mMenuBtRect[i]);
+					SDL_RenderCopy(renderer, gui.mMenuTex[i], NULL, &gui.mMenuTextRect[i]);
+					SDL_SetTextureColorMod(gui.button, 255, 255, 255);
+				}
+				break;
+			case MENU_BOARD:
+				draw_board();
+				break;
+			case MENU_LOGIN:
+				draw_login();
+				break;
 		}
 
 		mouseRect.x = mousePos.x;

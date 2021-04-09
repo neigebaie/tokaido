@@ -11,7 +11,6 @@
 #include "square_action.h"
 
 extern Board board;
-extern Ressources ressources;
 
 void load_squares(const char* path, Square *squares);
 
@@ -19,8 +18,6 @@ Board load_board(const char* path);
 void save_board(Board board, const char* path);
 
 void init_board(void);
-
-void load_ressources(void);
 
 int whos_turn_is_it(void);
 void random_move(void);

@@ -1,6 +1,11 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+
+#include "utility.h"
+
 // ressources
 #define SQUARES 10
 #define FOODS 14
@@ -126,8 +131,15 @@ typedef struct
 	Square squares[BOARD_SQUARES];
 	int squareCount;
 
+	int innFoods[6];
+	int innFoodCount;
+
 	int turn;													// Index du joueur qui joue ce tour
 } Board;
+
+extern Ressources ressources;
+
+void load_ressources(void);
 
 #endif
 

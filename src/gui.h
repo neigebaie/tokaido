@@ -32,5 +32,5 @@ extern Gui gui;
 void create_main_menu(void);
 SDL_Texture* create_texture_from_str(const char *text, int r, int g, int b);
 SDL_Rect centered_rect(SDL_Texture *texture, SDL_Rect rectParent, float scale);
-
+void draw_login(void);
 #endif
