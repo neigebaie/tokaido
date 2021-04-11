@@ -10,22 +10,22 @@
 #include "utility.h"
 
 
-void inn (Player *player);
+void inn(Player *player);
 
-void shop (Player *player);
+void shop(Player *player, int item);
 
-void hotspring (Player *player);
+void hot_spring(Player *player, int hotSpringTk);
 
-void temple (Player *player);
+void temple(Player *player);
 
-void farm (Player *player);
+void farm(Player *player);
 
-void encounter (Player *player);
+void encounter(Player *player, int choices);
 
-void pano_ric (Player *player);
+void pano_ric(Player *player);
 
-void pano_mon (Player *player);
+void pano_mon(Player *player);
 
-void pano_sea (Player *player);
+void pano_sea(Player *player);
 
 #endif

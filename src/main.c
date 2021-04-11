@@ -1,4 +1,4 @@
-// Tokaido by neigebaie (C) 2021
+// Tokaido by QINTO Esteban & SERANDER Paul (C) 2021
 #include "utility.h"
 #include "gui.h"
 #include "game.h"
@@ -18,14 +18,12 @@ int main(int argc, const char *argv[])
 
 	// load_textures();
 	load_ressources();
-	// save_ressources("ressources.dat");
-	create_main_menu();
+	Gui* gui = gui_init();
 	init_board();
 	// Textures
 	SDL_Point mousePos;
 
 	SDL_Rect mouseRect = {0, 0, 0, 0};
-	SDL_QueryTexture(gui.cursor, NULL, NULL, &mouseRect.w, &mouseRect.h);
 	mouseRect.w /= 2;
 	mouseRect.h /= 2;
 
@@ -66,7 +64,7 @@ int main(int argc, const char *argv[])
 					if (saisie) {
 						input_str(event, textbox);
 						textbox->texture = create_texture_from_str(textbox->text, 0, 13, 0);
-						textbox->rect = centered_rect(textbox->texture, gui.titleRect, 1);
+						textbox->rect = centered_rect(textbox->texture, gui->title->rect, 1);
 						debug_textbox(textbox);
 						if (!textbox->length)
 							saisie = SDL_FALSE;
@@ -100,24 +98,24 @@ int main(int argc, const char *argv[])
 						switch (menu)
 						{
 							case MENU_MAIN:
-								if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[0]))
+								if (SDL_PointInRect(&mousePos, gui->btnSolo->rect))
 								{
 									printf("\e[31m [INFO] : Le bouton Solo a été cliqué ! ✨\e[37m\n");
 									menu = MENU_BOARD;
 								}
-								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[1]))
+								else if (SDL_PointInRect(&mousePos, gui->btnMultiplayer->rect))
 								{
 									printf("\e[32m [INFO] : Le bouton Multi a été cliqué ! ✨\e[37m\n");
 								}
-								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[2]))
+								else if (SDL_PointInRect(&mousePos, gui->btnArchives->rect))
 								{
 									printf("\e[33m [INFO] : Le bouton Archives a été cliqué ! ✨\e[37m\n");
 								}
-								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[3]))
+								else if (SDL_PointInRect(&mousePos, gui->btnSettings->rect))
 								{
 									printf("\e[34m [INFO] : Le bouton Options a été cliqué ! ✨\e[37m\n");
 								}
-								else if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[4]))
+								else if (SDL_PointInRect(&mousePos, gui->btnQuit->rect))
 								{
 									printf("\e[35m [INFO] : Le bouton Quitter a été cliqué ! ✨\e[37m\n");
 									program_launched = SDL_FALSE;
@@ -144,27 +142,19 @@ int main(int argc, const char *argv[])
 		switch (menu)
 		{
 			case MENU_MAIN:
-				// SDL_RenderCopy(renderer, gui.title, NULL, &gui.titleRect);
-				SDL_RenderCopy(renderer, textbox->texture, NULL, &textbox->rect);
-				for (int i = 0; i < 5; i++) {
-					if (SDL_PointInRect(&mousePos, &gui.mMenuBtRect[i]))
-						SDL_SetTextureColorMod(gui.button, 200, 200, 200);
-					SDL_RenderCopy(renderer, gui.button, NULL, &gui.mMenuBtRect[i]);
-					SDL_RenderCopy(renderer, gui.mMenuTex[i], NULL, &gui.mMenuTextRect[i]);
-					SDL_SetTextureColorMod(gui.button, 255, 255, 255);
-				}
+				draw_main_menu();
 				break;
 			case MENU_BOARD:
 				draw_board();
 				break;
 			case MENU_LOGIN:
-				draw_login();
+				draw_login_menu();
 				break;
 		}
 
 		mouseRect.x = mousePos.x;
 		mouseRect.y = mousePos.y;
-		SDL_RenderCopy(renderer, gui.cursor, NULL, &mouseRect); // cursor toujours au dessus
+		SDL_RenderCopy(renderer, gui->atlas, gui->cursor->atlasPos, &mouseRect); // cursor toujours au dessus
 
 		SDL_RenderPresent(renderer);
 		frameLimit = SDL_GetTicks() + FPS_LIMIT;

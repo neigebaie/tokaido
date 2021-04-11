@@ -296,32 +296,23 @@ void square_action2()
 	switch (whos_turn_is_it())
 	{
 	 case 0 :
-	 		inn(&player);
-	 		break ;
+	 		break;
 	case 1 :
-	 	 	shop(&player);
-	 	 	break ;
+	 	 	break;
 	case 2 :
-			hotspring(&player);
-			break ;
+			break;
 	case 3 :
-			temple(&player);
-			break ;
+			break;
   case 4 :
-			encounter(&player);
 			break;
 	case 5 :
-			farm(&player);
 			break;
 	case 6 :
-			pano_ric(&player) ;
 			break;
 	case 7 :
-			pano_mon(&player);
 			break;
 	case 8 :
-			pano_sea(&player);
-			break ;
+			break;
 	}
 }
 /*

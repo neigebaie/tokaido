@@ -41,16 +41,15 @@ void input_str(SDL_Event event, Textbox *textbox)
 Textbox* init_textbox()
 {
 	Textbox* textbox = (Textbox*)malloc(sizeof(Textbox));
-	printf("init\n");
 	textbox->text = (char*)malloc(sizeof(char) * TEXT_SIZE);
 	textbox->length = 0;
 	textbox->texture = NULL;
-	textbox->rect.x = 0;
-	textbox->rect.y = 0;
-	textbox->rect.w = 0;
-	textbox->rect.h = 0;
+	textbox->rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+	textbox->rect->x = 0;
+	textbox->rect->y = 0;
+	textbox->rect->w = 0;
+	textbox->rect->h = 0;
 	textbox->caps = SDL_FALSE;
-	printf("return");
 	return textbox;
 }
 
@@ -60,10 +59,10 @@ void reset_textbox(Textbox* textbox)
 	sprintf(textbox->text, "");
 	textbox->length = 0;
 	textbox->texture = NULL;
-	textbox->rect.x = 0;
-	textbox->rect.y = 0;
-	textbox->rect.w = 0;
-	textbox->rect.h = 0;
+	textbox->rect->x = 0;
+	textbox->rect->y = 0;
+	textbox->rect->w = 0;
+	textbox->rect->h = 0;
 	textbox->caps = SDL_FALSE;
 }
 

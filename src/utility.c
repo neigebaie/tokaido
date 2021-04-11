@@ -97,8 +97,8 @@ void limit_fps(unsigned int limit)
     unsigned int ticks = SDL_GetTicks();
 		if (limit < ticks)
 			return;
-		else if (limit > ticks + FPS_LIMIT)
-			SDL_Delay(FPS_LIMIT);
+		else if (limit > ticks + (1/FPS_LIMIT)*1000)
+			SDL_Delay((1/FPS_LIMIT)*1000);
 		else
 			SDL_Delay(limit - ticks);
 }

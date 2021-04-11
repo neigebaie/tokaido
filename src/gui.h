@@ -6,31 +6,45 @@
 
 #include "utility.h"
 
+typedef struct {
+		SDL_Rect* atlasPos; // position in the spritesheet (px)
+    SDL_Rect* rect;     // position on screen (px)
+} GuiElement;
+
 typedef struct
 {
-		SDL_Texture  *cursor;
-		SDL_Texture  *title;
-		SDL_Texture  *button;
-		SDL_Texture	 *board;
+		SDL_Texture  *atlas;
 
-		SDL_Rect 		 titleRect;
+		// Generic UI elements
+		GuiElement*     cursor;
+		GuiElement*     btnBack;
 
-		SDL_Texture *mMenuTex[5];
-		SDL_Rect	 	mMenuBtRect[5];
-		SDL_Rect	 	mMenuTextRect[5];
-		/* Ordre des boutons :
-				0 : Solo
-				1 : Multijoueur
-				2 : Parties Archivées
-				3 : Options...
-				4 : Quitter le jeu
-		*/
+
+		// MENU_MAIN : MENU PRINCIPAL
+		GuiElement*     title;
+		GuiElement*     btnSolo;
+		GuiElement*     btnMultiplayer;
+		GuiElement*     btnArchives;
+		GuiElement*     btnSettings;
+		GuiElement*     btnQuit;
+
+
+		// MENU_LOGIN : MENU DE CONNEXION
+		GuiElement*     textUsername;
+		GuiElement*     textPassword;
+
+		// MENU_SIGNUP : MENU DE CREATION DE COMPTE
+
 } Gui;
 
-extern Gui gui;
+// extern Gui gui;
 
-void create_main_menu(void);
 SDL_Texture* create_texture_from_str(const char *text, int r, int g, int b);
-SDL_Rect centered_rect(SDL_Texture *texture, SDL_Rect rectParent, float scale);
-void draw_login(void);
+SDL_Rect* centered_rect(SDL_Texture *texture, SDL_Rect* rectParent, float scale);
+
+Gui* gui_init(void);
+
+void draw_main_menu(void);
+void draw_login_menu(void);
+
 #endif
