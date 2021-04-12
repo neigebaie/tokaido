@@ -6,32 +6,26 @@
 
 #include "utility.h"
 
-typedef struct {
-		SDL_Rect* atlasPos; // position in the spritesheet (px)
-    SDL_Rect* rect;     // position on screen (px)
-} GuiElement;
-
 typedef struct
 {
-		SDL_Texture  *atlas;
-
 		// Generic UI elements
-		GuiElement*     cursor;
-		GuiElement*     btnBack;
+		Sprite*     cursor;
+		Sprite*     btnBack;
 
 
 		// MENU_MAIN : MENU PRINCIPAL
-		GuiElement*     title;
-		GuiElement*     btnSolo;
-		GuiElement*     btnMultiplayer;
-		GuiElement*     btnArchives;
-		GuiElement*     btnSettings;
-		GuiElement*     btnQuit;
+		Sprite*     title;
+		Sprite*     btnSolo;
+		Sprite*     btnMultiplayer;
+		Sprite*     btnArchives;
+		Sprite*     btnSettings;
+		Sprite*     btnQuit;
 
 
 		// MENU_LOGIN : MENU DE CONNEXION
-		GuiElement*     textUsername;
-		GuiElement*     textPassword;
+		Sprite*     textLogin;
+		Sprite*     textUsername;
+		Sprite*     textPassword;
 
 		// MENU_SIGNUP : MENU DE CREATION DE COMPTE
 
@@ -44,7 +38,7 @@ SDL_Rect* centered_rect(SDL_Texture *texture, SDL_Rect* rectParent, float scale)
 
 Gui* gui_init(void);
 
-void draw_main_menu(void);
-void draw_login_menu(void);
+void draw_main_menu(Gui* gui);
+void draw_login_menu(Gui* gui);
 
 #endif

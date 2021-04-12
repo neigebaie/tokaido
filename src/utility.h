@@ -12,6 +12,12 @@
 #define WINDOW_HEIGHT 1080
 #define FPS_LIMIT 60
 
+typedef struct {
+		SDL_Texture* atlas; // spritesheet
+		SDL_Rect* atlasPos; // position in the spritesheet (px)
+    SDL_Rect* rect;     // position on screen (px)
+} Sprite;
+
 extern SDL_Window 	*window;
 extern SDL_Renderer *renderer;
 extern TTF_Font			*font;

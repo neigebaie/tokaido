@@ -12,7 +12,7 @@
 
 extern Board board;
 
-void load_squares(const char* path, Square *squares);
+void load_squares(Square *squares, int playerCount);
 
 Board load_board(const char* path);
 void save_board(Board board, const char* path);

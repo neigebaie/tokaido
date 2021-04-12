@@ -1,7 +1,6 @@
 #include "gui.h"
 
 /*
-
 But du fichier gui.c :
  - Création bouton
  - Création Rect avec centrage sur un autre Rect, ancrage à l'écran, etc.
@@ -49,15 +48,17 @@ Gui* gui_init(void)
 {
 	Gui* gui = (Gui*)malloc(sizeof(Gui));
 
-	gui->atlas = load_texture("ressources/gfx/gui/cursor.png");
+	SDL_Texture* atlas = load_texture("ressources/gfx/gui/cursor.png");
 
 	// cursor
-	gui->cursor = (GuiElement*)malloc(sizeof(GuiElement));
-	gui->cursor->atlasPos = rect(0, 0, 0, 0);
-	gui->cursor->rect     = rect(0, 0, 0, 0);
+	gui->cursor = (Sprite*)malloc(sizeof(Sprite));
+	gui->cursor->atlas = atlas;
+	gui->cursor->atlasPos = rect(0, 0, 128, 128);
+	gui->cursor->rect     = rect(0, 0, 64, 64);
 
 	// btnBack
-	gui->btnBack = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->btnBack = (Sprite*)malloc(sizeof(Sprite));
+	gui->btnBack->atlas = atlas;
 	gui->btnBack->atlasPos = rect(0, 0, 0, 0);
 	gui->btnBack->rect     = rect(0, 0, 0, 0);
 
@@ -65,32 +66,38 @@ Gui* gui_init(void)
 	// MENU_MAIN : MENU PRINCIPAL
 
 	// title
-	gui->title = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->title = (Sprite*)malloc(sizeof(Sprite));
+	gui->title->atlas = atlas;
 	gui->title->atlasPos = rect(0, 0, 0, 0);
 	gui->title->rect     = rect(0, 0, 0, 0);
 
 	// btnSolo
-	gui->btnSolo = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->btnSolo = (Sprite*)malloc(sizeof(Sprite));
+	gui->btnSolo->atlas = atlas;
 	gui->btnSolo->atlasPos = rect(0, 0, 0, 0);
 	gui->btnSolo->rect     = rect(0, 0, 0, 0);
 
 	// btnMultiplayer
-	gui->btnMultiplayer = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->btnMultiplayer = (Sprite*)malloc(sizeof(Sprite));
+	gui->btnMultiplayer->atlas = atlas;
 	gui->btnMultiplayer->atlasPos = rect(0, 0, 0, 0);
 	gui->btnMultiplayer->rect     = rect(0, 0, 0, 0);
 
 	// btnArchives
-	gui->btnArchives = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->btnArchives = (Sprite*)malloc(sizeof(Sprite));
+	gui->btnArchives->atlas = atlas;
 	gui->btnArchives->atlasPos = rect(0, 0, 0, 0);
 	gui->btnArchives->rect     = rect(0, 0, 0, 0);
 
 	// btnSettings
-	gui->btnSettings = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->btnSettings = (Sprite*)malloc(sizeof(Sprite));
+	gui->btnSettings->atlas = atlas;
 	gui->btnSettings->atlasPos = rect(0, 0, 0, 0);
 	gui->btnSettings->rect     = rect(0, 0, 0, 0);
 
 	// btnQuit
-	gui->btnQuit = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->btnQuit = (Sprite*)malloc(sizeof(Sprite));
+	gui->btnQuit->atlas = atlas;
 	gui->btnQuit->atlasPos = rect(0, 0, 0, 0);
 	gui->btnQuit->rect     = rect(0, 0, 0, 0);
 
@@ -98,24 +105,40 @@ Gui* gui_init(void)
 	// MENU_LOGIN : MENU DE CONNEXION
 
 	// textUsername
-	gui->textUsername = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->textLogin = (Sprite*)malloc(sizeof(Sprite));
+	gui->textLogin->atlas = atlas;
+	gui->textLogin->atlasPos = rect(0, 0, 0, 0);
+	gui->textLogin->rect     = rect(0, 0, 0, 0);
+
+	// textUsername
+	gui->textUsername = (Sprite*)malloc(sizeof(Sprite));
+	gui->textUsername->atlas = atlas;
 	gui->textUsername->atlasPos = rect(0, 0, 0, 0);
 	gui->textUsername->rect     = rect(0, 0, 0, 0);
 
 	// btnQuit
-	gui->textPassword = (GuiElement*)malloc(sizeof(GuiElement));
+	gui->textPassword = (Sprite*)malloc(sizeof(Sprite));
+	gui->textPassword->atlas = atlas;
 	gui->textPassword->atlasPos = rect(0, 0, 0, 0);
 	gui->textPassword->rect     = rect(0, 0, 0, 0);
 
 	return gui;
 }
 
-void draw_main_menu(void)
+void draw_main_menu(Gui* gui)
 {
-	printf("\n");
+	SDL_RenderCopy(renderer, gui->title->atlas, gui->title->atlasPos, gui->title->rect);
+
+	SDL_RenderCopy(renderer, gui->btnSolo->atlas, gui->btnSolo->atlasPos, gui->btnSolo->rect);
+	SDL_RenderCopy(renderer, gui->btnMultiplayer->atlas, gui->btnMultiplayer->atlasPos, gui->btnMultiplayer->rect);
+	// SDL_RenderCopy(renderer, gui->btnArchives->atlas, gui->btnArchives->atlasPos, gui->btnArchives->rect);
+	SDL_RenderCopy(renderer, gui->btnSettings->atlas, gui->btnSettings->atlasPos, gui->btnSettings->rect);
+	SDL_RenderCopy(renderer, gui->btnQuit->atlas, gui->btnQuit->atlasPos, gui->btnQuit->rect);
 }
 
-void draw_login_menu(void)
+void draw_login_menu(Gui* gui)
 {
-	printf("\n");
+	SDL_RenderCopy(renderer, gui->textLogin->atlas, gui->textLogin->atlasPos, gui->textLogin->rect);
+	SDL_RenderCopy(renderer, gui->textUsername->atlas, gui->textUsername->atlasPos, gui->textUsername->rect);
+	SDL_RenderCopy(renderer, gui->textPassword->atlas, gui->textPassword->atlasPos, gui->textPassword->rect);
 }

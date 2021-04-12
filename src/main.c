@@ -14,7 +14,7 @@ int main(int argc, const char *argv[])
 {
 	init();
 	init_fps_counter();
-	SDL_ShowCursor(0); // désactive le curseur windows pour afficher celui custom
+	// SDL_ShowCursor(0); // désactive le curseur windows pour afficher celui custom
 
 	// load_textures();
 	load_ressources();
@@ -24,11 +24,11 @@ int main(int argc, const char *argv[])
 	SDL_Point mousePos;
 
 	SDL_Rect mouseRect = {0, 0, 0, 0};
-	mouseRect.w /= 2;
-	mouseRect.h /= 2;
+	mouseRect.w = gui->cursor->rect->w;
+	mouseRect.h = gui->cursor->rect->h;
 
 	SDL_bool program_launched = SDL_TRUE;
-	SDL_bool menu = MENU_MAIN;
+	SDL_bool menu = MENU_BOARD;
 	SDL_bool update = SDL_TRUE;
 
 	SDL_bool saisie = SDL_FALSE;
@@ -65,7 +65,6 @@ int main(int argc, const char *argv[])
 						input_str(event, textbox);
 						textbox->texture = create_texture_from_str(textbox->text, 0, 13, 0);
 						textbox->rect = centered_rect(textbox->texture, gui->title->rect, 1);
-						debug_textbox(textbox);
 						if (!textbox->length)
 							saisie = SDL_FALSE;
 						break;
@@ -73,12 +72,15 @@ int main(int argc, const char *argv[])
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_RETURN:
-							if (menu != MENU_MAIN)
+							if (menu == MENU_BOARD)
+							{
 								random_move();
+							}
 							else
+							{
 								reset_textbox(textbox);
-								debug_textbox(textbox);
 								saisie = SDL_TRUE;
+							}
 							break;
 						case SDLK_LEFT:
 							scroll = 1;
@@ -142,19 +144,19 @@ int main(int argc, const char *argv[])
 		switch (menu)
 		{
 			case MENU_MAIN:
-				draw_main_menu();
+				draw_main_menu(gui);
 				break;
 			case MENU_BOARD:
 				draw_board();
 				break;
 			case MENU_LOGIN:
-				draw_login_menu();
+				draw_login_menu(gui);
 				break;
 		}
 
 		mouseRect.x = mousePos.x;
 		mouseRect.y = mousePos.y;
-		SDL_RenderCopy(renderer, gui->atlas, gui->cursor->atlasPos, &mouseRect); // cursor toujours au dessus
+		SDL_RenderCopy(renderer, gui->cursor->atlas, gui->cursor->atlasPos, &mouseRect); // cursor toujours au dessus
 
 		SDL_RenderPresent(renderer);
 		frameLimit = SDL_GetTicks() + FPS_LIMIT;

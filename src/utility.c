@@ -82,7 +82,6 @@ void update_fps_counter()
     fps = (int)(1.f / delta_time);
     update_time += delta_time;
 
-
     if (update_time >= 1.f)
 		{
         time_passed += update_time;

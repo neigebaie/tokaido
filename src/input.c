@@ -9,7 +9,7 @@ void input_str(SDL_Event event, Textbox *textbox)
 	if (keycode == SDLK_RETURN) //  || textbox->length >= TEXT_SIZE
 	{
 		textbox->length = 0;
-		printf("return0");
+		printf("return0\n");
 		return;
 	}
 
@@ -21,7 +21,7 @@ void input_str(SDL_Event event, Textbox *textbox)
 	}
 	else if ((keycode < 97 || keycode > 121) && keycode != SDLK_SPACE )
 	{
-		printf("return1");
+		printf("return1\n");
 		return;
 	}
 	SDL_Keymod mod = SDL_GetModState();
@@ -64,16 +64,4 @@ void reset_textbox(Textbox* textbox)
 	textbox->rect->w = 0;
 	textbox->rect->h = 0;
 	textbox->caps = SDL_FALSE;
-}
-
-void debug_textbox(Textbox* textbox)
-{
-	// printf("%s\n", textbox->text);
-	printf("%d\n", textbox->length);
-	// textbox->texture = NULL;
-	// printf("%d\n", textbox->rect.x);
-	// printf("%d\n", textbox->rect.y);
-	// printf("%d\n", textbox->rect.w);
-	// printf("%d\n", textbox->rect.h);
-	// textbox->caps = SDL_FALSE;
 }

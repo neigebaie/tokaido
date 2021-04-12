@@ -19,6 +19,5 @@ typedef struct {
 void input_str(SDL_Event event, Textbox *textbox);
 Textbox* init_textbox(void);
 void reset_textbox(Textbox *textbox);
-void debug_textbox(Textbox *textbox);
 
 #endif

@@ -38,33 +38,33 @@ Board load_board(const char* path)
 }
 
 // charge les tuiles dans l'ordre du plateau de jeu
-void load_squares(const char* path, Square *squares)
+void load_squares(Square *squares, int playerCount)
 {
-	FILE *file = fopen(path, "r");
-
-	if (file == NULL)
+	int n = 2;
+	if (playerCount < 5)
 	{
-		char errorMsg[100];
-		sprintf(errorMsg, "%s n'a pas pu être ouvert", path);
-		exit_with_error(errorMsg);
+		n = 1;
 	}
 
-	if(!feof(file))
-		fread(squares, sizeof(Square), BOARD_SQUARES, file);
-	fclose(file);
-}
+	const int boardSquares[] = {
+		SQUARE_INN, SQUARE_SHOP, SQUARE_TEMPLE, SQUARE_ENCOUNTER, SQUARE_PAN_RICE, SQUARE_HOTSPRING, SQUARE_PAN_MOUNT, SQUARE_FARM, SQUARE_SHOP, SQUARE_TEMPLE, SQUARE_ENCOUNTER, SQUARE_PAN_SEA, SQUARE_PAN_MOUNT, SQUARE_HOTSPRING,
+		SQUARE_INN, SQUARE_PAN_SEA, SQUARE_TEMPLE, SQUARE_FARM, SQUARE_PAN_RICE, SQUARE_PAN_MOUNT, SQUARE_ENCOUNTER, SQUARE_TEMPLE, SQUARE_HOTSPRING, SQUARE_PAN_MOUNT, SQUARE_PAN_SEA, SQUARE_SHOP, SQUARE_FARM,
+		SQUARE_INN, SQUARE_PAN_RICE, SQUARE_SHOP, SQUARE_ENCOUNTER, SQUARE_FARM, SQUARE_PAN_MOUNT, SQUARE_HOTSPRING, SQUARE_PAN_SEA, SQUARE_PAN_RICE, SQUARE_TEMPLE, SQUARE_FARM, SQUARE_ENCOUNTER, SQUARE_PAN_SEA, SQUARE_SHOP,
+		SQUARE_INN, SQUARE_HOTSPRING, SQUARE_TEMPLE, SQUARE_ENCOUNTER, SQUARE_SHOP, SQUARE_PAN_SEA, SQUARE_FARM, SQUARE_HOTSPRING, SQUARE_ENCOUNTER, SQUARE_PAN_MOUNT, SQUARE_PAN_RICE, SQUARE_PAN_SEA, SQUARE_SHOP,
+		SQUARE_INN
+	};
+	const int boardCapacities[] = {
+		playerCount, n, 1, 1, 1, n, n, n, 1, n, 1, n, 1, 1,
+		playerCount, 1, 1, n, n, n, n, 1, n, 1, n, 1, 1,
+		playerCount, 1, 1, n, 1, n, 1, n, 1, n, n, 1, 1, n,
+		playerCount, 1, n, 1, n, 1, n, n, 1, 1, n, n, 1,
+		playerCount
+	};
 
-// REMOVE
-void draw_test(void)
-{
-	SDL_Rect srcRect = {0, 0, 126, 115};
-	SDL_Rect dstRect = {0, 0, 126, 115};
-	for (int id = 0; id < 14; id++)
+	for (int i = 0; i < BOARD_SQUARES; i++)
 	{
-		srcRect.x = srcRect.w * id;
-		dstRect.x = dstRect.w * id + id * 10;
-		printf("%s\n", ressources.foods[id].name);
-		SDL_RenderCopy(renderer, ressources.itemTex, &srcRect, &dstRect);
+		squares[i].type = ressources.squareTypes[boardSquares[i]];
+		squares[i].capacity = boardCapacities[i];
 	}
 }
 
@@ -93,13 +93,13 @@ void init_board(void)
 
 	for (int i = 0; i < BOARD_PLAYERS; i++)
 	{
-		board.players[i].traveler = travId[i];
+		board.players[i].traveler = ressources.travelers[travId[i]];
 		sprintf(board.players[i].nickname, "Joueur %d", i + 1);
 		board.players[i].isHuman = SDL_FALSE;
 		board.players[i].position = 0;
 		board.players[i].roadDist = roadDist[i];
 		board.players[i].bundleToken = 0;
-		board.players[i].coins = ressources.travelers[board.players[i].traveler].startCoins;
+		board.players[i].coins = board.players[i].traveler->startCoins;
 		board.players[i].templeCoins = 0;
 		board.players[i].hotSpring = 0;
 		board.players[i].foodCount = 0;
@@ -113,13 +113,13 @@ void init_board(void)
 		board.playerCount++;
 	}
 
-	load_squares("ressources/templates/squares.dat", board.squares);
+	load_squares(board.squares, board.playerCount);
 	board.squareCount = BOARD_SQUARES;
 
 	/*
 	for (int i = 0; i < BOARD_SQUARES; i++)
 	{
-		printf(" \e[32m%s\e[37m : \e[31m%d\e[37m\n", ressources.squares[board.squares[i].id].name, board.squares[i].capacity);
+		printf(" \e[32m%s\e[37m : \e[31m%d\e[37m\n", ressources.squareTypes[board.squares[i].id].name, board.squares[i].capacity);
 	}
 	*/
 }
@@ -137,7 +137,7 @@ void draw_lines(int squareCount)
 	{
 		for (int j = 0; j < board.squares[position].capacity; j++)
 		{
-			SDL_SetRenderDrawColor(renderer, ressources.squares[board.squares[position].id].color.r, ressources.squares[board.squares[position].id].color.g, ressources.squares[board.squares[position].id].color.b, 255);
+			SDL_SetRenderDrawColor(renderer, board.squares[position].type->color.r, board.squares[position].type->color.g, board.squares[position].type->color.b, 255);
 
 			rect.x = board.camera.origin + 128 * position + 128/2 - 2;
 			rect.y = WINDOW_HEIGHT - 100 - 128 * j - 128;
@@ -153,9 +153,9 @@ void draw_lines(int squareCount)
 			// 	rect.y = WINDOW_HEIGHT - 100 + 128 * j + 128;
 			rect.w = 20;
 			rect.h = 20;
-			SDL_SetTextureColorMod(ressources.squareTex, ressources.squares[board.squares[position].id].color.r, ressources.squares[board.squares[position].id].color.g, ressources.squares[board.squares[position].id].color.b);
-			SDL_RenderCopy(renderer, ressources.squareTex, &ressources.squares[9].rect, &rect);
-			SDL_SetTextureColorMod(ressources.squareTex, 255, 255, 255);
+			SDL_SetTextureColorMod(board.squares[position].type->sprite->atlas, board.squares[position].type->color.r, board.squares[position].type->color.g, board.squares[position].type->color.b);
+			// SDL_RenderCopy(renderer, ressources.squareTypes[9]->sprite->atlas, ressources.squareTypes[9]->sprite->atlasPos, &rect);
+			SDL_SetTextureColorMod(board.squares[position].type->sprite->atlas, 255, 255, 255);
 			// SDL_RenderFillRect(renderer, &rect);
 		}
 		if (position == squareCount - 1) // fin du plateau
@@ -180,7 +180,7 @@ void draw_squares(int squareCount, Square *squares)
 		rect.y = WINDOW_HEIGHT - 100 - 128/2;
 		rect.w = 128;
 		rect.h = 128;
-		SDL_RenderCopy(renderer, ressources.squareTex, &ressources.squares[board.squares[position].id].rect, &rect);
+		SDL_RenderCopy(renderer, board.squares[position].type->sprite->atlas, board.squares[position].type->sprite->atlasPos, &rect);
 	}
 }
 
@@ -192,7 +192,7 @@ void draw_players()
 		rect.y = WINDOW_HEIGHT - 100 - 128 * board.players[i].roadDist - 128 - 100/2;
 		rect.w = 100;
 		rect.h = 100;
-		SDL_RenderCopy(renderer, ressources.travelerTex, &ressources.travelers[board.players[i].traveler].rect, &rect);
+		SDL_RenderCopy(renderer, board.players[i].traveler->sprite->atlas, board.players[i].traveler->sprite->atlasPos, &rect);
 	}
 }
 
@@ -235,7 +235,8 @@ SDL_bool is_move_allowed(int position, Player player)
 
 	for (int i = player.position + 1; i < BOARD_SQUARES; i++)
 	{
-		if (board.squares[i].id == 0)
+
+		if (board.squares[i].type->id == SQUARE_INN)
 		{
 			next_inn = i;
 			break;
@@ -255,7 +256,7 @@ SDL_bool is_move_allowed(int position, Player player)
 	if (space <= 0)
 		return SDL_FALSE;
 
-	if ((board.squares[position].id == 1 || board.squares[position].id == 3) && player.coins == 0)
+	if ((board.squares[position].type->id == SQUARE_SHOP || board.squares[position].type->id == SQUARE_TEMPLE) && player.coins == 0)
 		return SDL_FALSE;
 	return SDL_TRUE;
 }
@@ -276,7 +277,10 @@ void random_move()
 		}
 	}
 	if (possibilities == 0)
+	{
+		printf("\e[34m [DEBUG] Game over !\e[37m\n");
 		return;
+	}
 	shuffle(possibleSquares, possibilities);
 	int position = possibleSquares[0];
 	int space = board.squares[position].capacity;
