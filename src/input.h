@@ -6,10 +6,12 @@
 #include <string.h>
 #include <SDL2/SDL.h>
 
+#include "utility.h"
+
 #define TEXT_SIZE 64
 
 typedef struct {
-	SDL_Texture* texture;
+	Sprite*      sprite;
 	SDL_Rect*    rect;
 	char*        text;
 	SDL_bool     caps;

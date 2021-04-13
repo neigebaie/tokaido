@@ -12,10 +12,13 @@
 #define WINDOW_HEIGHT 1080
 #define FPS_LIMIT 60
 
+#define WHITE 255, 255, 255, 255
+#define BLACK 0, 0, 0, 255
+
 typedef struct {
-		SDL_Texture* atlas; // spritesheet
-		SDL_Rect* atlasPos; // position in the spritesheet (px)
-    SDL_Rect* rect;     // position on screen (px)
+		SDL_Texture* tex; // spritesheet/texture
+		SDL_Rect* texPos; // position in the spritesheet (px) (NULL if texture)
+		SDL_Rect* rect; // where to draw it onscreen
 } Sprite;
 
 extern SDL_Window 	*window;
@@ -31,6 +34,9 @@ void init_fps_counter();
 void update_fps_counter();
 
 SDL_Texture* load_texture(const char *path);
+
+Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* texPos);
+SDL_Rect* new_rect(int x, int y, int w, int h);
 
 void exit_with_success(void);
 void exit_with_error(const char *message);

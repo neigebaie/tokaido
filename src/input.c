@@ -43,7 +43,7 @@ Textbox* init_textbox()
 	Textbox* textbox = (Textbox*)malloc(sizeof(Textbox));
 	textbox->text = (char*)malloc(sizeof(char) * TEXT_SIZE);
 	textbox->length = 0;
-	textbox->texture = NULL;
+	textbox->sprite = new_sprite(NULL, new_rect(0, 0, 0, 0));
 	textbox->rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
 	textbox->rect->x = 0;
 	textbox->rect->y = 0;
@@ -58,7 +58,7 @@ void reset_textbox(Textbox* textbox)
 	printf("reset\n");
 	sprintf(textbox->text, "");
 	textbox->length = 0;
-	textbox->texture = NULL;
+	textbox->sprite->tex = NULL;
 	textbox->rect->x = 0;
 	textbox->rect->y = 0;
 	textbox->rect->w = 0;

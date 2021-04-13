@@ -116,6 +116,25 @@ SDL_Texture * load_texture(const char *path)
 	return texture;
 }
 
+Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* texPos)
+{
+	Sprite* sprite = (Sprite*)malloc(sizeof(Sprite));
+	sprite->tex = tex;
+	sprite->texPos = texPos;
+	sprite->rect = new_rect(0, 0, texPos->w, texPos->h);
+	return sprite;
+}
+
+SDL_Rect* new_rect(int x, int y, int w, int h)
+{
+	SDL_Rect* rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+	rect->x = x;
+	rect->y = y;
+	rect->w = w;
+	rect->h = h;
+	return rect;
+}
+
 void exit_with_error(const char *message)
 {
 	// Affiche un message d'erreur et quitte le programme

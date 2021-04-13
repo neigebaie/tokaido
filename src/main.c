@@ -7,14 +7,17 @@
 
 #define MENU_MAIN     0
 #define MENU_LOGIN    1
-#define MENU_SETTINGS 2
-#define MENU_BOARD    3
+#define MENU_SIGNUP   2
+#define MENU_ARCHIVES 3
+#define MENU_SETTINGS 4
+#define MENU_BOARD    5
 
 int main(int argc, const char *argv[])
 {
 	init();
 	init_fps_counter();
 	// SDL_ShowCursor(0); // désactive le curseur windows pour afficher celui custom
+	// SDL_SetCursor(init_system_cursor(arrow));
 
 	// load_textures();
 	load_ressources();
@@ -28,7 +31,7 @@ int main(int argc, const char *argv[])
 	mouseRect.h = gui->cursor->rect->h;
 
 	SDL_bool program_launched = SDL_TRUE;
-	SDL_bool menu = MENU_BOARD;
+	SDL_bool menu = MENU_MAIN;
 	SDL_bool update = SDL_TRUE;
 
 	SDL_bool saisie = SDL_FALSE;
@@ -45,6 +48,19 @@ int main(int argc, const char *argv[])
 
 		SDL_Event event;
 		SDL_GetMouseState(&mousePos.x, &mousePos.y);
+
+		for (int btnId = 0; btnId < BTN_NB; btnId++) {
+			if (SDL_PointInRect(&mousePos, gui->btnList[btnId]->bg->rect))
+			{
+				gui->btnList[btnId]->hovered = SDL_TRUE;
+			} else {
+				gui->btnList[btnId]->hovered = SDL_FALSE;
+			}
+			if (gui->btnList[btnId]->clicked) {
+				gui->btnList[btnId]->clicked -= 1;
+			}
+		}
+
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
@@ -63,8 +79,8 @@ int main(int argc, const char *argv[])
 				case SDL_KEYDOWN:
 					if (saisie) {
 						input_str(event, textbox);
-						textbox->texture = create_texture_from_str(textbox->text, 0, 13, 0);
-						textbox->rect = centered_rect(textbox->texture, gui->title->rect, 1);
+						textbox->sprite = new_sprite_from_str(textbox->text, BLACK);
+						center_rect(textbox->rect, gui->title->rect, 1);
 						if (!textbox->length)
 							saisie = SDL_FALSE;
 						break;
@@ -97,30 +113,65 @@ int main(int argc, const char *argv[])
 				case SDL_MOUSEBUTTONDOWN:
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
+						for (int btnId = 0; btnId < BTN_NB; btnId++) {
+							if (SDL_PointInRect(&mousePos, gui->btnList[btnId]->bg->rect))
+							{
+								gui->btnList[btnId]->clicked = 10;
+							}
+						}
 						switch (menu)
 						{
 							case MENU_MAIN:
-								if (SDL_PointInRect(&mousePos, gui->btnSolo->rect))
+								if (SDL_PointInRect(&mousePos, gui->btnSolo->bg->rect))
 								{
 									printf("\e[31m [INFO] : Le bouton Solo a été cliqué ! ✨\e[37m\n");
 									menu = MENU_BOARD;
 								}
-								else if (SDL_PointInRect(&mousePos, gui->btnMultiplayer->rect))
+								else if (SDL_PointInRect(&mousePos, gui->btnMultiplayer->bg->rect))
 								{
 									printf("\e[32m [INFO] : Le bouton Multi a été cliqué ! ✨\e[37m\n");
+									menu = MENU_LOGIN;
 								}
-								else if (SDL_PointInRect(&mousePos, gui->btnArchives->rect))
+								else if (SDL_PointInRect(&mousePos, gui->btnArchives->bg->rect))
 								{
 									printf("\e[33m [INFO] : Le bouton Archives a été cliqué ! ✨\e[37m\n");
+									menu = MENU_SIGNUP;
 								}
-								else if (SDL_PointInRect(&mousePos, gui->btnSettings->rect))
+								else if (SDL_PointInRect(&mousePos, gui->btnSettings->bg->rect))
 								{
 									printf("\e[34m [INFO] : Le bouton Options a été cliqué ! ✨\e[37m\n");
 								}
-								else if (SDL_PointInRect(&mousePos, gui->btnQuit->rect))
+								else if (SDL_PointInRect(&mousePos, gui->btnQuit->bg->rect))
 								{
 									printf("\e[35m [INFO] : Le bouton Quitter a été cliqué ! ✨\e[37m\n");
 									program_launched = SDL_FALSE;
+								}
+								break;
+							case MENU_LOGIN:
+								if (SDL_PointInRect(&mousePos, gui->btnSignUp->bg->rect))
+								{
+									printf("\e[31m [INFO] : Le bouton SignUp a été cliqué ! ✨\e[37m\n");
+									menu = MENU_SIGNUP;
+								}
+								else if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
+								{
+									printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
+								}
+								else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
+								{
+									printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
+									menu = MENU_MAIN;
+								}
+								break;
+							case MENU_SIGNUP:
+								if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
+								{
+									printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
+								}
+								else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
+								{
+									printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
+									menu = MENU_LOGIN;
 								}
 								break;
 						}
@@ -134,13 +185,14 @@ int main(int argc, const char *argv[])
 			}
 		}
 
+		// UPDATE MGR
 		board.camera.origin += scroll * 10;
+		if (menu == MENU_BOARD)
+			; // update_board();
 
-
+		// RENDER MGR
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderClear(renderer);
-		// draw_board();
-		// draw_test();
 		switch (menu)
 		{
 			case MENU_MAIN:
@@ -152,13 +204,18 @@ int main(int argc, const char *argv[])
 			case MENU_LOGIN:
 				draw_login_menu(gui);
 				break;
+			case MENU_SIGNUP:
+				draw_signup_menu(gui);
+				break;
 		}
 
-		mouseRect.x = mousePos.x;
-		mouseRect.y = mousePos.y;
-		SDL_RenderCopy(renderer, gui->cursor->atlas, gui->cursor->atlasPos, &mouseRect); // cursor toujours au dessus
+		// mouseRect.x = mousePos.x;
+		// mouseRect.y = mousePos.y;
+		// SDL_RenderCopy(renderer, gui->cursor->tex, gui->cursor->texPos, &mouseRect); // cursor toujours au dessus
 
 		SDL_RenderPresent(renderer);
+
+		// FPS MGR
 		frameLimit = SDL_GetTicks() + FPS_LIMIT;
 		limit_fps(frameLimit);
 	}

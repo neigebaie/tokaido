@@ -153,9 +153,9 @@ void draw_lines(int squareCount)
 			// 	rect.y = WINDOW_HEIGHT - 100 + 128 * j + 128;
 			rect.w = 20;
 			rect.h = 20;
-			SDL_SetTextureColorMod(board.squares[position].type->sprite->atlas, board.squares[position].type->color.r, board.squares[position].type->color.g, board.squares[position].type->color.b);
-			// SDL_RenderCopy(renderer, ressources.squareTypes[9]->sprite->atlas, ressources.squareTypes[9]->sprite->atlasPos, &rect);
-			SDL_SetTextureColorMod(board.squares[position].type->sprite->atlas, 255, 255, 255);
+			SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, board.squares[position].type->color.r, board.squares[position].type->color.g, board.squares[position].type->color.b);
+			SDL_RenderCopy(renderer, ressources.squareTypes[9]->sprite->tex, ressources.squareTypes[9]->sprite->texPos, &rect);
+			SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 255, 255, 255);
 			// SDL_RenderFillRect(renderer, &rect);
 		}
 		if (position == squareCount - 1) // fin du plateau
@@ -180,7 +180,7 @@ void draw_squares(int squareCount, Square *squares)
 		rect.y = WINDOW_HEIGHT - 100 - 128/2;
 		rect.w = 128;
 		rect.h = 128;
-		SDL_RenderCopy(renderer, board.squares[position].type->sprite->atlas, board.squares[position].type->sprite->atlasPos, &rect);
+		SDL_RenderCopy(renderer, board.squares[position].type->sprite->tex, board.squares[position].type->sprite->texPos, &rect);
 	}
 }
 
@@ -192,7 +192,7 @@ void draw_players()
 		rect.y = WINDOW_HEIGHT - 100 - 128 * board.players[i].roadDist - 128 - 100/2;
 		rect.w = 100;
 		rect.h = 100;
-		SDL_RenderCopy(renderer, board.players[i].traveler->sprite->atlas, board.players[i].traveler->sprite->atlasPos, &rect);
+		SDL_RenderCopy(renderer, board.players[i].traveler->sprite->tex, board.players[i].traveler->sprite->texPos, &rect);
 	}
 }
 

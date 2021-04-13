@@ -126,12 +126,12 @@ void load_ressources(void)
 	for (int i = 0; i < TRAVELERS; i++)
 	{
 		ressources.travelers[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
-		ressources.travelers[i]->sprite->atlas = travelerTex;
-		ressources.travelers[i]->sprite->atlasPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
-		ressources.travelers[i]->sprite->atlasPos->x = i * 256;
-		ressources.travelers[i]->sprite->atlasPos->y = 0;
-		ressources.travelers[i]->sprite->atlasPos->w = 256;
-		ressources.travelers[i]->sprite->atlasPos->h = 256;
+		ressources.travelers[i]->sprite->tex = travelerTex;
+		ressources.travelers[i]->sprite->texPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+		ressources.travelers[i]->sprite->texPos->x = i * 256;
+		ressources.travelers[i]->sprite->texPos->y = 0;
+		ressources.travelers[i]->sprite->texPos->w = 256;
+		ressources.travelers[i]->sprite->texPos->h = 256;
 	}
 
 
@@ -196,12 +196,12 @@ void load_ressources(void)
 	{
 		ressources.squareTypes[i]->id = i;
 		ressources.squareTypes[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
-		ressources.squareTypes[i]->sprite->atlas = squareTex;
-		ressources.squareTypes[i]->sprite->atlasPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
-		ressources.squareTypes[i]->sprite->atlasPos->x = i * 256;
-		ressources.squareTypes[i]->sprite->atlasPos->y = 0;
-		ressources.squareTypes[i]->sprite->atlasPos->w = 256;
-		ressources.squareTypes[i]->sprite->atlasPos->h = 256;
+		ressources.squareTypes[i]->sprite->tex = squareTex;
+		ressources.squareTypes[i]->sprite->texPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+		ressources.squareTypes[i]->sprite->texPos->x = i * 256;
+		ressources.squareTypes[i]->sprite->texPos->y = 0;
+		ressources.squareTypes[i]->sprite->texPos->w = 256;
+		ressources.squareTypes[i]->sprite->texPos->h = 256;
 	}
 
 	printf("\e[34m [DEBUG] Ressources loaded !\e[37m\n");
