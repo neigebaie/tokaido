@@ -6,15 +6,26 @@
 
 #include "utility.h"
 
-#define BTN_NB 7
+#define TEXTBOX_SIZE 64
+#define BTN_NB 10
+#define TEXTOBX_NB 2
 
 typedef struct
 {
 	Sprite* bg;
 	Sprite* text;
 	SDL_bool hovered;
-	SDL_bool clicked;
+	int clicked;
+	// int (*action)(void);
 } Button;
+
+typedef struct {
+	Button*      box; // Même mécanique que pour un bouton donc je fais ça xD
+	char*        text;
+	int          textLen;
+	SDL_bool     isPassword;
+} Textbox;
+
 
 typedef struct
 {
@@ -23,6 +34,7 @@ typedef struct
 		int screenHeight;
 
 		Button* btnList[BTN_NB];
+		Button* textboxList[TEXTOBX_NB];
 
 		// Generic UI elements
 		Sprite*     cursor;
@@ -43,8 +55,12 @@ typedef struct
 		// MENU_LOGIN : MENU DE CONNEXION
 		Sprite*     textLogin;
 		Sprite*     textUsername;
+		Textbox*    textboxUsername;
 		Sprite*     textPassword;
+		Textbox*    textboxPassword;
 		Button*     btnLogin;
+		Sprite*     textInfo;
+		char        textInfoStr[64];
 
 
 		// MENU_SIGNUP : MENU DE CREATION DE COMPTE
@@ -54,20 +70,23 @@ typedef struct
 
 } Gui;
 
-// extern Gui gui;
+Gui* gui_init(void);
 
-Sprite* new_sprite_from_str(const char* text, int r, int g, int b, int a);
+Sprite* new_sprite_from_str(const char* text, int r, int g, int b);
+Button* new_button(const char* text, int r, int g, int b, Sprite* bgSprite, float textScale);
+Textbox* new_textbox(Sprite* bgSprite, SDL_bool isPassword);
+
 void center_rect(SDL_Rect* rectChild, SDL_Rect* rectParent, float scale);
-
-Button* new_button(const char* text, int r, int g, int b, int a, Sprite* bgSprite, float textScale);
 
 void print_rect(SDL_Rect* rect);
 void draw_button(Button* button);
 
-Gui* gui_init(void);
-
 void draw_main_menu(Gui* gui);
 void draw_login_menu(Gui* gui);
 void draw_signup_menu(Gui* gui);
+
+void textbox_event(Textbox *textbox, SDL_Event event);
+void textbox_update(Textbox *textbox);
+void text_sprite_update(Sprite* sprite, char* text);
 
 #endif

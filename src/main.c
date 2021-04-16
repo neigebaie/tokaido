@@ -3,7 +3,7 @@
 #include "gui.h"
 #include "game.h"
 #include "board.h"
-#include "input.h"
+#include "account.h"
 
 #define MENU_MAIN     0
 #define MENU_LOGIN    1
@@ -34,9 +34,7 @@ int main(int argc, const char *argv[])
 	SDL_bool menu = MENU_MAIN;
 	SDL_bool update = SDL_TRUE;
 
-	SDL_bool saisie = SDL_FALSE;
-
-	Textbox* textbox = init_textbox();
+	Textbox* focusedTextbox = NULL;
 
 	int stage = 0;
 	int scroll = 0;
@@ -77,12 +75,8 @@ int main(int argc, const char *argv[])
 					}
 					break;
 				case SDL_KEYDOWN:
-					if (saisie) {
-						input_str(event, textbox);
-						textbox->sprite = new_sprite_from_str(textbox->text, BLACK);
-						center_rect(textbox->rect, gui->title->rect, 1);
-						if (!textbox->length)
-							saisie = SDL_FALSE;
+					if (focusedTextbox) {
+						textbox_event(focusedTextbox, event);
 						break;
 					}
 					switch (event.key.keysym.sym)
@@ -94,8 +88,8 @@ int main(int argc, const char *argv[])
 							}
 							else
 							{
-								reset_textbox(textbox);
-								saisie = SDL_TRUE;
+								// reset_textbox(textbox);
+								focusedTextbox = gui->textboxUsername;
 							}
 							break;
 						case SDLK_LEFT:
@@ -117,6 +111,7 @@ int main(int argc, const char *argv[])
 							if (SDL_PointInRect(&mousePos, gui->btnList[btnId]->bg->rect))
 							{
 								gui->btnList[btnId]->clicked = 10;
+								// gui->btnSolo->action();
 							}
 						}
 						switch (menu)
@@ -148,30 +143,85 @@ int main(int argc, const char *argv[])
 								}
 								break;
 							case MENU_LOGIN:
+							focusedTextbox = NULL;
 								if (SDL_PointInRect(&mousePos, gui->btnSignUp->bg->rect))
 								{
 									printf("\e[31m [INFO] : Le bouton SignUp a été cliqué ! ✨\e[37m\n");
 									menu = MENU_SIGNUP;
+									strcpy(gui->textInfoStr, "");
+									text_sprite_update(gui->textInfo, gui->textInfoStr);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
 								{
 									printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
+									if (account_login(gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfoStr))
+									{
+										printf("Connexion échouée !\n");
+									}
+									else
+									{
+										printf("Connexion réussie !\n");
+										gui->textboxUsername->text[0] = 0;
+										gui->textboxUsername->textLen = 0;
+										textbox_update(gui->textboxUsername);
+									}
+									focusedTextbox = NULL;
+									gui->textboxPassword->text[0] = 0;
+									gui->textboxPassword->textLen = 0;
+									textbox_update(gui->textboxPassword);
+									text_sprite_update(gui->textInfo, gui->textInfoStr);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
 								{
 									printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
 									menu = MENU_MAIN;
+									strcpy(gui->textInfoStr, "");
+									text_sprite_update(gui->textInfo, gui->textInfoStr);
+								}
+								else if (SDL_PointInRect(&mousePos, gui->textboxUsername->box->bg->rect))
+								{
+									focusedTextbox = gui->textboxUsername;
+								}
+								else if (SDL_PointInRect(&mousePos, gui->textboxPassword->box->bg->rect))
+								{
+									focusedTextbox = gui->textboxPassword;
 								}
 								break;
 							case MENU_SIGNUP:
 								if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
 								{
 									printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
+									if (account_create(gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfoStr))
+									{
+										printf("Création échouée !\n");
+									}
+									else
+									{
+										printf("Compte créé !\n");
+										gui->textboxUsername->text[0] = 0;
+										gui->textboxUsername->textLen = 0;
+										textbox_update(gui->textboxUsername);
+									}
+									focusedTextbox = NULL;
+									gui->textboxPassword->text[0] = 0;
+									gui->textboxPassword->textLen = 0;
+									textbox_update(gui->textboxPassword);
+									text_sprite_update(gui->textInfo, gui->textInfoStr);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
 								{
 									printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
 									menu = MENU_LOGIN;
+									strcpy(gui->textInfoStr, "");
+									text_sprite_update(gui->textInfo, gui->textInfoStr);
+								}
+								else if (SDL_PointInRect(&mousePos, gui->textboxUsername->box->bg->rect))
+								{
+									focusedTextbox = gui->textboxUsername;
+								}
+								else if (SDL_PointInRect(&mousePos, gui->textboxPassword->box->bg->rect))
+								{
+									focusedTextbox = gui->textboxPassword;
 								}
 								break;
 						}

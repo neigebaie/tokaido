@@ -12,13 +12,11 @@
 #define WINDOW_HEIGHT 1080
 #define FPS_LIMIT 60
 
-#define WHITE 255, 255, 255, 255
-#define BLACK 0, 0, 0, 255
 
 typedef struct {
 		SDL_Texture* tex; // spritesheet/texture
 		SDL_Rect* texPos; // position in the spritesheet (px) (NULL if texture)
-		SDL_Rect* rect; // where to draw it onscreen
+		SDL_Rect* rect;   // where to draw it onscreen
 } Sprite;
 
 extern SDL_Window 	*window;
