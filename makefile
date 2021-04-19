@@ -11,6 +11,6 @@ TARGETS = tokaido
 
 all: $(TARGETS)
 
-tokaido: src/square_action.c src/game.c src/board.c src/utility.c src/gui.c src/account.c src/main.c
+tokaido: src/square_draw.c src/square_action.c src/game.c src/board.c src/utility.c src/gui.c src/account.c src/main.c
 	@cc $(CFLAGS) -o $@ $+ $(LDFLAGS)
 	$(call colorecho,"$@ success. ./\"$@\" to execute.")

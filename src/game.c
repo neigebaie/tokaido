@@ -66,6 +66,17 @@ void load_ressources(void)
 	strcpy(ressources.foods[12]->name, "Tai Meshi");
 	strcpy(ressources.foods[13]->name, "Sashimi");
 
+	for (int i = 0; i < FOODS; i++)
+	{
+		ressources.foods[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
+		ressources.foods[i]->sprite->tex = foodTex;
+		ressources.foods[i]->sprite->texPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+		ressources.foods[i]->sprite->texPos->x = i * 126;
+		ressources.foods[i]->sprite->texPos->y = 0;
+		ressources.foods[i]->sprite->texPos->w = 126;
+		ressources.foods[i]->sprite->texPos->h = 115;
+		ressources.foods[i]->sprite->rect = new_rect(0, 0, 126, 115);
+	}
 
 	// ENCOUNTERS
 
@@ -204,5 +215,5 @@ void load_ressources(void)
 		ressources.squareTypes[i]->sprite->texPos->h = 256;
 	}
 
-	printf("\e[34m [DEBUG] Ressources loaded !\e[37m\n");
+	printf("\e[34m [DEBUG] Game ressources loaded !\e[37m\n");
 }

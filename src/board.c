@@ -68,12 +68,28 @@ void load_squares(Square *squares, int playerCount)
 	}
 }
 
-void init_board(void)
+void init_board(Account* loggedAccount)
 {
 	srand(time(NULL));
 
-	board.camera.origin = 0;
-	board.camera.scale = 1;
+	board.camera.origin.x = 0;
+	board.camera.origin.y = 0;
+	board.camera.scale = 1.f;
+
+	board.squareGui = init_square_gui(loggedAccount->nick);
+
+	int foods[FOODS];
+  for(int i = 0; i < FOODS; i++)
+  {
+    foods[i] = i;
+  }
+
+	shuffle(foods, FOODS);
+
+	for (int i = 0; i < INN_FRAMES; i++) {
+		set_food_in_frame(board.squareGui->innGui->foodFrames[i], ressources.foods[foods[i]]);
+		// print_rect(ressources.foods[foods[i]]->sprite->rect);
+	}
 
 	// Initialisation des joueurs
 	int travId[TRAVELERS];
@@ -94,8 +110,17 @@ void init_board(void)
 	for (int i = 0; i < BOARD_PLAYERS; i++)
 	{
 		board.players[i].traveler = ressources.travelers[travId[i]];
-		sprintf(board.players[i].nickname, "Joueur %d", i + 1);
-		board.players[i].isHuman = SDL_FALSE;
+		if (i == 0)
+		{
+			sprintf(board.players[i].nickname, "%s", loggedAccount->nick);
+			board.players[i].isHuman = SDL_FALSE;
+		}
+		else
+		{
+			sprintf(board.players[i].nickname, "Joueur %d", i + 1);
+			board.players[i].isHuman = SDL_FALSE;
+		}
+		board.players[i].nameTag = new_sprite_from_str(board.players[i].nickname, 0, 0, 0, 0.5);
 		board.players[i].position = 0;
 		board.players[i].roadDist = roadDist[i];
 		board.players[i].bundleToken = 0;
@@ -116,12 +141,47 @@ void init_board(void)
 	load_squares(board.squares, board.playerCount);
 	board.squareCount = BOARD_SQUARES;
 
-	/*
-	for (int i = 0; i < BOARD_SQUARES; i++)
+	board.squares[0].offsetY = 0;
+	for (int i = 1; i < BOARD_SQUARES; i++)
 	{
-		printf(" \e[32m%s\e[37m : \e[31m%d\e[37m\n", ressources.squareTypes[board.squares[i].id].name, board.squares[i].capacity);
+		board.squares[i].offsetY = board.squares[i - 1].offsetY + (rand() % 150 - 75);
+		board.squares[i].hovered = SDL_FALSE;
+		board.squares[i].clicked = 0;
+		board.squares[i].position = i;
 	}
-	*/
+}
+
+void hover_board(SDL_Point* mousePos)
+{
+	SDL_Rect rect;
+
+	for (int position = 0; position < BOARD_SQUARES; position++) {
+		rect.x = board.camera.scale * (board.camera.origin.x + 128 * position);
+		rect.y = board.camera.scale * (board.squares[position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128/2);
+		rect.w = board.camera.scale * 128;
+		rect.h = board.camera.scale * 128;
+		if (SDL_PointInRect(mousePos, &rect))
+			board.squares[position].hovered = SDL_TRUE;
+		else
+			board.squares[position].hovered = SDL_FALSE;
+	}
+}
+
+void click_board(SDL_Point* mousePos)
+{
+	SDL_Rect rect;
+
+	for (int position = 0; position < BOARD_SQUARES; position++) {
+		rect.x = board.camera.scale * (board.camera.origin.x + 128 * position);
+		rect.y = board.camera.scale * (board.squares[position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128/2);
+		rect.w = board.camera.scale * 128;
+		rect.h = board.camera.scale * 128;
+		if (SDL_PointInRect(mousePos, &rect))
+		{
+			board.squares[position].clicked = 10;
+			square_action(&board.squares[position]);
+		}
+	}
 }
 
 void draw_bg(void)
@@ -132,6 +192,22 @@ void draw_bg(void)
 void draw_lines(int squareCount)
 {
 	SDL_Rect rect;
+	if (!squareCount)
+		return;
+
+	for (int position = 0; position < squareCount - 1; position++)
+	{
+		SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+		rect.x = board.camera.scale * (board.camera.origin.x + 128 * position + 128/2);
+		rect.y = board.camera.scale * (board.squares[position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 2);
+		rect.w = board.camera.scale * 128;
+		rect.h = board.camera.scale * 4;
+		for (int j = 0; j <= (int)(board.camera.scale * 4); j++)
+		{
+			SDL_RenderDrawLine(renderer, rect.x, rect.y + j, rect.x + rect.w, board.camera.scale * (board.squares[position + 1].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 2) + j);
+		}
+		// SDL_RenderFillRect(renderer, &rect);
+	}
 
 	for (int position = 0; position < squareCount; position++)
 	{
@@ -139,35 +215,31 @@ void draw_lines(int squareCount)
 		{
 			SDL_SetRenderDrawColor(renderer, board.squares[position].type->color.r, board.squares[position].type->color.g, board.squares[position].type->color.b, 255);
 
-			rect.x = board.camera.origin + 128 * position + 128/2 - 2;
-			rect.y = WINDOW_HEIGHT - 100 - 128 * j - 128;
+			rect.x = board.camera.scale * (board.camera.origin.x + 128 * position + 128/2 - 2);
+			rect.y = board.camera.scale * (board.squares[position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128 * j - 128);
 			// if (position%2)
 			// 	rect.y = WINDOW_HEIGHT - 100 + 128 * j;
-			rect.w = 4;
-			rect.h = 128;
-			SDL_RenderFillRect(renderer, &rect);
+			rect.w = board.camera.scale * 4;
+			rect.h = board.camera.scale * 128;
+			if (is_rect_on_screen(&rect))
+			{
+				SDL_RenderFillRect(renderer, &rect);
+			}
 
-			rect.x = board.camera.origin + 128 * position + 128/2 - 10;
-			rect.y = WINDOW_HEIGHT - 100 - 128 * j - 128 - 10;
+			rect.x = board.camera.scale * (board.camera.origin.x + 128 * position + 128/2 - 10);
+			rect.y = board.camera.scale * (board.squares[position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128 * j - 128 - 10);
 			// if (position%2)
 			// 	rect.y = WINDOW_HEIGHT - 100 + 128 * j + 128;
-			rect.w = 20;
-			rect.h = 20;
+			rect.w = board.camera.scale * 20;
+			rect.h = board.camera.scale * 20;
 			SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, board.squares[position].type->color.r, board.squares[position].type->color.g, board.squares[position].type->color.b);
-			SDL_RenderCopy(renderer, ressources.squareTypes[9]->sprite->tex, ressources.squareTypes[9]->sprite->texPos, &rect);
+			if (is_rect_on_screen(&rect))
+			{
+				SDL_RenderCopy(renderer, ressources.squareTypes[9]->sprite->tex, ressources.squareTypes[9]->sprite->texPos, &rect);
+			}
 			SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 255, 255, 255);
 			// SDL_RenderFillRect(renderer, &rect);
 		}
-		if (position == squareCount - 1) // fin du plateau
-			return;
-
-		SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-
-		rect.x = board.camera.origin + 128 * position + 128/2;
-		rect.y = WINDOW_HEIGHT - 100 - 2;
-		rect.w = 128;
-		rect.h = 4;
-		SDL_RenderFillRect(renderer, &rect);
 	}
 }
 
@@ -176,11 +248,22 @@ void draw_squares(int squareCount, Square *squares)
 	SDL_Rect rect;
 	for (int position = 0; position < squareCount; position++)
 	{
-		rect.x = (board.camera.origin + 128 * position);
-		rect.y = WINDOW_HEIGHT - 100 - 128/2;
-		rect.w = 128;
-		rect.h = 128;
-		SDL_RenderCopy(renderer, board.squares[position].type->sprite->tex, board.squares[position].type->sprite->texPos, &rect);
+		rect.x = board.camera.scale * (board.camera.origin.x + 128 * position);
+		rect.y = board.camera.scale * (board.squares[position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128/2);
+		rect.w = board.camera.scale * 128;
+		rect.h = board.camera.scale * 128;
+		if (is_rect_on_screen(&rect))
+		{
+			if (board.squares[position].clicked)
+			{
+				SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 150, 150, 150);
+				board.squares[position].clicked--;
+			}
+			else if (board.squares[position].hovered)
+				SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 200, 200, 200);
+			SDL_RenderCopy(renderer, board.squares[position].type->sprite->tex, board.squares[position].type->sprite->texPos, &rect);
+			SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 255, 255, 255);
+		}
 	}
 }
 
@@ -188,21 +271,36 @@ void draw_players()
 {
 	SDL_Rect rect;
 	for (int i = 0; i < board.playerCount; i++) {
-		rect.x = board.camera.origin + 128 * board.players[i].position + 128/2 - 100/2;
-		rect.y = WINDOW_HEIGHT - 100 - 128 * board.players[i].roadDist - 128 - 100/2;
-		rect.w = 100;
-		rect.h = 100;
-		SDL_RenderCopy(renderer, board.players[i].traveler->sprite->tex, board.players[i].traveler->sprite->texPos, &rect);
+		rect.x = board.camera.scale * (board.camera.origin.x + 128 * board.players[i].position + 128/2 - 100/2);
+		rect.y = board.camera.scale * (board.squares[board.players[i].position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128 * (board.players[i].roadDist + 1) - 100/2);
+		rect.w = board.camera.scale * 100;
+		rect.h = board.camera.scale * 100;
+		center_rect(board.players[i].nameTag->rect, new_rect(rect.x - board.players[i].nameTag->rect->w, rect.y, board.players[i].nameTag->rect->w, rect.h));
+		draw_sprite(board.players[i].nameTag);
+		if (is_rect_on_screen(&rect))
+		{
+			SDL_RenderCopy(renderer, board.players[i].traveler->sprite->tex, board.players[i].traveler->sprite->texPos, &rect);
+		}
 	}
+}
+
+void draw_hud()
+{
+	SDL_Rect rect = {0, 0, WINDOW_WIDTH, 64};
+	SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
+	SDL_RenderFillRect(renderer, &rect);
+	draw_sprite(board.squareGui->hud->nick);
 }
 
 void draw_board()
 {
+	// draw_inn(board.squareGui->innGui);
 	// draw_bg(); // Affiche l'arrière plan du plateau
 	draw_lines(board.squareCount);
 	// draw_points();
 	draw_squares(board.squareCount, board.squares);
 	draw_players();
+	draw_hud();
 }
 
 int whos_turn_is_it()
@@ -294,37 +392,14 @@ void random_move()
 	return;
 }
 
-void square_action2()
+void square_action(Square* square)
 {
-	Player player = board.players[whos_turn_is_it()];
-	switch (whos_turn_is_it())
+	Player* player = &board.players[whos_turn_is_it()];
+	printf("SQUARE ACTION = %s\n", player->nickname);
+	switch (square->type->id)
 	{
-	 case 0 :
-	 		break;
-	case 1 :
-	 	 	break;
-	case 2 :
-			break;
-	case 3 :
-			break;
-  case 4 :
-			break;
-	case 5 :
-			break;
-	case 6 :
-			break;
-	case 7 :
-			break;
-	case 8 :
+		case SQUARE_INN:
+			printf("TYPE = INN\n");
 			break;
 	}
 }
-/*
-Liste des fonctions à créer :
- - move_player(Player player, int position)
- - square action
- - random_move -> IA
- -
- - REMOVE GLOBAL VARIABLES
- - pétales de ceriser :3
-*/

@@ -96,8 +96,8 @@ void limit_fps(unsigned int limit)
     unsigned int ticks = SDL_GetTicks();
 		if (limit < ticks)
 			return;
-		else if (limit > ticks + (1/FPS_LIMIT)*1000)
-			SDL_Delay((1/FPS_LIMIT)*1000);
+		else if (limit > ticks + (1000/FPS_LIMIT))
+			SDL_Delay((1000/FPS_LIMIT));
 		else
 			SDL_Delay(limit - ticks);
 }
@@ -133,6 +133,28 @@ SDL_Rect* new_rect(int x, int y, int w, int h)
 	rect->w = w;
 	rect->h = h;
 	return rect;
+}
+
+SDL_bool is_rect_on_screen(SDL_Rect* rect)
+{
+	if (
+		(
+			(rect->x >= 0 && rect->x <= WINDOW_WIDTH) ||
+			(rect->x + rect->w >= 0 && rect->x + rect->w <= WINDOW_WIDTH)
+		)
+		&&
+		(
+			(rect->y >= 0 && rect->y <= WINDOW_HEIGHT) ||
+			(rect->y + rect->h >= 0 && rect->y + rect->h <= WINDOW_HEIGHT)
+		)
+	)
+	{
+		return SDL_TRUE;
+	}
+	else
+	{
+		return SDL_FALSE;
+	}
 }
 
 void exit_with_error(const char *message)

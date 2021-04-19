@@ -36,6 +36,8 @@ SDL_Texture* load_texture(const char *path);
 Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* texPos);
 SDL_Rect* new_rect(int x, int y, int w, int h);
 
+SDL_bool is_rect_on_screen(SDL_Rect* rect);
+
 void exit_with_success(void);
 void exit_with_error(const char *message);
 

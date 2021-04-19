@@ -5,12 +5,19 @@
 #include "board.h"
 #include "account.h"
 
-#define MENU_MAIN     0
-#define MENU_LOGIN    1
-#define MENU_SIGNUP   2
-#define MENU_ARCHIVES 3
-#define MENU_SETTINGS 4
-#define MENU_BOARD    5
+#define MENU_MAIN      0
+#define MENU_LOGIN     1
+#define MENU_SIGNUP    2
+#define MENU_ACCOUNT   3
+#define MENU_LOAD      4
+#define MENU_SAVE      5
+#define MENU_CHAR_SEL  6
+#define MENU_RULES     7
+#define MENU_ARCHIVES  8
+#define MENU_SETTINGS  9
+#define MENU_BOARD    10
+
+int frameCount = 0;
 
 int main(int argc, const char *argv[])
 {
@@ -18,59 +25,93 @@ int main(int argc, const char *argv[])
 	init_fps_counter();
 	// SDL_ShowCursor(0); // désactive le curseur windows pour afficher celui custom
 	// SDL_SetCursor(init_system_cursor(arrow));
+	Account* loggedAccount = (Account*)malloc(sizeof(Account));
 
-	// load_textures();
 	load_ressources();
+
 	Gui* gui = gui_init();
-	init_board();
-	// Textures
+
 	SDL_Point mousePos;
 
-	SDL_Rect mouseRect = {0, 0, 0, 0};
-	mouseRect.w = gui->cursor->rect->w;
-	mouseRect.h = gui->cursor->rect->h;
+	// SDL_Rect mouseRect = {0, 0, 0, 0};
+	// mouseRect.w = gui->cursor->rect->w;
+	// mouseRect.h = gui->cursor->rect->h;
 
 	SDL_bool program_launched = SDL_TRUE;
 	SDL_bool menu = MENU_MAIN;
-	SDL_bool update = SDL_TRUE;
+	// SDL_bool update = SDL_TRUE;
 
 	Textbox* focusedTextbox = NULL;
 
-	int stage = 0;
-	int scroll = 0;
-	unsigned int frameLimit = SDL_GetTicks() + FPS_LIMIT;
+	// debug
+	int debugMode = 0;
+	float k = 20;
+	SDL_Rect rect;
+	TextInfo* debugInfo = new_text_info(0, 0, 0, 1);
+	// Sprite* debugInfo = new_sprite_from_str("", 0, 0, 0);
+	debugInfo->sprite->rect->x = 10;
+	debugInfo->sprite->rect->y = 10;
+	// char debugInfoStr[128];
+
+	// int stage = 0;
+	SDL_Point scroll = {0, 0};
+	float zoom = 0.f;
+	unsigned int frameLimit = SDL_GetTicks() + (1000/FPS_LIMIT);
 
 	while (program_launched)
 	{
+		clock_t begin = clock();
 		update_fps_counter();
 
 		SDL_Event event;
-		SDL_GetMouseState(&mousePos.x, &mousePos.y);
-
-		for (int btnId = 0; btnId < BTN_NB; btnId++) {
-			if (SDL_PointInRect(&mousePos, gui->btnList[btnId]->bg->rect))
-			{
-				gui->btnList[btnId]->hovered = SDL_TRUE;
-			} else {
-				gui->btnList[btnId]->hovered = SDL_FALSE;
-			}
-			if (gui->btnList[btnId]->clicked) {
-				gui->btnList[btnId]->clicked -= 1;
-			}
-		}
 
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
 			{
+				case SDL_MOUSEMOTION:
+					SDL_GetMouseState(&mousePos.x, &mousePos.y);
+
+					if (menu == MENU_BOARD)
+					{
+						hover_board(&mousePos);
+					}
+					else
+					{
+						for (int btnId = 0; btnId < BTN_NB; btnId++) {
+							if (SDL_PointInRect(&mousePos, gui->btnList[btnId]->bg->rect))
+							{
+								gui->btnList[btnId]->hovered = SDL_TRUE;
+							} else {
+								gui->btnList[btnId]->hovered = SDL_FALSE;
+							}
+							if (gui->btnList[btnId]->clicked) {
+								gui->btnList[btnId]->clicked -= 1;
+							}
+						}
+					}
+					break;
+
 				case SDL_KEYUP:
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_LEFT:
-							scroll = 0;
+							scroll.x = 0;
 							break;
 						case SDLK_RIGHT:
-							scroll = 0;
+							scroll.x = 0;
+							break;
+						case SDLK_UP:
+							scroll.y = 0;
+							break;
+						case SDLK_DOWN:
+							scroll.y = 0;
+							break;
+						case SDLK_PAGEUP:
+							zoom = 0;
+							break;
+						case SDLK_PAGEDOWN:
+							zoom = 0;
 							break;
 					}
 					break;
@@ -93,12 +134,35 @@ int main(int argc, const char *argv[])
 							}
 							break;
 						case SDLK_LEFT:
-							scroll = 1;
+							scroll.x = 1;
 							break;
 						case SDLK_RIGHT:
-							scroll = -1;
+							scroll.x = -1;
 							break;
-						case SDLK_q:
+						case SDLK_UP:
+							scroll.y = 1;
+							break;
+						case SDLK_DOWN:
+							scroll.y = -1;
+							break;
+						case SDLK_PAGEUP:
+							zoom = 1;
+							break;
+						case SDLK_PAGEDOWN:
+							zoom = -1;
+							break;
+						case SDLK_F1:
+							k -= 0.5;
+							printf("%f\n", k);
+							break;
+						case SDLK_F2:
+							k += 0.5;
+							printf("%f\n", k);
+							break;
+						case SDLK_F12:
+							debugMode = (debugMode + 1) % 4;
+							break;
+						// case SDLK_q:
 						case SDLK_ESCAPE:
 							program_launched = SDL_FALSE;
 							break;
@@ -148,35 +212,34 @@ int main(int argc, const char *argv[])
 								{
 									printf("\e[31m [INFO] : Le bouton SignUp a été cliqué ! ✨\e[37m\n");
 									menu = MENU_SIGNUP;
-									strcpy(gui->textInfoStr, "");
-									text_sprite_update(gui->textInfo, gui->textInfoStr);
+									text_info_clear(gui->textInfo);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
 								{
 									printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
-									if (account_login(gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfoStr))
+									if (account_login(loggedAccount, gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfo->text))
 									{
 										printf("Connexion échouée !\n");
 									}
 									else
 									{
-										printf("Connexion réussie !\n");
+										printf("Connexion réussie ! %s\n", loggedAccount->nick);
 										gui->textboxUsername->text[0] = 0;
 										gui->textboxUsername->textLen = 0;
 										textbox_update(gui->textboxUsername);
+										init_board(loggedAccount);
 									}
 									focusedTextbox = NULL;
 									gui->textboxPassword->text[0] = 0;
 									gui->textboxPassword->textLen = 0;
 									textbox_update(gui->textboxPassword);
-									text_sprite_update(gui->textInfo, gui->textInfoStr);
+									text_info_update(gui->textInfo);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
 								{
 									printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
 									menu = MENU_MAIN;
-									strcpy(gui->textInfoStr, "");
-									text_sprite_update(gui->textInfo, gui->textInfoStr);
+									text_info_clear(gui->textInfo);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->textboxUsername->box->bg->rect))
 								{
@@ -191,7 +254,7 @@ int main(int argc, const char *argv[])
 								if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
 								{
 									printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
-									if (account_create(gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfoStr))
+									if (account_create(gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfo->text))
 									{
 										printf("Création échouée !\n");
 									}
@@ -206,14 +269,13 @@ int main(int argc, const char *argv[])
 									gui->textboxPassword->text[0] = 0;
 									gui->textboxPassword->textLen = 0;
 									textbox_update(gui->textboxPassword);
-									text_sprite_update(gui->textInfo, gui->textInfoStr);
+									text_info_update(gui->textInfo);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
 								{
 									printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
 									menu = MENU_LOGIN;
-									strcpy(gui->textInfoStr, "");
-									text_sprite_update(gui->textInfo, gui->textInfoStr);
+									text_info_clear(gui->textInfo);
 								}
 								else if (SDL_PointInRect(&mousePos, gui->textboxUsername->box->bg->rect))
 								{
@@ -223,6 +285,9 @@ int main(int argc, const char *argv[])
 								{
 									focusedTextbox = gui->textboxPassword;
 								}
+								break;
+							case MENU_BOARD:
+								click_board(&mousePos);
 								break;
 						}
 					}
@@ -236,7 +301,14 @@ int main(int argc, const char *argv[])
 		}
 
 		// UPDATE MGR
-		board.camera.origin += scroll * 10;
+		if ((board.camera.scale >= CAMERA_MIN_ZOOM && zoom == -1) || (board.camera.scale <= CAMERA_MAX_ZOOM && zoom == 1))
+		{
+			board.camera.scale += zoom * 0.02f * board.camera.scale;
+			board.camera.origin.x += -19.8 * zoom /board.camera.scale;
+			board.camera.origin.y += -10.80 * zoom /board.camera.scale;
+		}
+		board.camera.origin.x += scroll.x * (10/board.camera.scale);
+		board.camera.origin.y += scroll.y * (10/board.camera.scale);
 		if (menu == MENU_BOARD)
 			; // update_board();
 
@@ -263,10 +335,81 @@ int main(int argc, const char *argv[])
 		// mouseRect.y = mousePos.y;
 		// SDL_RenderCopy(renderer, gui->cursor->tex, gui->cursor->texPos, &mouseRect); // cursor toujours au dessus
 
+		clock_t end = clock();
+		double time_spent = (time_spent  + (1000 * (double)(end - begin) / CLOCKS_PER_SEC))/2;
+		frameCount++;
+
+		switch (debugMode) {
+			case 3:
+				SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+				for (int i = 0; i < WINDOW_WIDTH; i += WINDOW_WIDTH / 10)
+				{
+					SDL_RenderDrawLine(renderer, i, 0, i, WINDOW_HEIGHT);
+				}
+				SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+				for (int i = 0; i < WINDOW_HEIGHT; i += WINDOW_HEIGHT / 10)
+				{
+					SDL_RenderDrawLine(renderer, 0, i, WINDOW_WIDTH, i);
+				}
+			case 2:
+				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+				rect.w = 1;
+				rect.h = WINDOW_HEIGHT;
+				rect.x = WINDOW_WIDTH / 2 - rect.w / 2;
+				rect.y = WINDOW_HEIGHT / 2 - rect.h / 2;
+				SDL_RenderFillRect(renderer, &rect);
+
+				rect.w = WINDOW_WIDTH;
+				rect.h = 1;
+				rect.x = WINDOW_WIDTH / 2 - rect.w / 2;
+				rect.y = WINDOW_HEIGHT / 2 - rect.h / 2;
+				SDL_RenderFillRect(renderer, &rect);
+			case 1:
+				if (frameCount%10 == 0)
+				{
+					sprintf(debugInfo->text, "time elapsed (ms) = %.2lf", time_spent);
+					// printf("time elapsed (ms) = %.2lf\n", time_spent);
+					frameCount = 0;
+				}
+				text_info_update(debugInfo);
+				draw_sprite(debugInfo->sprite);
+				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+				rect.w = 20;
+				rect.h = 4;
+				rect.x = WINDOW_WIDTH / 2 - rect.w / 2;
+				rect.y = WINDOW_HEIGHT / 2 - rect.h / 2;
+				SDL_RenderFillRect(renderer, &rect);
+
+				rect.w = 4;
+				rect.h = 20;
+				rect.x = WINDOW_WIDTH / 2 - rect.w / 2;
+				rect.y = WINDOW_HEIGHT / 2 - rect.h / 2;
+				SDL_RenderFillRect(renderer, &rect);
+
+				SDL_SetRenderDrawColor(renderer, 50, 100, 50, 255);
+
+				rect.w = 18;
+				rect.h = 2;
+				rect.x = WINDOW_WIDTH / 2 - rect.w / 2;
+				rect.y = WINDOW_HEIGHT / 2 - rect.h / 2;
+				SDL_RenderFillRect(renderer, &rect);
+
+				rect.w = 2;
+				rect.h = 18;
+				rect.x = WINDOW_WIDTH / 2 - rect.w / 2;
+				rect.y = WINDOW_HEIGHT / 2 - rect.h / 2;
+				SDL_RenderFillRect(renderer, &rect);
+				break;
+			default:
+			break;
+		}
+
 		SDL_RenderPresent(renderer);
 
 		// FPS MGR
-		frameLimit = SDL_GetTicks() + FPS_LIMIT;
+		frameLimit = SDL_GetTicks() + (1000/FPS_LIMIT);
 		limit_fps(frameLimit);
 	}
 

@@ -1,8 +1,6 @@
 #include "square_action.h"
 
-//srand(time(NULL));
-
-void init_inn (int* innFoods,int playerCount)
+void init_inn(int* innFoods, int playerCount)
 {
   int foods[FOODS];
   for(int i=0;i<FOODS;i++)
@@ -10,7 +8,7 @@ void init_inn (int* innFoods,int playerCount)
     items[i] = i;
   }
 
-  shuffle(foods,FOODS)
+  shuffle(foods,FOODS);
 
   for(int j=0;i<playerCount+1,i++)
   {
@@ -18,7 +16,7 @@ void init_inn (int* innFoods,int playerCount)
   }
 }
 
-void init_shop (int* shopItems)
+void init_shop(int* shopItems)
 {
   int items[ITEMS];
   for(int i=0;i<ITEMS;i++)
@@ -26,7 +24,7 @@ void init_shop (int* shopItems)
     items[i] = i;
   }
 
-  shuffle(items,ITEMS)
+  shuffle(items,ITEMS);
 
   for(int j=0;i<3,i++)
   {
@@ -34,12 +32,12 @@ void init_shop (int* shopItems)
   }
 }
 
-int init_hotspring ()
+int init_hotspring()
 {
   return 2+rand()%2;
 }
 
-int init_encounter (Player* player)
+int init_encounter(Player* player)
 {
   int type ;
   int choices[ENCOUNTERS];

@@ -1,16 +1,23 @@
 #include "gui.h"
 
-void center_rect(SDL_Rect* rectChild, SDL_Rect* rectParent, float scale)
+void center_rect(SDL_Rect* rectChild, SDL_Rect* rectParent)
 {
-	rectChild->w *= scale;
-	rectChild->h *= scale;
 	rectChild->x = rectParent->x + (rectParent->w/2 - rectChild->w/2);
 	rectChild->y = rectParent->y + (rectParent->h/2 - rectChild->h/2);
 }
 
 // void anchor_rect(SDL_Rect* rectChild, SDL_Rect* rectParent, float scale);
 
-Sprite* new_sprite_from_str(const char* text, int r, int g, int b)
+Sprite* sprite_copy(Sprite* src)
+{
+	Sprite* dst = (Sprite*)malloc(sizeof(Sprite));
+	dst->tex    = src->tex;
+	dst->texPos = src->texPos;
+	dst->rect   = new_rect(0, 0, src->rect->w, src->rect->h);
+	return dst;
+}
+
+Sprite* new_sprite_from_str(const char* text, int r, int g, int b, float scale)
 {
 	SDL_Surface *surface = NULL;
 	SDL_Texture *texture = NULL;
@@ -21,25 +28,41 @@ Sprite* new_sprite_from_str(const char* text, int r, int g, int b)
 	SDL_FreeSurface(surface);
 
 	Sprite* sprite = new_sprite(texture, new_rect(0, 0, 0, 0));
-	SDL_QueryTexture(sprite->tex, NULL, NULL, &sprite->rect->w, &sprite->rect->h);
 	SDL_QueryTexture(sprite->tex, NULL, NULL, &sprite->texPos->w, &sprite->texPos->h);
+	sprite->rect->w = sprite->texPos->w * scale;
+	sprite->rect->h = sprite->texPos->h * scale;
 
 	return sprite;
+}
+
+TextInfo* new_text_info(int r, int g, int b, float textScale)
+{
+	TextInfo* textInfo = (TextInfo*)malloc(sizeof(TextInfo));
+
+	textInfo->color    = (SDL_Color*)malloc(sizeof(SDL_Color));
+	textInfo->color->r = r;
+	textInfo->color->g = g;
+	textInfo->color->b = b;
+	textInfo->text     = (char*)malloc(sizeof(char) * 128);
+	textInfo->sprite   = new_sprite_from_str("", textInfo->color->r, textInfo->color->g, textInfo->color->b, textScale);
+
+	return textInfo;
 }
 
 Button* new_button(const char* text, int r, int g, int b, Sprite* bgSprite, float textScale)
 {
 	Button* button     = (Button*)malloc(sizeof(Button));
 	button->text       = (Sprite*)malloc(sizeof(Sprite));
-	button->bg         = (Sprite*)malloc(sizeof(Sprite));
+	button->bg         = sprite_copy(bgSprite);
+	// button->bg         = (Sprite*)malloc(sizeof(Sprite));
 	// memcpy(button->bg, bgSprite, sizeof(Sprite));
-	button->bg->tex    = bgSprite->tex;
-	button->bg->texPos = new_rect(bgSprite->texPos->x, bgSprite->texPos->y, bgSprite->texPos->w, bgSprite->texPos->h);
-	button->bg->rect   = new_rect(0, 0, bgSprite->rect->w, bgSprite->rect->h);
+	// button->bg->tex    = bgSprite->tex;
+	// button->bg->texPos = bgSprite->texPos;
+	// button->bg->rect   = new_rect(0, 0, bgSprite->rect->w, bgSprite->rect->h);
 	button->hovered    = SDL_FALSE;
 	button->clicked    = SDL_FALSE;
-	button->text       = new_sprite_from_str(text, r, g, b);
-	center_rect(button->text->rect, button->bg->rect, textScale);
+	button->text       = new_sprite_from_str(text, r, g, b, textScale);
+	center_rect(button->text->rect, button->bg->rect);
 
 	return button;
 }
@@ -77,70 +100,70 @@ Gui* gui_init(void)
 	// MENU_MAIN : MENU PRINCIPAL
 
 	gui->title 		      = new_sprite(tex, new_rect(0, 308, 888, 335));
-	center_rect(gui->title->rect, new_rect(0, 150, 1920, 200), 1);
+	center_rect(gui->title->rect, new_rect(0, 150, 1920, 200));
 
 	gui->btnSolo        = new_button("Solo", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnSolo->bg->rect, new_rect(0, 500, 1920, 200), 1);
-	center_rect(gui->btnSolo->text->rect, gui->btnSolo->bg->rect, 1);
+	center_rect(gui->btnSolo->bg->rect, new_rect(0, 500, 1920, 200));
+	center_rect(gui->btnSolo->text->rect, gui->btnSolo->bg->rect);
 	// print_rect(gui->btnSolo->text->rect);
 
 	gui->btnMultiplayer = new_button("Se connecter", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnMultiplayer->bg->rect, new_rect(0, 600, 1920, 200), 1);
-	center_rect(gui->btnMultiplayer->text->rect, gui->btnMultiplayer->bg->rect, 1);
+	center_rect(gui->btnMultiplayer->bg->rect, new_rect(0, 600, 1920, 200));
+	center_rect(gui->btnMultiplayer->text->rect, gui->btnMultiplayer->bg->rect);
 	// print_rect(gui->btnMultiplayer->text->rect);
 
 	gui->btnArchives    = new_button("Archives", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnArchives->bg->rect, new_rect(0, 700, 1920, 200), 1);
-	center_rect(gui->btnArchives->text->rect, gui->btnArchives->bg->rect, 1);
+	center_rect(gui->btnArchives->bg->rect, new_rect(0, 700, 1920, 200));
+	center_rect(gui->btnArchives->text->rect, gui->btnArchives->bg->rect);
 
 	gui->btnSettings    = new_button("Options", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnSettings->bg->rect, new_rect(0, 800, 1920, 200), 1);
-	center_rect(gui->btnSettings->text->rect, gui->btnSettings->bg->rect, 1);
+	center_rect(gui->btnSettings->bg->rect, new_rect(0, 800, 1920, 200));
+	center_rect(gui->btnSettings->text->rect, gui->btnSettings->bg->rect);
 
 	gui->btnQuit        = new_button("Quitter", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnQuit->bg->rect, new_rect(0, 900, 1920, 200), 1);
-	center_rect(gui->btnQuit->text->rect, gui->btnQuit->bg->rect, 1);
+	center_rect(gui->btnQuit->bg->rect, new_rect(0, 900, 1920, 200));
+	center_rect(gui->btnQuit->text->rect, gui->btnQuit->bg->rect);
 
 	gui->btnBack        = new_button("Retour", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnBack->bg->rect, new_rect(0, 900, 1920, 200), 1);
-	center_rect(gui->btnBack->text->rect, gui->btnBack->bg->rect, 1);
+	center_rect(gui->btnBack->bg->rect, new_rect(0, 900, 1920, 200));
+	center_rect(gui->btnBack->text->rect, gui->btnBack->bg->rect);
 
 	gui->btnNext        = new_button("Suivant", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnNext->bg->rect, new_rect(0, 800, 1920, 200), 1);
-	center_rect(gui->btnNext->text->rect, gui->btnNext->bg->rect, 1);
+	center_rect(gui->btnNext->bg->rect, new_rect(0, 800, 1920, 200));
+	center_rect(gui->btnNext->text->rect, gui->btnNext->bg->rect);
 
-	gui->btnSignUp      = new_button("Creer un compte", 255, 255, 255, gui->btn, 0.5);
-	center_rect(gui->btnSignUp->bg->rect, new_rect(0, 700, 1920, 200), 1);
-	center_rect(gui->btnSignUp->text->rect, gui->btnSignUp->bg->rect, 1);
+	gui->btnSignUp      = new_button("Créer un compte", 255, 255, 255, gui->btn, 0.5);
+	center_rect(gui->btnSignUp->bg->rect, new_rect(0, 700, 1920, 200));
+	center_rect(gui->btnSignUp->text->rect, gui->btnSignUp->bg->rect);
 
 	// MENU_LOGIN : MENU DE CONNEXION
 
-	gui->textLogin = new_sprite_from_str("Connexion au compte", 0, 0, 0);
-	center_rect(gui->textLogin->rect, new_rect(0, 150, 1920, 200), 1);
+	gui->textLogin = new_sprite_from_str("Connexion au compte", 0, 0, 0, 1);
+	center_rect(gui->textLogin->rect, new_rect(0, 150, 1920, 200));
 
-	gui->textUsername = new_sprite_from_str("Nom d'utilisateur : ", 0, 0, 0);
-	center_rect(gui->textUsername->rect, new_rect(0, 300, 1420, 200), 0.5);
+	gui->textUsername = new_sprite_from_str("Nom d'utilisateur : ", 0, 0, 0, 0.5);
+	center_rect(gui->textUsername->rect, new_rect(0, 300, 1420, 200));
 	gui->textboxUsername = new_textbox(textboxBg, SDL_FALSE);
 	gui->textboxUsername->box->bg->rect->x = gui->textUsername->rect->x + gui->textUsername->rect->w + 50;
 	gui->textboxUsername->box->bg->rect->y = gui->textUsername->rect->y - 15;
 	gui->textboxUsername->box->bg->rect->w = 500;
 	gui->textboxUsername->box->bg->rect->h = 80;
 
-	gui->textPassword = new_sprite_from_str("Mot de passe :", 0, 0, 0);
-	center_rect(gui->textPassword->rect, new_rect(0, 400, 1420, 200), 0.5);
+	gui->textPassword = new_sprite_from_str("Mot de passe :", 0, 0, 0, 0.5);
+	center_rect(gui->textPassword->rect, new_rect(0, 400, 1420, 200));
 	gui->textboxPassword = new_textbox(textboxBg, SDL_TRUE);
 	gui->textboxPassword->box->bg->rect->x = gui->textUsername->rect->x + gui->textUsername->rect->w + 50;
 	gui->textboxPassword->box->bg->rect->y = gui->textPassword->rect->y - 15;
 	gui->textboxPassword->box->bg->rect->w = 500;
 	gui->textboxPassword->box->bg->rect->h = 80;
 
-	gui->textInfo = new_sprite_from_str("A É È à é è", 0, 0, 0);
-	center_rect(gui->textInfo->rect, new_rect(0, 500, 1420, 200), 0.5);
+	gui->textInfo = new_text_info(0, 0, 0, 1);
+	center_rect(gui->textInfo->sprite->rect, new_rect(0, 500, 1420, 200));
 
 	// MENU_SIGNUP : MENU DE CREATION DE COMPTE
 
-	gui->textSignUp	= new_sprite_from_str("Creation d'un nouveau compte", 0, 0, 0);
-	center_rect(gui->textSignUp->rect, new_rect(0, 150, 1920, 200), 1);
+	gui->textSignUp	= new_sprite_from_str("Création d'un nouveau compte", 0, 0, 0, 1);
+	center_rect(gui->textSignUp->rect, new_rect(0, 150, 1920, 200));
 
 	gui->btnList[0] = gui->btnSolo;
 	gui->btnList[1] = gui->btnMultiplayer;
@@ -155,6 +178,7 @@ Gui* gui_init(void)
 	gui->btnList[8] = gui->textboxUsername->box;
 	gui->btnList[9] = gui->textboxPassword->box;
 
+	printf("\e[35m [DEBUG] Gui loaded !\e[37m\n");
 	return gui;
 }
 
@@ -179,21 +203,29 @@ void draw_sprite(Sprite* sprite)
 	SDL_RenderCopy(renderer, sprite->tex, sprite->texPos, sprite->rect);
 }
 
-void text_sprite_update(Sprite* sprite, char* text)
+void text_info_clear(TextInfo* textInfo)
 {
-	SDL_Rect rect = *sprite->rect;
-	Sprite* newSprite = new_sprite_from_str(text, 50, 0, 0);
-	SDL_DestroyTexture(sprite->tex);
-	sprite->tex = newSprite->tex;
+	strcpy(textInfo->text, "");
+	text_info_update(textInfo);
+}
+
+void text_info_update(TextInfo* textinfo)
+{
+	SDL_Rect rect = *textinfo->sprite->rect;
+	Sprite* newSprite = new_sprite_from_str(textinfo->text, 0, 0, 0, 1);
+	SDL_DestroyTexture(textinfo->sprite->tex);
+	textinfo->sprite->tex = newSprite->tex;
 	free(newSprite);
-	SDL_QueryTexture(sprite->tex, NULL, NULL, &sprite->texPos->w, &sprite->texPos->h);
-	sprite->rect->w = sprite->texPos->w * 0.5;
-	sprite->rect->h = sprite->texPos->h * 0.5;
+	SDL_QueryTexture(textinfo->sprite->tex, NULL, NULL, &textinfo->sprite->texPos->w, &textinfo->sprite->texPos->h);
+	textinfo->sprite->rect->w = textinfo->sprite->texPos->w * 0.5;
+	textinfo->sprite->rect->h = textinfo->sprite->texPos->h * 0.5;
 }
 
 void textbox_update(Textbox *textbox)
 {
+	SDL_DestroyTexture(textbox->box->text->rect);
 	free(textbox->box->text);
+
 	if (textbox->isPassword)
 	{
 		char hidedText[TEXTBOX_SIZE];
@@ -201,17 +233,14 @@ void textbox_update(Textbox *textbox)
 			hidedText[i] = '*';
 		}
 		hidedText[textbox->textLen] = '\0';
-		textbox->box->text = new_sprite_from_str(hidedText, 255, 255, 255);
+		textbox->box->text = new_sprite_from_str(hidedText, 255, 255, 255, 1);
 	}
 	else
 	{
-		textbox->box->text = new_sprite_from_str(textbox->text, 255, 255, 255);
+		textbox->box->text = new_sprite_from_str(textbox->text, 255, 255, 255, 0.5);
 	}
 	textbox->box->text->rect->x = textbox->box->bg->rect->x + 10;
-	textbox->box->text->rect->w *= 0.5;
-	textbox->box->text->rect->h *= 0.5;
-	textbox->box->text->rect->y =  textbox->box->bg->rect->y + ( textbox->box->bg->rect->h/2 - textbox->box->text->rect->h/2);
-	// center_rect(textbox->box->text->rect, textbox->box->bg->rect, 0.5);
+	textbox->box->text->rect->y = textbox->box->bg->rect->y + ( textbox->box->bg->rect->h/2 - textbox->box->text->rect->h/2);
 }
 
 void textbox_event(Textbox *textbox, SDL_Event event)
@@ -274,7 +303,7 @@ void draw_login_menu(Gui* gui)
 	draw_button(gui->btnBack);
 	draw_button(gui->textboxUsername->box);
 	draw_button(gui->textboxPassword->box);
-	draw_sprite(gui->textInfo);
+	draw_sprite(gui->textInfo->sprite);
 }
 
 void draw_signup_menu(Gui* gui)
@@ -286,5 +315,5 @@ void draw_signup_menu(Gui* gui)
 	draw_button(gui->btnBack);
 	draw_button(gui->textboxUsername->box);
 	draw_button(gui->textboxPassword->box);
-	draw_sprite(gui->textInfo);
+	draw_sprite(gui->textInfo->sprite);
 }

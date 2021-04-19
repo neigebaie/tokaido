@@ -6,6 +6,10 @@
 
 #include "utility.h"
 
+// camera
+#define CAMERA_MIN_ZOOM 0.5
+#define CAMERA_MAX_ZOOM 1.25
+
 // ressources
 #define SQUARES 10
 #define FOODS 14
@@ -31,42 +35,6 @@
 
 typedef struct
 {
-	char name[100];        // nom de la case
-	int id;
-	Sprite* sprite;
-	SDL_Color color;
-} SquareType;
-
-typedef struct
-{
-	char name[100];        // nom de la catégorie
-	Sprite* sprite;
-} ItemCategory;
-
-typedef struct
-{
-	char name[100];        // nom du repas
-	Sprite* sprite;
-	int price;
-} Food;
-
-typedef struct
-{
-	char name[100];					// nom du souvenir
-	Sprite* sprite;
-	int price;
-	ItemCategory category;
-} Item;
-
-typedef struct
-{
-	char name[100];					// nom de la categorie de souvenir
-	Sprite* sprite;
-	int startCoins;
-} Traveler;
-
-typedef struct
-{
 	char name[100];					// nom de la categorie de souvenir
 	Sprite* sprite;
 	int giveItem;           // Artisan       →  x:quantity
@@ -78,17 +46,55 @@ typedef struct
 
 typedef struct
 {
-	SquareType*		squareTypes[SQUARES];    // Cases
+	char name[100];        // nom de la catégorie
+	Sprite* sprite;
+} ItemCategory;
+
+typedef struct
+{
+	char name[100];					// nom du souvenir
+	Sprite* sprite;
+	int price;
+	ItemCategory category;
+} Item;
+
+typedef struct
+{
+	char name[100];        // nom du repas
+	Sprite* sprite;
+	int price;
+} Food;
+
+typedef struct
+{
+	char name[100];  // nom de la case
+	int id;
+	Sprite* sprite;
+	SDL_Color color;
+} SquareType;
+
+typedef struct
+{
+	char name[100]; // nom de la categorie de souvenir
+	Sprite* sprite;
+	int startCoins;
+} Traveler;
+
+typedef struct
+{
+	Encounter*		encounters[ENCOUNTERS];  // rencontres
 	Food*					foods[FOODS];            // nourritures
 	Item*					items[ITEMS];            // souvenirs
-	Encounter*		encounters[ENCOUNTERS];  // rencontres
+	ItemCategory* itemCats[ITEM_CATS];     // catégories
+	SquareType*		squareTypes[SQUARES];    // Cases
 	Traveler*			travelers[TRAVELERS];    // voyageurs
 } Ressources;
 
 
 typedef struct
 {
-	Traveler* traveler;						// personnage choisi
+	Traveler* traveler;     // personnage choisi
+	Sprite* nameTag;
 
 	char nickname[100];			// pseudo du joueur si jeu en LAN/WAN
 	SDL_bool isHuman;				// joueur IA ou humain
@@ -119,30 +125,18 @@ typedef struct
 typedef struct
 {
 	SquareType* type;    // pointeur vers le type de case
+	int position;
 	int capacity;        // Nb de joueurs pouvant être sur la case
+	int offsetY;         // Elevation aléatoire de la case pour donner un côté organique au plateau
+	SDL_bool hovered;
+	int      clicked;
 } Square;
 
 typedef struct
 {
-	int origin;
+	SDL_Point origin;
 	float scale;
 } Camera;
-
-typedef struct
-{
-	Camera camera;
-
-	Player players[BOARD_PLAYERS];		// Liste des joueurs
-	int playerCount;									// nb de joueurs sur le plateau
-
-	Square squares[BOARD_SQUARES];
-	int squareCount;
-
-	int innFoods[6];
-	int innFoodCount;
-
-	int turn;													// Index du joueur qui joue ce tour
-} Board;
 
 extern Ressources ressources;
 

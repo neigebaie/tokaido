@@ -34,7 +34,7 @@ void account_load_file(Account* accounts, int* accountCount)
 
 	while (!feof(file) && fread(&accounts[*accountCount], sizeof(Account), 1, file))
 	{
-		print_account(accounts[*accountCount]);
+		// print_account(accounts[*accountCount]);
 		*accountCount = *accountCount + 1;
 		if (*accountCount >= ACCOUNT_MAX_COUNT)
 			break;
@@ -77,7 +77,7 @@ int account_create(const char* nick, const char* pswd, char* outputMessage)
 	{
 		for (int i = 0; i < accountCount; i++)
 		{
-			printf("%d\n", i);
+			// printf("%d\n", i);
 			if(strcmp(accounts[i].nick, nick) == 0)
 			{
 				strcpy(outputMessage, "Le nom d'utilisateur a déja été pris !");
@@ -112,7 +112,7 @@ int account_create(const char* nick, const char* pswd, char* outputMessage)
 	newAccount.id = accountCount;
 	newAccount.score = 0;
 
-	print_account(newAccount);
+	// print_account(newAccount);
 
 	accounts[accountCount] = newAccount;
 	accountCount++;
@@ -130,13 +130,31 @@ int account_create(const char* nick, const char* pswd, char* outputMessage)
 
 int account_delete(int id)
 {
+	Account accounts[ACCOUNT_MAX_COUNT];
+	int accountCount = 0;
 
+	account_load_file(accounts, &accountCount);
+
+	if (accountCount)
+	{
+		for (int i = 0; i < accountCount; i++)
+		{
+			if (accounts[i].id == id)
+			{
+				accounts[i] = accounts[accountCount - 1];
+				accountCount--;
+				account_save_file(accounts, accountCount);
+				return 0;
+			}
+		}
+		return 1; // Compte non trouvé
+	}
+	return 1; // Pas de comptes
 }
 
-int account_login(const char* nick, const char* pswd, char* outputMessage)
+int account_login(Account* loggedAccount, const char* nick, const char* pswd, char* outputMessage)
 {
 	Account accounts[ACCOUNT_MAX_COUNT];
-	Account newAccount;
 	int accountCount = 0;
 
 	account_load_file(accounts, &accountCount);
@@ -149,11 +167,12 @@ int account_login(const char* nick, const char* pswd, char* outputMessage)
 
 		for (int i = 0; i < accountCount; i++)
 		{
-			if(strcmp(accounts[i].nick, nick) == 0)
+			if (strcmp(accounts[i].nick, nick) == 0)
 			{
 				if (strcmp(accounts[i].pswd, outputBuffer) == 0)
 				{
-					print_account(accounts[i]);
+					// print_account(accounts[i]);
+					memcpy(loggedAccount, &accounts[i], sizeof(Account));
 					sprintf(outputMessage, "Bienvenue %s !", nick);
 					return 0;
 				}

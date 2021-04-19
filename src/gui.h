@@ -12,29 +12,32 @@
 
 typedef struct
 {
-	Sprite* bg;
-	Sprite* text;
-	SDL_bool hovered;
-	int clicked;
+	Sprite*       bg;
+	Sprite*       text;
+	SDL_bool      hovered;
+	int           clicked;
 	// int (*action)(void);
 } Button;
 
-typedef struct {
-	Button*      box; // Même mécanique que pour un bouton donc je fais ça xD
-	char*        text;
-	int          textLen;
-	SDL_bool     isPassword;
+typedef struct
+{
+	Button*       box; // Même mécanique que pour un bouton donc je fais ça xD
+	char*         text;
+	int           textLen;
+	SDL_bool      isPassword;
 } Textbox;
-
 
 typedef struct
 {
-		// Screen dimensions
-		int screenWidth;
-		int screenHeight;
+	Sprite*       sprite;
+	char*         text;
+	SDL_Color*    color;
+} TextInfo;
 
-		Button* btnList[BTN_NB];
-		Button* textboxList[TEXTOBX_NB];
+typedef struct
+{
+		Button*     btnList[BTN_NB];
+		Button*     textboxList[TEXTOBX_NB];
 
 		// Generic UI elements
 		Sprite*     cursor;
@@ -59,8 +62,7 @@ typedef struct
 		Sprite*     textPassword;
 		Textbox*    textboxPassword;
 		Button*     btnLogin;
-		Sprite*     textInfo;
-		char        textInfoStr[64];
+		TextInfo*   textInfo;
 
 
 		// MENU_SIGNUP : MENU DE CREATION DE COMPTE
@@ -72,14 +74,17 @@ typedef struct
 
 Gui* gui_init(void);
 
-Sprite* new_sprite_from_str(const char* text, int r, int g, int b);
+Sprite* new_sprite_from_str(const char* text, int r, int g, int b, float scale);
 Button* new_button(const char* text, int r, int g, int b, Sprite* bgSprite, float textScale);
 Textbox* new_textbox(Sprite* bgSprite, SDL_bool isPassword);
+TextInfo* new_text_info(int r, int g, int b, float textScale);
 
-void center_rect(SDL_Rect* rectChild, SDL_Rect* rectParent, float scale);
+void center_rect(SDL_Rect* rectChild, SDL_Rect* rectParent);
+Sprite* sprite_copy(Sprite* src);
 
 void print_rect(SDL_Rect* rect);
 void draw_button(Button* button);
+void draw_sprite(Sprite* sprite);
 
 void draw_main_menu(Gui* gui);
 void draw_login_menu(Gui* gui);
@@ -87,6 +92,8 @@ void draw_signup_menu(Gui* gui);
 
 void textbox_event(Textbox *textbox, SDL_Event event);
 void textbox_update(Textbox *textbox);
-void text_sprite_update(Sprite* sprite, char* text);
+
+void text_info_clear(TextInfo* textinfo);
+void text_info_update(TextInfo* textinfo);
 
 #endif

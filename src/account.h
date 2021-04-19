@@ -22,6 +22,6 @@ typedef struct
 
 int account_create(const char* nick, const char* pswd, char* outputMessage);
 int account_delete(int id);
-int account_login(const char* nick, const char* pswd, char* outputMessage);
+int account_login(Account* loggedAccount, const char* nick, const char* pswd, char* outputMessage);
 
 #endif
