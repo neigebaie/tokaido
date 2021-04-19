@@ -1,4 +1,4 @@
-// Tokaido by QINTO Esteban & SERANDER Paul (C) 2021
+// Tokaido by QUINTO Esteban & SERANDER Paul (C) 2021
 #include <utility.h>
 #include <gui.h>
 #include <game.h>
