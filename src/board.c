@@ -1,4 +1,4 @@
-#include "board.h"
+#include <board.h>
 
 Board board;
 Ressources ressources;
@@ -243,26 +243,26 @@ void draw_lines(int squareCount)
 	}
 }
 
-void draw_squares(int squareCount, Square *squares)
+void draw_squares(Board* board)
 {
 	SDL_Rect rect;
-	for (int position = 0; position < squareCount; position++)
+	for (int position = 0; position < board->squareCount; position++)
 	{
-		rect.x = board.camera.scale * (board.camera.origin.x + 128 * position);
-		rect.y = board.camera.scale * (board.squares[position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128/2);
-		rect.w = board.camera.scale * 128;
-		rect.h = board.camera.scale * 128;
+		rect.x = board->camera.scale * (board->camera.origin.x + 128 * position);
+		rect.y = board->camera.scale * (board->squares[position].offsetY + board->camera.origin.y + WINDOW_HEIGHT - 100 - 128/2);
+		rect.w = board->camera.scale * 128;
+		rect.h = board->camera.scale * 128;
 		if (is_rect_on_screen(&rect))
 		{
-			if (board.squares[position].clicked)
+			if (board->squares[position].clicked)
 			{
-				SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 150, 150, 150);
-				board.squares[position].clicked--;
+				SDL_SetTextureColorMod(board->squares[position].type->sprite->tex, 150, 150, 150);
+				board->squares[position].clicked--;
 			}
-			else if (board.squares[position].hovered)
-				SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 200, 200, 200);
-			SDL_RenderCopy(renderer, board.squares[position].type->sprite->tex, board.squares[position].type->sprite->texPos, &rect);
-			SDL_SetTextureColorMod(board.squares[position].type->sprite->tex, 255, 255, 255);
+			else if (board->squares[position].hovered)
+				SDL_SetTextureColorMod(board->squares[position].type->sprite->tex, 200, 200, 200);
+			SDL_RenderCopy(renderer, board->squares[position].type->sprite->tex, board->squares[position].type->sprite->texPos, &rect);
+			SDL_SetTextureColorMod(board->squares[position].type->sprite->tex, 255, 255, 255);
 		}
 	}
 }
@@ -298,7 +298,7 @@ void draw_board()
 	// draw_bg(); // Affiche l'arrière plan du plateau
 	draw_lines(board.squareCount);
 	// draw_points();
-	draw_squares(board.squareCount, board.squares);
+	draw_squares(&board);
 	draw_players();
 	draw_hud();
 }

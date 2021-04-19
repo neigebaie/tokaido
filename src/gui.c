@@ -1,4 +1,4 @@
-#include "gui.h"
+#include <gui.h>
 
 void center_rect(SDL_Rect* rectChild, SDL_Rect* rectParent)
 {
@@ -211,7 +211,6 @@ void text_info_clear(TextInfo* textInfo)
 
 void text_info_update(TextInfo* textinfo)
 {
-	SDL_Rect rect = *textinfo->sprite->rect;
 	Sprite* newSprite = new_sprite_from_str(textinfo->text, 0, 0, 0, 1);
 	SDL_DestroyTexture(textinfo->sprite->tex);
 	textinfo->sprite->tex = newSprite->tex;
@@ -223,7 +222,7 @@ void text_info_update(TextInfo* textinfo)
 
 void textbox_update(Textbox *textbox)
 {
-	SDL_DestroyTexture(textbox->box->text->rect);
+	SDL_DestroyTexture(textbox->box->text->tex);
 	free(textbox->box->text);
 
 	if (textbox->isPassword)
@@ -261,7 +260,7 @@ void textbox_event(Textbox *textbox, SDL_Event event)
 		textbox_update(textbox);
 		return;
 	}
-	else if ((keycode < 97 || keycode > 121) && keycode != SDLK_SPACE || textbox->textLen == TEXTBOX_SIZE - 1)
+	else if (((keycode < 97 || keycode > 121) && keycode != SDLK_SPACE) || textbox->textLen == TEXTBOX_SIZE - 1)
 	{
 		return;
 	}

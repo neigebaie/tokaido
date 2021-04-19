@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#include "utility.h"
+#include <utility.h>
 
 // camera
 #define CAMERA_MIN_ZOOM 0.5

@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#include "utility.h"
+#include <utility.h>
 
 #define TEXTBOX_SIZE 64
 #define BTN_NB 10

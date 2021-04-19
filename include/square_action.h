@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "game.h"
-#include "utility.h"
+#include <game.h>
+#include <utility.h>
 
 
 void action_inn(Player *player);

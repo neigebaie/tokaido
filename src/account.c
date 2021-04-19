@@ -1,4 +1,4 @@
-#include "account.h"
+#include <account.h>
 
 void sha256_string(const char* string, char* outputBuffer)
 {
@@ -48,9 +48,14 @@ int account_save_file(Account* accounts, int accountCount)
 {
 	struct stat st = {0};
 
-	if (stat("user_data", &st) == -1) {
-	    mkdir("user_data", 0700);
-			printf("Création du dossier user_data\n");
+	if (stat("user_data", &st) == -1)
+	{
+		#ifdef __linux__
+			mkdir("user_data", 0700);
+		#else
+			_mkdir("user_data");
+		#endif
+		printf("Création du dossier user_data\n");
 	}
 
 	FILE* file = fopen("user_data/accounts.dat", "w");
@@ -99,7 +104,7 @@ int account_create(const char* nick, const char* pswd, char* outputMessage)
 	}
 	else if (strlen(pswd) < ACCOUNT_MIN_PSWD_LEN) // Si le mdp est trop court
 	{
-		printf("PSWD LEN = %d\n", strlen(pswd));
+		printf("PSWD LEN = %ld\n", strlen(pswd));
 		sprintf(outputMessage, "Mot de passe trop court ! (%d car. min)", ACCOUNT_MIN_PSWD_LEN);
 		return 1;
 	}

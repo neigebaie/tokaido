@@ -1,4 +1,4 @@
-#include "square_action.h"
+#include <square_action.h>
 
 void inn(Player* player)
 {

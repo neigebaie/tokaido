@@ -6,11 +6,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "utility.h"
-#include "account.h"
-#include "game.h"
-#include "square_draw.h"
-#include "square_action.h"
+#include <utility.h>
+#include <account.h>
+#include <game.h>
+#include <square_draw.h>
+#include <square_action.h>
 
 typedef struct
 {
@@ -46,7 +46,7 @@ void random_move(void);
 
 void draw_bg(void);
 void draw_board(void);
-void draw_squares(int squareCount, Square squares[]);
+void draw_squares(Board* board);
 void draw_hud(void);
 
 void square_action(Square* square);

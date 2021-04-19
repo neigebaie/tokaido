@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#include "game.h"
-#include "gui.h"
+#include <game.h>
+#include <gui.h>
 
 #define INN_FRAMES 6
 #define SHOP_FRAMES 3

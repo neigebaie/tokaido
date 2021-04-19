@@ -1,4 +1,4 @@
-#include "square_draw.h"
+#include <square_draw.h>
 
 // SQUARE GUI INIT
 
@@ -10,7 +10,7 @@ SquareGui* init_square_gui(char* nick)
 	SquareGuiRes* res = (SquareGuiRes*)malloc(sizeof(SquareGuiRes));
 
 	SDL_Texture* tex    = load_texture("ressources/gfx/gui/spritesheet.png");
-	Sprite* btn 	      = new_sprite(tex, new_rect(0, 0, 1319, 307));
+	Sprite* btn         = new_sprite(tex, new_rect(0, 0, 1319, 307));
 	btn->rect->w *= 0.25;
 	btn->rect->h *= 0.25;
 
@@ -26,15 +26,15 @@ SquareGui* init_square_gui(char* nick)
 
 	squareGui->hud = new_hud(res, nick);
 
-	squareGui->innGui = new_inn_gui(res);
-	squareGui->shopGui = new_shop_gui(res);
+	squareGui->innGui       = new_inn_gui(res);
+	squareGui->shopGui      = new_shop_gui(res);
 	squareGui->hotSpringGui = new_hot_spring_gui(res);
-	squareGui->templeGui = new_temple_gui(res);
+	squareGui->templeGui    = new_temple_gui(res);
 	squareGui->encounterGui = new_encounter_gui(res);
-	squareGui->farmGui = new_farm_gui(res);
-	squareGui->panRiceGui = new_pan_rice_gui(res);
-	squareGui->panMountGui = new_pan_mount_gui(res);
-	squareGui->panSeaGui = new_pan_sea_gui(res);
+	squareGui->farmGui      = new_farm_gui(res);
+	squareGui->panRiceGui   = new_pan_rice_gui(res);
+	squareGui->panMountGui  = new_pan_mount_gui(res);
+	squareGui->panSeaGui    = new_pan_sea_gui(res);
 
 	printf("\e[36m [DEBUG] SquareGui loaded !\e[37m\n");
 	return squareGui;

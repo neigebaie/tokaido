@@ -1,4 +1,4 @@
-#include "utility.h"
+#include <utility.h>
 
 // Argh, global variables...
 SDL_Window   	*window    = NULL;

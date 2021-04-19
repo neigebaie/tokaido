@@ -1,9 +1,9 @@
 // Tokaido by QINTO Esteban & SERANDER Paul (C) 2021
-#include "utility.h"
-#include "gui.h"
-#include "game.h"
-#include "board.h"
-#include "account.h"
+#include <utility.h>
+#include <gui.h>
+#include <game.h>
+#include <board.h>
+#include <account.h>
 
 #define MENU_MAIN      0
 #define MENU_LOGIN     1
@@ -38,7 +38,7 @@ int main(int argc, const char *argv[])
 	// mouseRect.h = gui->cursor->rect->h;
 
 	SDL_bool program_launched = SDL_TRUE;
-	SDL_bool menu = MENU_MAIN;
+	int menu = MENU_MAIN;
 	// SDL_bool update = SDL_TRUE;
 
 	Textbox* focusedTextbox = NULL;
@@ -309,8 +309,8 @@ int main(int argc, const char *argv[])
 		}
 		board.camera.origin.x += scroll.x * (10/board.camera.scale);
 		board.camera.origin.y += scroll.y * (10/board.camera.scale);
-		if (menu == MENU_BOARD)
-			; // update_board();
+		//if (menu == MENU_BOARD)
+			// update_board();
 
 		// RENDER MGR
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -351,6 +351,7 @@ int main(int argc, const char *argv[])
 				{
 					SDL_RenderDrawLine(renderer, 0, i, WINDOW_WIDTH, i);
 				}
+
 			case 2:
 				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
@@ -365,6 +366,7 @@ int main(int argc, const char *argv[])
 				rect.x = WINDOW_WIDTH / 2 - rect.w / 2;
 				rect.y = WINDOW_HEIGHT / 2 - rect.h / 2;
 				SDL_RenderFillRect(renderer, &rect);
+
 			case 1:
 				if (frameCount%10 == 0)
 				{
