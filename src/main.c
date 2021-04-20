@@ -23,23 +23,20 @@ int main(int argc, const char *argv[])
 {
 	init();
 	init_fps_counter();
-	// SDL_ShowCursor(0); // désactive le curseur windows pour afficher celui custom
 	// SDL_SetCursor(init_system_cursor(arrow));
 	Account* loggedAccount = (Account*)malloc(sizeof(Account));
+	// SDL_bool logged = SDL_FALSE;
+	SDL_bool logged = SDL_TRUE; // debug
 
-	load_ressources();
+	TextureMgr* textureMgr = load_textures();
+	load_ressources(textureMgr);
 
-	Gui* gui = gui_init();
+	Gui* gui = gui_init(textureMgr);
 
 	SDL_Point mousePos;
 
-	// SDL_Rect mouseRect = {0, 0, 0, 0};
-	// mouseRect.w = gui->cursor->rect->w;
-	// mouseRect.h = gui->cursor->rect->h;
-
 	SDL_bool program_launched = SDL_TRUE;
 	int menu = MENU_MAIN;
-	// SDL_bool update = SDL_TRUE;
 
 	Textbox* focusedTextbox = NULL;
 
@@ -48,15 +45,12 @@ int main(int argc, const char *argv[])
 	float k = 20;
 	SDL_Rect rect;
 	TextInfo* debugInfo = new_text_info(0, 0, 0, 1);
-	// Sprite* debugInfo = new_sprite_from_str("", 0, 0, 0);
 	debugInfo->sprite->rect->x = 10;
 	debugInfo->sprite->rect->y = 10;
-	// char debugInfoStr[128];
 
-	// int stage = 0;
 	SDL_Point scroll = {0, 0};
 	float zoom = 0.f;
-	unsigned int frameLimit = SDL_GetTicks() + (1000/FPS_LIMIT);
+	unsigned int frameLimit = SDL_GetTicks() + (1000 / FPS_LIMIT);
 
 	while (program_launched)
 	{
@@ -129,7 +123,6 @@ int main(int argc, const char *argv[])
 							}
 							else
 							{
-								// reset_textbox(textbox);
 								focusedTextbox = gui->textboxUsername;
 							}
 							break;
@@ -184,7 +177,11 @@ int main(int argc, const char *argv[])
 								if (SDL_PointInRect(&mousePos, gui->btnSolo->bg->rect))
 								{
 									printf("\e[31m [INFO] : Le bouton Solo a été cliqué ! ✨\e[37m\n");
-									menu = MENU_BOARD;
+									if (logged)
+									{
+										init_board(loggedAccount, textureMgr);
+										menu = MENU_BOARD;
+									}
 								}
 								else if (SDL_PointInRect(&mousePos, gui->btnMultiplayer->bg->rect))
 								{
@@ -223,11 +220,11 @@ int main(int argc, const char *argv[])
 									}
 									else
 									{
+										logged = SDL_TRUE;
 										printf("Connexion réussie ! %s\n", loggedAccount->nick);
 										gui->textboxUsername->text[0] = 0;
 										gui->textboxUsername->textLen = 0;
 										textbox_update(gui->textboxUsername);
-										init_board(loggedAccount);
 									}
 									focusedTextbox = NULL;
 									gui->textboxPassword->text[0] = 0;

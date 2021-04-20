@@ -82,16 +82,15 @@ void print_rect(SDL_Rect* rect)
 	printf("Rect : %4d %4d %4d %4d\n", rect->x, rect->y, rect->w, rect->h);
 }
 
-Gui* gui_init(void)
+Gui* gui_init(TextureMgr* textureMgr)
 {
 	Gui* gui = (Gui*)malloc(sizeof(Gui));
 
-	SDL_Texture* tex = load_texture("ressources/gfx/gui/spritesheet.png");
 
 	// Generic
-	gui->cursor         = new_sprite(tex, new_rect(889, 308, 60, 47));
-	gui->btn 		        = new_sprite(tex, new_rect(0, 0, 1319, 307));
-	Sprite* textboxBg   = new_sprite(tex, new_rect(0, 644, 1319, 307));
+	gui->cursor         = new_sprite(textureMgr->guiTex, new_rect(889, 308, 60, 47));
+	gui->btn 		        = new_sprite(textureMgr->guiTex, new_rect(0, 0, 1319, 307));
+	Sprite* textboxBg   = new_sprite(textureMgr->guiTex, new_rect(0, 644, 1319, 307));
 	textboxBg->rect->w *= 0.25;
 	textboxBg->rect->h *= 0.25;
 	gui->btn->rect->w *= 0.25;
@@ -99,7 +98,7 @@ Gui* gui_init(void)
 
 	// MENU_MAIN : MENU PRINCIPAL
 
-	gui->title 		      = new_sprite(tex, new_rect(0, 308, 888, 335));
+	gui->title 		      = new_sprite(textureMgr->guiTex, new_rect(0, 308, 888, 335));
 	center_rect(gui->title->rect, new_rect(0, 150, 1920, 200));
 
 	gui->btnSolo        = new_button("Solo", 255, 255, 255, gui->btn, 0.5);
@@ -211,7 +210,7 @@ void text_info_clear(TextInfo* textInfo)
 
 void text_info_update(TextInfo* textinfo)
 {
-	Sprite* newSprite = new_sprite_from_str(textinfo->text, 0, 0, 0, 1);
+	Sprite* newSprite = new_sprite_from_str(textinfo->text, textinfo->color->r, textinfo->color->g, textinfo->color->b, 1);
 	SDL_DestroyTexture(textinfo->sprite->tex);
 	textinfo->sprite->tex = newSprite->tex;
 	free(newSprite);
@@ -232,7 +231,7 @@ void textbox_update(Textbox *textbox)
 			hidedText[i] = '*';
 		}
 		hidedText[textbox->textLen] = '\0';
-		textbox->box->text = new_sprite_from_str(hidedText, 255, 255, 255, 1);
+		textbox->box->text = new_sprite_from_str(hidedText, 255, 255, 255, 0.5);
 	}
 	else
 	{
@@ -244,7 +243,7 @@ void textbox_update(Textbox *textbox)
 
 void textbox_event(Textbox *textbox, SDL_Event event)
 {
-	int keycode = event.key.keysym.sym;
+	char keycode = event.key.keysym.sym;
 
 	if (keycode == SDLK_RETURN) //  || textbox->length >= TEXTBOX_SIZE
 	{

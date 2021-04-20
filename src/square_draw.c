@@ -3,24 +3,23 @@
 // SQUARE GUI INIT
 
 // todo
-SquareGui* init_square_gui(char* nick)
+SquareGui* init_square_gui(char* nick, TextureMgr* textureMgr)
 {
 	SquareGui* squareGui = (SquareGui*)malloc(sizeof(SquareGui));
 
 	SquareGuiRes* res = (SquareGuiRes*)malloc(sizeof(SquareGuiRes));
 
-	SDL_Texture* tex    = load_texture("ressources/gfx/gui/spritesheet.png");
-	Sprite* btn         = new_sprite(tex, new_rect(0, 0, 1319, 307));
+	Sprite* btn = new_sprite(textureMgr->guiTex, new_rect(0, 0, 1319, 307));
 	btn->rect->w *= 0.25;
 	btn->rect->h *= 0.25;
 
-	SDL_Texture* iconTex = load_texture("ressources/gfx/gui/icon_spritesheet.png");
-	res->bundleTkIcon = new_sprite(iconTex, new_rect(256, 0, 256, 256));
-	res->coinIcon = new_sprite(iconTex, new_rect(0, 0, 256, 256));
+	res->bundleTkIcon = new_sprite(textureMgr->iconTex, new_rect(256, 0, 256, 256));
+	res->coinIcon = new_sprite(textureMgr->iconTex, new_rect(0, 0, 256, 256));
 	for (int i = 0; i < ITEM_CATS; i++) {
-		res->itemCatIcons[i] = new_sprite(iconTex, new_rect(128 * i, 384, 128, 128));
+		res->itemCatIcons[i] = new_sprite(textureMgr->iconTex, new_rect(128 * i, 384, 128, 128));
 	}
-	res->templeCoinIcon = new_sprite(iconTex, new_rect(0, 265, 128, 128));
+	res->templeCoinIcon = new_sprite(textureMgr->iconTex, new_rect(0, 265, 128, 128));
+	res->frameBg = new_sprite(textureMgr->guiTex, new_rect(1320, 0, 643, 882));
 
 	res->backBtn = new_button("Retour", 255, 255, 255, btn, 0.5);
 
@@ -53,32 +52,41 @@ void set_item_in_frame(ItemFrame* itemFrame, Item* item)
 	itemFrame->item = item;
 }
 
-FoodFrame* new_food_frame(SquareGuiRes* res, SDL_Point anchorPoint)
+FoodFrame* new_food_frame(SquareGuiRes* res, SDL_Rect* frameRect)
 {
 	FoodFrame* foodFrame = (FoodFrame*)malloc(sizeof(FoodFrame));
 
-	foodFrame->anchorPoint = anchorPoint; // change to rect
+	foodFrame->frameRect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+	foodFrame->frameRect->x = frameRect->x;
+	foodFrame->frameRect->y = frameRect->y;
+	foodFrame->frameRect->w = frameRect->w;
+	foodFrame->frameRect->h = frameRect->h;
 	foodFrame->title = NULL;
+	foodFrame->bg = sprite_copy(res->frameBg);
+	foodFrame->bg->rect->x = foodFrame->frameRect->x - 23;
+	foodFrame->bg->rect->y = foodFrame->frameRect->y - 20;
+	foodFrame->bg->rect->w = foodFrame->frameRect->w + 40;
+	foodFrame->bg->rect->h = foodFrame->frameRect->h + 40;
 
 	foodFrame->coinIcon = sprite_copy(res->coinIcon);
-	foodFrame->coinIcon->rect->x = anchorPoint.x + 8 + 100;
-	foodFrame->coinIcon->rect->y = anchorPoint.y + 300 - 40;
+	foodFrame->coinIcon->rect->x = foodFrame->frameRect->x + 16 + 100;
+	foodFrame->coinIcon->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 45;
 	foodFrame->coinIcon->rect->w = 32;
 	foodFrame->coinIcon->rect->h = 32;
 
-	foodFrame->coinText = new_text_info(0, 0, 0, 1);
-	foodFrame->coinText->sprite->rect->x = anchorPoint.x + 8 + 40 + 100;
-	foodFrame->coinText->sprite->rect->y = anchorPoint.y + 300 - 40;
+	foodFrame->coinText = new_text_info(255, 255, 255, 1);
+	foodFrame->coinText->sprite->rect->x = foodFrame->frameRect->x + 16 + 40 + 100;
+	foodFrame->coinText->sprite->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 50;
 
 	foodFrame->bundleTkIcon = sprite_copy(res->bundleTkIcon);
-	foodFrame->bundleTkIcon->rect->x = anchorPoint.x + 8;
-	foodFrame->bundleTkIcon->rect->y = anchorPoint.y + 300 - 40;
+	foodFrame->bundleTkIcon->rect->x = foodFrame->frameRect->x + 16;
+	foodFrame->bundleTkIcon->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 45;
 	foodFrame->bundleTkIcon->rect->w = 32;
 	foodFrame->bundleTkIcon->rect->h = 32;
 
-	foodFrame->bundleTkText = new_text_info(0, 0, 0, 1);
-	foodFrame->bundleTkText->sprite->rect->x = anchorPoint.x + 8 + 40;
-	foodFrame->bundleTkText->sprite->rect->y = anchorPoint.y + 300 - 40;
+	foodFrame->bundleTkText = new_text_info(255, 255, 255, 1);
+	foodFrame->bundleTkText->sprite->rect->x = foodFrame->frameRect->x + 16 + 35;
+	foodFrame->bundleTkText->sprite->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 50;
 
 	foodFrame->food = (Food*)malloc(sizeof(Food));
 
@@ -87,11 +95,11 @@ FoodFrame* new_food_frame(SquareGuiRes* res, SDL_Point anchorPoint)
 
 void set_food_in_frame(FoodFrame* foodFrame, Food* food)
 {
-	foodFrame->title = new_sprite_from_str(food->name, 0, 0, 0, 0.4);
-	center_rect(foodFrame->title->rect, new_rect(foodFrame->anchorPoint.x, foodFrame->anchorPoint.y + 200, 200, 50));
+	foodFrame->title = new_sprite_from_str(food->name, 255, 255, 255, 0.4);
+	center_rect(foodFrame->title->rect, new_rect(foodFrame->frameRect->x, foodFrame->frameRect->y + foodFrame->frameRect->w, foodFrame->frameRect->w, 50));
 	// foodFrame->food = food;
 	foodFrame->food->sprite = sprite_copy(food->sprite);
-	foodFrame->food->sprite->rect = new_rect(foodFrame->anchorPoint.x + 20, foodFrame->anchorPoint.y + 25, 160, 150);
+	center_rect(foodFrame->food->sprite->rect, new_rect(foodFrame->frameRect->x + 20, foodFrame->frameRect->y + 20, foodFrame->frameRect->w - 40, foodFrame->frameRect->w - 40));
 }
 
 // NEW GUI FOR EACH SQUARE TYPE
@@ -123,8 +131,8 @@ InnGui* new_inn_gui(SquareGuiRes* res)
 	innGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
 	center_rect(innGui->title->rect, new_rect(0, 0, 1920, 300));
 	for (int i = 0; i < INN_FRAMES; i++) {
-		SDL_Point anchorPoint = {WINDOW_WIDTH/2 - (1 - i) * 320 - 320 * 3 * (int)(i/3) - 200/2, 100 + WINDOW_HEIGHT/2 - 360 * (1 - (int)(i/3))};
-		innGui->foodFrames[i] = new_food_frame(res, anchorPoint);
+		SDL_Rect frameRect = {WINDOW_WIDTH/2 - (1 - i) * 320 - 320 * 3 * (int)(i/3) - 200/2, 100 + WINDOW_HEIGHT/2 - 360 * (1 - (int)(i/3)), 200, 300};
+		innGui->foodFrames[i] = new_food_frame(res, &frameRect);
 
 		char price[2];
 		sprintf(price, "%d", rand() % 3 + 1);
@@ -223,27 +231,7 @@ void draw_item_frame(ItemFrame* itemFrame)
 
 void draw_food_frame(FoodFrame* foodFrame)
 {
-	SDL_Rect* debugRect = new_rect(foodFrame->anchorPoint.x + 10, foodFrame->anchorPoint.y + 10, 200, 300);
-	SDL_SetRenderDrawColor(renderer, 180, 180, 200, 50);
-	SDL_RenderFillRect(renderer, debugRect);
-	debugRect->x = foodFrame->anchorPoint.x;
-	debugRect->y = foodFrame->anchorPoint.y;
-	debugRect->w = 200;
-	debugRect->h = 300;
-	SDL_SetRenderDrawColor(renderer, 240, 240, 240, 50);
-	SDL_RenderFillRect(renderer, debugRect);
-	SDL_SetRenderDrawColor(renderer, 0, 100, 200, 50);
-	SDL_RenderDrawRect(renderer, debugRect);
-	debugRect->x = foodFrame->anchorPoint.x + 10;
-	debugRect->y = foodFrame->anchorPoint.y + 10;
-	debugRect->w = 200 - 20;
-	debugRect->h = 180;
-	SDL_SetRenderDrawColor(renderer, 20, 20, 20, 50);
-	SDL_RenderFillRect(renderer, debugRect);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
-	SDL_RenderDrawRect(renderer, debugRect);
-	free(debugRect);
-
+	draw_sprite(foodFrame->bg);
 	draw_sprite(foodFrame->title);
 
 	draw_sprite(foodFrame->coinIcon);
@@ -256,6 +244,20 @@ void draw_food_frame(FoodFrame* foodFrame)
 	{
 		draw_sprite(foodFrame->food->sprite);
 	}
+
+	// SDL_Rect debugRect = {0, 0, 0, 0};
+	// debugRect.x = foodFrame->frameRect->x;
+	// debugRect.y = foodFrame->frameRect->y;
+	// debugRect.w = foodFrame->frameRect->w;
+	// debugRect.h = foodFrame->frameRect->h;
+	// SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	// SDL_RenderDrawRect(renderer, &debugRect);
+	// debugRect.x = foodFrame->bg->rect->x;
+	// debugRect.y = foodFrame->bg->rect->y;
+	// debugRect.w = foodFrame->bg->rect->w;
+	// debugRect.h = foodFrame->bg->rect->h;
+	// SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+	// SDL_RenderDrawRect(renderer, &debugRect);
 }
 
 // DRAW FOR EACH SQUARE TYPE

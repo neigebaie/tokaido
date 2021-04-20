@@ -102,7 +102,7 @@ void limit_fps(unsigned int limit)
 			SDL_Delay(limit - ticks);
 }
 
-SDL_Texture * load_texture(const char *path)
+SDL_Texture* load_texture(const char *path)
 {
 	SDL_Surface *surface = NULL;
 	SDL_Texture *texture = NULL;
@@ -114,6 +114,23 @@ SDL_Texture * load_texture(const char *path)
 		exit_with_error("Création de texture échouée");
 	SDL_FreeSurface(surface);
 	return texture;
+}
+
+TextureMgr* load_textures()
+{
+	TextureMgr* textureMgr = (TextureMgr*)malloc(sizeof(TextureMgr));
+	// TEXTURES
+
+	textureMgr->squareTex    = load_texture("ressources/gfx/square_spritesheet.png");
+	textureMgr->foodTex      = load_texture("ressources/gfx/food_spritesheet.png");
+	textureMgr->travelerTex  = load_texture("ressources/gfx/traveler_spritesheet.png");
+	// textureMgr->itemTex      = load_texture("ressources/gfx/item_spritesheet.png");
+	// textureMgr->encounterTex = load_texture("ressources/gfx/encounter_spritesheet.png");
+	textureMgr->iconTex      = load_texture("ressources/gfx/gui/icon_spritesheet.png");
+	textureMgr->guiTex       = load_texture("ressources/gfx/gui/gui_spritesheet.png");
+
+	printf("\e[29m [DEBUG] Textures loaded !\e[37m\n");
+	return textureMgr;
 }
 
 Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* texPos)

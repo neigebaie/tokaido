@@ -120,6 +120,8 @@ typedef struct
 	int panMount;						// cartes panorama Montagne
 	int panSea;							// cartes panorama Mer
 
+	SDL_bool hovered;
+	int      clicked;
 } Player;
 
 typedef struct
@@ -128,6 +130,7 @@ typedef struct
 	int position;
 	int capacity;        // Nb de joueurs pouvant être sur la case
 	int offsetY;         // Elevation aléatoire de la case pour donner un côté organique au plateau
+
 	SDL_bool hovered;
 	int      clicked;
 } Square;
@@ -140,7 +143,7 @@ typedef struct
 
 extern Ressources ressources;
 
-void load_ressources(void);
+void load_ressources(TextureMgr* textureMgr);
 
 #endif
 

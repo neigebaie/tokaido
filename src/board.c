@@ -68,7 +68,7 @@ void load_squares(Square *squares, int playerCount)
 	}
 }
 
-void init_board(Account* loggedAccount)
+void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 {
 	srand(time(NULL));
 
@@ -76,7 +76,9 @@ void init_board(Account* loggedAccount)
 	board.camera.origin.y = 0;
 	board.camera.scale = 1.f;
 
-	board.squareGui = init_square_gui(loggedAccount->nick);
+	board.subMenu = SUBMENU_NONE;
+
+	board.squareGui = init_square_gui(loggedAccount->nick, textureMgr);
 
 	int foods[FOODS];
   for(int i = 0; i < FOODS; i++)
@@ -133,6 +135,8 @@ void init_board(Account* loggedAccount)
 		board.players[i].panRice = 0;
 		board.players[i].panMount = 0;
 		board.players[i].panSea = 0;
+		board.players[i].hovered = SDL_FALSE;
+		board.players[i].clicked = 0;
 		// printf(" %s\n", board.players[i].nickname);
 		// printf(" \e[32m%s\e[37m\n\n", ressources.travelers[board.players[i].traveler].name);
 		board.playerCount++;
@@ -164,6 +168,17 @@ void hover_board(SDL_Point* mousePos)
 			board.squares[position].hovered = SDL_TRUE;
 		else
 			board.squares[position].hovered = SDL_FALSE;
+	}
+
+	for (int i = 0; i < BOARD_PLAYERS; i++) {
+		rect.x = board.camera.scale * (board.camera.origin.x + 128 * board.players[i].position + 128/2 - 100/2);
+		rect.y = board.camera.scale * (board.squares[board.players[i].position].offsetY + board.camera.origin.y + WINDOW_HEIGHT - 100 - 128 * (board.players[i].roadDist + 1) - 100/2);
+		rect.w = board.camera.scale * 100;
+		rect.h = board.camera.scale * 100;
+		if (SDL_PointInRect(mousePos, &rect))
+			board.players[i].hovered = SDL_TRUE;
+		else
+			board.players[i].hovered = SDL_FALSE;
 	}
 }
 
@@ -276,10 +291,16 @@ void draw_players()
 		rect.w = board.camera.scale * 100;
 		rect.h = board.camera.scale * 100;
 		center_rect(board.players[i].nameTag->rect, new_rect(rect.x - board.players[i].nameTag->rect->w, rect.y, board.players[i].nameTag->rect->w, rect.h));
-		draw_sprite(board.players[i].nameTag);
+
 		if (is_rect_on_screen(&rect))
 		{
+			if (board.players[i].hovered)
+			{
+				draw_sprite(board.players[i].nameTag);
+				SDL_SetTextureColorMod(board.players[i].traveler->sprite->tex, 200, 200, 200);
+			}
 			SDL_RenderCopy(renderer, board.players[i].traveler->sprite->tex, board.players[i].traveler->sprite->texPos, &rect);
+			SDL_SetTextureColorMod(board.players[i].traveler->sprite->tex, 255, 255, 255);
 		}
 	}
 }
@@ -294,12 +315,18 @@ void draw_hud()
 
 void draw_board()
 {
-	// draw_inn(board.squareGui->innGui);
-	// draw_bg(); // Affiche l'arrière plan du plateau
-	draw_lines(board.squareCount);
-	// draw_points();
-	draw_squares(&board);
-	draw_players();
+	switch (board.subMenu) {
+		case SQUARE_INN:
+			draw_inn(board.squareGui->innGui);
+			break;
+		case SUBMENU_NONE:
+			// draw_bg(); // Affiche l'arrière plan du plateau
+			draw_lines(board.squareCount);
+			// draw_points();
+			draw_squares(&board);
+			draw_players();
+			break;
+	}
 	draw_hud();
 }
 
@@ -399,6 +426,7 @@ void square_action(Square* square)
 	switch (square->type->id)
 	{
 		case SQUARE_INN:
+			board.subMenu = SQUARE_INN;
 			printf("TYPE = INN\n");
 			break;
 	}

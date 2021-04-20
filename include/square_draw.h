@@ -17,8 +17,9 @@
 
 typedef struct
 {
-	SDL_Point anchorPoint;
+	SDL_Rect* frameRect;
 	Sprite* title;
+	Sprite* bg;
 
 	Sprite* coinIcon;
 	TextInfo* coinText;
@@ -31,15 +32,15 @@ typedef struct
 
 typedef struct
 {
+	SDL_Rect* frameRect;
 	Sprite* title;
+	Sprite* bg;
 
 	Sprite* coinIcon;
 	TextInfo* coinText;
 
 	Sprite* bundleTkIcon;
 	TextInfo* bundleTkText;
-
-	Sprite* itemCatIcon;
 
 	Item* item;
 } ItemFrame;
@@ -138,6 +139,7 @@ typedef struct
 	Sprite* coinIcon;
 	Sprite* itemCatIcons[ITEM_CATS];
 	Sprite* templeCoinIcon;
+	Sprite* frameBg;
 	Button* backBtn;
 } SquareGuiRes;
 
@@ -161,12 +163,12 @@ typedef struct
 
 
 // INIT SQUARE GUI
-SquareGui* init_square_gui(char* nick);
+SquareGui* init_square_gui(char* nick, TextureMgr* textureMgr);
 
 // NEW FRAME
 ItemFrame* new_item_frame(SquareGuiRes* res);
 void set_item_in_frame(ItemFrame* itemFrame, Item* item);
-FoodFrame* new_food_frame(SquareGuiRes* res, SDL_Point anchorPoint);
+FoodFrame* new_food_frame(SquareGuiRes* res, SDL_Rect* frameRect);
 void set_food_in_frame(FoodFrame* foodFrame, Food* food);
 
 // NEW GUI FOR EACH SQUARE

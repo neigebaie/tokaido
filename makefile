@@ -4,7 +4,7 @@ define colorecho
       @tput sgr0
 endef
 
-CFLAGS  = `sdl2-config --cflags` -Wall -Wextra -mtune=native -no-pie -Iinclude
+CFLAGS  = `sdl2-config --cflags` -Wall -mtune=native -no-pie -Iinclude # -Wextra
 LDFLAGS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -lcrypto
 
 TARGETS = tokaido

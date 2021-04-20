@@ -72,7 +72,7 @@ typedef struct
 
 } Gui;
 
-Gui* gui_init(void);
+Gui* gui_init(TextureMgr* textureMgr);
 
 Sprite* new_sprite_from_str(const char* text, int r, int g, int b, float scale);
 Button* new_button(const char* text, int r, int g, int b, Sprite* bgSprite, float textScale);

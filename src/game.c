@@ -1,16 +1,7 @@
 #include <game.h>
 
-void load_ressources(void)
+void load_ressources(TextureMgr* textureMgr)
 {
-	// TEXTURES
-
-	SDL_Texture* squareTex = load_texture("ressources/gfx/square_spritesheet.png");
-	SDL_Texture* foodTex = load_texture("ressources/gfx/food_spritesheet.png");
-	SDL_Texture* travelerTex = load_texture("ressources/gfx/traveler_spritesheet.png");
-	// SDL_Texture* itemTex = load_texture("ressources/gfx/item_spritesheet.png");
-	// SDL_Texture* encounterTex = load_texture("ressources/gfx/encounter_spritesheet.png");
-
-
 	// ITEMS
 
 	for (int i = 0 ; i< ITEMS; i++)
@@ -69,13 +60,13 @@ void load_ressources(void)
 	for (int i = 0; i < FOODS; i++)
 	{
 		ressources.foods[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
-		ressources.foods[i]->sprite->tex = foodTex;
+		ressources.foods[i]->sprite->tex = textureMgr->foodTex;
 		ressources.foods[i]->sprite->texPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
-		ressources.foods[i]->sprite->texPos->x = i * 126;
+		ressources.foods[i]->sprite->texPos->x = i * 128;
 		ressources.foods[i]->sprite->texPos->y = 0;
-		ressources.foods[i]->sprite->texPos->w = 126;
-		ressources.foods[i]->sprite->texPos->h = 115;
-		ressources.foods[i]->sprite->rect = new_rect(0, 0, 126, 115);
+		ressources.foods[i]->sprite->texPos->w = 128;
+		ressources.foods[i]->sprite->texPos->h = 128;
+		ressources.foods[i]->sprite->rect = new_rect(0, 0, 128, 128);
 	}
 
 	// ENCOUNTERS
@@ -137,7 +128,7 @@ void load_ressources(void)
 	for (int i = 0; i < TRAVELERS; i++)
 	{
 		ressources.travelers[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
-		ressources.travelers[i]->sprite->tex = travelerTex;
+		ressources.travelers[i]->sprite->tex = textureMgr->travelerTex;
 		ressources.travelers[i]->sprite->texPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
 		ressources.travelers[i]->sprite->texPos->x = i * 256;
 		ressources.travelers[i]->sprite->texPos->y = 0;
@@ -207,7 +198,7 @@ void load_ressources(void)
 	{
 		ressources.squareTypes[i]->id = i;
 		ressources.squareTypes[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
-		ressources.squareTypes[i]->sprite->tex = squareTex;
+		ressources.squareTypes[i]->sprite->tex = textureMgr->squareTex;
 		ressources.squareTypes[i]->sprite->texPos = (SDL_Rect*)malloc(sizeof(SDL_Rect));
 		ressources.squareTypes[i]->sprite->texPos->x = i * 256;
 		ressources.squareTypes[i]->sprite->texPos->y = 0;

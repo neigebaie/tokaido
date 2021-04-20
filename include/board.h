@@ -12,10 +12,14 @@
 #include <square_draw.h>
 #include <square_action.h>
 
+#define SUBMENU_NONE -1
+
 typedef struct
 {
 	Camera camera;
 	SquareGui* squareGui;
+
+	int subMenu;
 
 	Player players[BOARD_PLAYERS];		// Liste des joueurs
 	int playerCount;									// nb de joueurs sur le plateau
@@ -36,7 +40,7 @@ void load_squares(Square *squares, int playerCount);
 Board load_board(const char* path);
 void save_board(Board board, const char* path);
 
-void init_board(Account* loggedAccount);
+void init_board(Account* loggedAccount, TextureMgr* textureMgr);
 
 void hover_board(SDL_Point* mousePos);
 void click_board(SDL_Point* mousePos);

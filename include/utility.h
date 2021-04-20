@@ -13,11 +13,25 @@
 #define FPS_LIMIT 60
 
 
-typedef struct {
+typedef struct
+{
 		SDL_Texture* tex; // spritesheet/texture
 		SDL_Rect* texPos; // position in the spritesheet (px) (NULL if texture)
 		SDL_Rect* rect;   // where to draw it onscreen
 } Sprite;
+
+typedef struct
+{
+	// All the textures in the game
+	SDL_Texture* squareTex;
+	SDL_Texture* foodTex;
+	SDL_Texture* travelerTex;
+	SDL_Texture* itemTex;
+	SDL_Texture* encounterTex;
+	SDL_Texture* iconTex;
+	SDL_Texture* guiTex;
+
+} TextureMgr;
 
 extern SDL_Window 	*window;
 extern SDL_Renderer *renderer;
@@ -32,6 +46,7 @@ void init_fps_counter();
 void update_fps_counter();
 
 SDL_Texture* load_texture(const char *path);
+TextureMgr* load_textures();
 
 Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* texPos);
 SDL_Rect* new_rect(int x, int y, int w, int h);
