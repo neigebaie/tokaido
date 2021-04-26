@@ -25,7 +25,7 @@ int main(int argc, const char *argv[])
 	Gui* gui = init_gui();
 	Menu* menu = gui->mainMenu;
 	MenuId menuId = MENU_MAIN;
-	if (logged) // à décaler évidemment 
+	if (logged) // à décaler évidemment
 		init_board(loggedAccount, textureMgr);
 
 	SDL_Point mousePos;
@@ -106,7 +106,6 @@ int main(int argc, const char *argv[])
 								button_action(menu->buttons[btnId], &menuId);
 							}
 						}
-						// button_event(&gui, &menu);
 					}
 					break;
 				case SDL_WINDOWEVENT:

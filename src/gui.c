@@ -42,34 +42,16 @@ Menu* new_main_menu(Gui* gui)
 	menu->texts[0]->sprite->ai.at = AT_BOTTOM_LEFT;
 
 	menu->buttons[0] = new_button("Solo",        0.5, ACTION_START_SOLO, MENU_BOARD);
-	menu->buttons[0]->bg.ai.at = AT_CENTER;
-	menu->buttons[0]->bg.ai.offset.y = y;
-	menu->buttons[0]->text->sprite->parent = &menu->buttons[0]->bg.ai;
-	y += menu->buttons[0]->bg.ai.size.h + 30;
-
 	menu->buttons[1] = new_button("Multijoueur", 0.5, ACTION_START_LAN,  MENU_NONE);
-	menu->buttons[1]->bg.ai.at = AT_CENTER;
-	menu->buttons[1]->bg.ai.offset.y = y;
-	menu->buttons[1]->text->sprite->parent = &menu->buttons[1]->bg.ai;
-	y += menu->buttons[1]->bg.ai.size.h + 30;
-
 	menu->buttons[2] = new_button("Archives",    0.5, ACTION_NONE,       MENU_ARCHIVES);
-	menu->buttons[2]->bg.ai.at = AT_CENTER;
-	menu->buttons[2]->bg.ai.offset.y = y;
-	menu->buttons[2]->text->sprite->parent = &menu->buttons[2]->bg.ai;
-	y += menu->buttons[2]->bg.ai.size.h + 30;
-
 	menu->buttons[3] = new_button("Options",     0.5, ACTION_NONE,       MENU_SETTINGS);
-	menu->buttons[3]->bg.ai.at = AT_CENTER;
-	menu->buttons[3]->bg.ai.offset.y = y;
-	menu->buttons[3]->text->sprite->parent = &menu->buttons[3]->bg.ai;
-	y += menu->buttons[3]->bg.ai.size.h + 30;
-
 	menu->buttons[4] = new_button("Quitter",     0.5, ACTION_QUIT,       MENU_NONE);
-	menu->buttons[4]->bg.ai.at = AT_CENTER;
-	menu->buttons[4]->bg.ai.offset.y = y;
-	menu->buttons[4]->text->sprite->parent = &menu->buttons[4]->bg.ai;
-	y += menu->buttons[4]->bg.ai.size.h + 30;
+
+	for (int i = 0; i < menu->buttonCount; i++) {
+		menu->buttons[i]->bg.ai.at = AT_CENTER;
+		menu->buttons[i]->bg.ai.offset.y = y;
+		y += menu->buttons[i]->bg.ai.size.h + 30;
+	}
 
 	return menu;
 }
@@ -126,6 +108,7 @@ Button* new_button(char* content, float scale, Action action, MenuId nextMenuId)
 	button->bg = textureMgr->button;
 	button->text = new_text(content, 255, 255, 255, scale);
 	button->text->sprite->ai.at = AT_CENTER;
+	button->text->sprite->parent = &button->bg.ai;
 	button->state = STATE_IDLE;
 	button->action = action;
 	button->nextMenuId = nextMenuId;
