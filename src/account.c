@@ -24,6 +24,16 @@ void print_account(Account account)
 	printf("ID   = %d\n", account.id);
 }
 
+Account* guest_account()
+{
+	Account* account = (Account*)malloc(sizeof(Account));
+	strcpy(account->nick, "Invité");
+	strcpy(account->pswd, "");
+	account->id = -1;
+	account->score = 0;
+	return account;
+}
+
 void account_load_file(Account* accounts, int* accountCount)
 {
 	FILE* file = fopen("user_data/accounts.dat", "r");

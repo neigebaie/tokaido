@@ -6,94 +6,119 @@
 
 #include <utility.h>
 
-#define TEXTBOX_SIZE 64
-#define BTN_NB 10
-#define TEXTOBX_NB 2
+#define TEXT_LEN 512
+
+typedef enum
+{
+	ACTION_NONE,
+	ACTION_QUIT,
+	ACTION_START_SOLO,
+	ACTION_START_LAN,
+	ACTION_LOGIN,
+	ACTION_SIGNUP,
+	ACTION_JOIN_LAN,
+	ACTION_BUY,
+	ACTION_TEMPLE
+} Action;
+
+typedef enum
+{
+	MENU_NONE,
+	MENU_MAIN,
+	MENU_LOGIN,
+	MENU_SIGNUP,
+	MENU_ACCOUNT,
+	MENU_LOAD,
+	MENU_SAVE,
+	MENU_CHAR_SEL,
+	MENU_RULES,
+	MENU_ARCHIVES,
+	MENU_SETTINGS,
+	MENU_BOARD
+} MenuId;
 
 typedef struct
 {
-	Sprite*       bg;
-	Sprite*       text;
-	SDL_bool      hovered;
-	int           clicked;
-	// int (*action)(void);
+	Sprite* sprite;
+  char content[TEXT_LEN];
+  SDL_Color color;
+	float scale;
+} Text;
+
+typedef struct
+{
+	Sprite bg;
+	Text* text;
+	State state;
+	Action action;
+	MenuId nextMenuId;
 } Button;
 
 typedef struct
 {
-	Button*       box; // Même mécanique que pour un bouton donc je fais ça xD
-	char*         text;
-	int           textLen;
-	SDL_bool      isPassword;
+	Sprite* bg;
+	Text* text;
+	int textLen;
+	State state;
+	SDL_bool isPassword;
+	int nextTextboxId; // switch to the next textbox when <tab> hit
 } Textbox;
 
 typedef struct
 {
-	Sprite*       sprite;
-	char*         text;
-	SDL_Color*    color;
-} TextInfo;
+	Sprite**  sprites;
+	int       spriteCount;
+
+	Text**    texts;
+	int       textCount;
+
+	Textbox** textboxes;
+	int       textboxCount;
+
+	Button**  buttons;
+	int       buttonCount;
+} Menu;
 
 typedef struct
 {
-		Button*     btnList[BTN_NB];
-		Button*     textboxList[TEXTOBX_NB];
-
-		// Generic UI elements
-		Sprite*     cursor;
-		Sprite*     btn;
-		Button*     btnNext;
-		Button*     btnBack;
-
-
-		// MENU_MAIN : MENU PRINCIPAL
-		Sprite*     title;
-		Button*     btnSolo;
-		Button*     btnMultiplayer;
-		Button*     btnArchives;
-		Button*     btnSettings;
-		Button*     btnQuit;
-
-
-		// MENU_LOGIN : MENU DE CONNEXION
-		Sprite*     textLogin;
-		Sprite*     textUsername;
-		Textbox*    textboxUsername;
-		Sprite*     textPassword;
-		Textbox*    textboxPassword;
-		Button*     btnLogin;
-		TextInfo*   textInfo;
-
-
-		// MENU_SIGNUP : MENU DE CREATION DE COMPTE
-		Sprite*     textSignUp;
-		Sprite*     textRepeatPassword;
-		Button*     btnSignUp;
-
+	Menu* mainMenu;
+	Menu* loginMenu;
+	Menu* signupMenu;
+	Menu* archivesMenu;
+	Menu* settingsMenu;
 } Gui;
 
-Gui* gui_init(TextureMgr* textureMgr);
+Gui* init_gui();
 
-Sprite* new_sprite_from_str(const char* text, int r, int g, int b, float scale);
-Button* new_button(const char* text, int r, int g, int b, Sprite* bgSprite, float textScale);
-Textbox* new_textbox(Sprite* bgSprite, SDL_bool isPassword);
-TextInfo* new_text_info(int r, int g, int b, float textScale);
+// MENU
+Menu* new_main_menu();
+Menu* new_login_menu();
+Menu* new_signup_menu();
+Menu* new_archives_menu();
+Menu* new_settings_menu();
 
-void center_rect(SDL_Rect* rectChild, SDL_Rect* rectParent);
-Sprite* sprite_copy(Sprite* src);
+void draw_menu(Menu* menu);
+void update_menu(Menu* menu);
+void destroy_menu(Menu* menu);
 
-void print_rect(SDL_Rect* rect);
-void draw_button(Button* button);
+// SPRITE
 void draw_sprite(Sprite* sprite);
 
-void draw_main_menu(Gui* gui);
-void draw_login_menu(Gui* gui);
-void draw_signup_menu(Gui* gui);
+// BUTTON
+Button* new_button(char* content, float scale, Action action, MenuId nextMenuId);
+void draw_button(Button* button);
+void button_action(Button* button, MenuId* menuId);
+void destroy_button(Button* button);
 
-void textbox_event(Textbox *textbox, SDL_Event event);
-void textbox_update(Textbox *textbox);
+// TEXT
+Text* new_text(char* content, int r, int g, int b, float scale);
+void update_text(Text* text);
+void destroy_text(Text* text);
 
-void text_info_clear(TextInfo* textinfo);
-void text_info_update(TextInfo* textinfo);
+// TEXTBOX
+Textbox* new_textbox(Sprite* bg);
+void textbox_event(Textbox *textbox, SDL_Event* event);
+void draw_textbox(Textbox* textbox);
+void destroy_textbox(Textbox* textbox);
 
 #endif

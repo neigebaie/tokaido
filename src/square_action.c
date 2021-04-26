@@ -1,31 +1,38 @@
 #include <square_action.h>
 
-void inn(Player* player)
+// buy_food(Food* food)
+// {
+//
+// }
+
+// auto-actions for bots ?
+
+void action_inn(Player* player)
 {
 	printf("todo\n");
 }
 
-void shop(Player* player, int item)
+void action_shop(Player* player, int item)
 {
 	printf("todo\n");
 }
 
-void hotspring(Player* player, int hotSpringTk)
+void action_hot_spring(Player* player, int hotSpringTk)
 {
   player->bundleToken += hotSpringTk;
 }
 
-void temple(Player* player)
+void action_temple(Player* player)
 {
 	printf("todo\n");
 }
 
-void farm(Player* player)
+void action_farm(Player* player)
 {
   player->coins +=3;
 }
 
-void encounter(Player* player, int choices)
+void action_encounter(Player* player, int choices)
 {
     switch (choices)
     {
@@ -59,17 +66,17 @@ void encounter(Player* player, int choices)
     }
 }
 
-void pano_mon(Player* player)
-{
-  player->panRice += 1;
-}
-
-void pano_ric(Player* player)
+void action_pan_rice(Player* player)
 {
   player->panMount += 1;
 }
 
-void pano_sea(Player* player)
+void action_pan_mount(Player* player)
+{
+  player->panRice += 1;
+}
+
+void action_pan_sea(Player* player)
 {
   player->panSea += 1;
 }

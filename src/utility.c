@@ -1,9 +1,12 @@
 #include <utility.h>
 
-// Argh, global variables...
-SDL_Window   	*window    = NULL;
-SDL_Renderer 	*renderer  = NULL;
-TTF_Font 			*font      = NULL;
+SDL_Window*   window    = NULL;
+SDL_Renderer* renderer  = NULL;
+TTF_Font*     font      = NULL;
+TextureMgr*   textureMgr = NULL;
+SDL_bool program_launched = SDL_TRUE;
+int debugMode = 0;
+int k = 0;
 
 char title[100];
 int freq;
@@ -14,10 +17,12 @@ float update_time;
 float time_passed;
 int fps;
 
+AnchorInfo windowAnchor;
+
 void init(void)
 {
 	// Initialisation SDL
-	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
 		exit_with_error("Initialisation SDL échouée");
 
 	// Création de la fenêtre (SDL_Window)
@@ -32,23 +37,28 @@ void init(void)
 	if (window == NULL)
 		exit_with_error("Création de la fenêtre échouée");
 
+	SDL_GetWindowSize(window, &windowAnchor.size.w, &windowAnchor.size.h);
+
 	// Chargement de l'icon
 	SDL_Surface *icon = NULL;
-	icon = IMG_Load("ressources/gfx/gui/icon.png");
+	icon = IMG_Load("resources/gfx/gui/icon.png");
 	SDL_SetWindowIcon(window, icon);
 	SDL_FreeSurface(icon);
 
 	// Création du renderer (SDL_Renderer)
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); // | SDL_RENDERER_PRESENTVSYNC
+	// renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	if (renderer == NULL)
 		exit_with_error("Création du Renderer échouée");
 
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
 	// Initialisation SDL_TTF
 	TTF_Init();
-	font = TTF_OpenFont("ressources/fonts/Buried K9.ttf", 80);
+	font = TTF_OpenFont("resources/fonts/Buried K9.ttf", 80);
 	if (font == NULL)
-		exit_with_error("\ressources/fonts/Buried K9.ttf\" n'a pas pu être chargé");
+		exit_with_error("\resources/fonts/Buried K9.ttf\" n'a pas pu être chargé");
 }
 
 void shuffle(int *array, size_t n)
@@ -66,6 +76,15 @@ void shuffle(int *array, size_t n)
     }
 }
 
+float min(float f1, float f2)
+{
+	if (f1 < f2)
+		return f1;
+	else
+		return f2;
+}
+
+// FPS
 void init_fps_counter()
 {
     curr_count = SDL_GetPerformanceCounter();
@@ -85,23 +104,13 @@ void update_fps_counter()
     if (update_time >= 1.f)
 		{
         time_passed += update_time;
-        sprintf(title, "Tokaido by neigebaie      Time:  %.2f  -  FPS:  %d", time_passed, fps);
+        sprintf(title, "Tokaido by neigebaie      UpdateT:  %d  -  FPS:  %d", (int)(curr_count - last_count)/1000, fps);
         SDL_SetWindowTitle(window, title);
         update_time -= 1.f;
     }
 }
 
-void limit_fps(unsigned int limit)
-{
-    unsigned int ticks = SDL_GetTicks();
-		if (limit < ticks)
-			return;
-		else if (limit > ticks + (1000/FPS_LIMIT))
-			SDL_Delay((1000/FPS_LIMIT));
-		else
-			SDL_Delay(limit - ticks);
-}
-
+// TEXTURES
 SDL_Texture* load_texture(const char *path)
 {
 	SDL_Surface *surface = NULL;
@@ -116,32 +125,108 @@ SDL_Texture* load_texture(const char *path)
 	return texture;
 }
 
-TextureMgr* load_textures()
+void load_textures()
 {
-	TextureMgr* textureMgr = (TextureMgr*)malloc(sizeof(TextureMgr));
+	textureMgr = (TextureMgr*)malloc(sizeof(TextureMgr));
 	// TEXTURES
 
-	textureMgr->squareTex    = load_texture("ressources/gfx/square_spritesheet.png");
-	textureMgr->foodTex      = load_texture("ressources/gfx/food_spritesheet.png");
-	textureMgr->travelerTex  = load_texture("ressources/gfx/traveler_spritesheet.png");
-	// textureMgr->itemTex      = load_texture("ressources/gfx/item_spritesheet.png");
-	// textureMgr->encounterTex = load_texture("ressources/gfx/encounter_spritesheet.png");
-	textureMgr->iconTex      = load_texture("ressources/gfx/gui/icon_spritesheet.png");
-	textureMgr->guiTex       = load_texture("ressources/gfx/gui/gui_spritesheet.png");
+	textureMgr->squareTex    = load_texture("resources/gfx/square_spritesheet.png");
+	textureMgr->foodTex      = load_texture("resources/gfx/food_spritesheet.png");
+	textureMgr->travelerTex  = load_texture("resources/gfx/traveler_spritesheet.png");
+	textureMgr->itemTex      = load_texture("resources/gfx/item_spritesheet.png");
+	// textureMgr->encounterTex = load_texture("resources/gfx/encounter_spritesheet.png");
+	textureMgr->iconTex      = load_texture("resources/gfx/gui/icon_spritesheet.png");
+	textureMgr->guiTex       = load_texture("resources/gfx/gui/gui_spritesheet.png");
 
-	printf("\e[29m [DEBUG] Textures loaded !\e[37m\n");
-	return textureMgr;
+	textureMgr->title  = *new_sprite(textureMgr->guiTex, new_rect(0, 308, 888, 335));
+	textureMgr->button = *new_sprite(textureMgr->guiTex, new_rect(0, 0, 1319, 307));
+	textureMgr->button.ai.size.w *= 0.3;
+	textureMgr->button.ai.size.h *= 0.3;
+
+	textureMgr->bundleTkIcon = *new_sprite(textureMgr->iconTex, new_rect(256, 0, 256, 256));
+	textureMgr->coinIcon = *new_sprite(textureMgr->iconTex, new_rect(0, 0, 256, 256));
+	for (int i = 0; i < 4 /*ITEM_CATS*/; i++) {
+		textureMgr->itemCatIcons[i] = *new_sprite(textureMgr->iconTex, new_rect(128 * i, 384, 128, 128));
+	}
+	textureMgr->templeCoinIcon = *new_sprite(textureMgr->iconTex, new_rect(0, 256, 128, 128));
+	textureMgr->frame = *new_sprite(textureMgr->guiTex, new_rect(1320, 0, 643, 882));
+
+	printf("\e[32m [DEBUG] Textures loaded !\e[37m\n");
 }
 
-Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* texPos)
+Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* crop)
 {
 	Sprite* sprite = (Sprite*)malloc(sizeof(Sprite));
+
 	sprite->tex = tex;
-	sprite->texPos = texPos;
-	sprite->rect = new_rect(0, 0, texPos->w, texPos->h);
+
+	sprite->crop = crop;
+
+	sprite->parent = NULL;
+
+	sprite->ai.at = AT_TOP_LEFT;
+
+	sprite->ai.offset.x = 0;
+	sprite->ai.offset.y = 0;
+
+	sprite->ai.size.w = crop->w;
+	sprite->ai.size.h = crop->h;
+
 	return sprite;
 }
 
+// ANCHOR
+SDL_Rect anchored_rect(AnchorInfo ai, AnchorInfo* parentAi)
+{
+	SDL_Rect rect;
+	SDL_Rect parent;
+	if (parentAi != NULL)
+	{
+		parent = anchored_rect(*parentAi, NULL);
+		// print_rect(&parent);
+	}
+	else
+	{
+		parent.x = 0;
+		parent.y = 0;
+		parent.w = windowAnchor.size.w;
+		parent.h = windowAnchor.size.h;
+	}
+	float scale = min((float)windowAnchor.size.w / 1920, (float)windowAnchor.size.h / 1080);
+	rect.w = ai.size.w * scale;
+	rect.h = ai.size.h * scale;
+
+	switch (ai.at)
+	{
+		case AT_CENTER:
+			rect.x = parent.w / 2 - rect.w / 2;
+			rect.y = parent.h / 2 - rect.h / 2;
+			break;
+		case AT_TOP_CENTER:
+			rect.x = parent.w / 2 - rect.w / 2;
+			rect.y = 0;
+			break;
+		case AT_TOP_LEFT:
+			rect.x = 0;
+			rect.y = 0;
+			break;
+		case AT_BOTTOM_LEFT:
+			rect.x = 0;
+			rect.y = parent.h - rect.h;
+			break;
+		case AT_BOTTOM_RIGHT:
+			rect.x = parent.w - rect.w;
+			rect.y = parent.h - rect.h;
+			break;
+	}
+
+	rect.x += parent.x + ai.offset.x  * scale;
+	rect.y += parent.y + ai.offset.y  * scale;
+
+	return rect;
+}
+
+// RECT
 SDL_Rect* new_rect(int x, int y, int w, int h)
 {
 	SDL_Rect* rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
@@ -154,18 +239,23 @@ SDL_Rect* new_rect(int x, int y, int w, int h)
 
 SDL_bool is_rect_on_screen(SDL_Rect* rect)
 {
+	SDL_DisplayMode DM;
+	SDL_GetCurrentDisplayMode(0, &DM);
+	SDL_Rect screenRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+	// SDL_RenderDrawRect(renderer, &screenRect);
 	if (
 		(
-			(rect->x >= 0 && rect->x <= WINDOW_WIDTH) ||
-			(rect->x + rect->w >= 0 && rect->x + rect->w <= WINDOW_WIDTH)
+			(rect->x >= screenRect.x && rect->x <= screenRect.x + screenRect.w) ||
+			(rect->x + rect->w >= screenRect.x && rect->x + rect->w <= screenRect.x + screenRect.w)
 		)
 		&&
 		(
-			(rect->y >= 0 && rect->y <= WINDOW_HEIGHT) ||
-			(rect->y + rect->h >= 0 && rect->y + rect->h <= WINDOW_HEIGHT)
+			(rect->y >= screenRect.y && rect->y <= screenRect.y + screenRect.h) ||
+			(rect->y + rect->h >= screenRect.y && rect->y + rect->h <= screenRect.y + screenRect.h)
 		)
 	)
 	{
+		k++;
 		return SDL_TRUE;
 	}
 	else
@@ -174,6 +264,29 @@ SDL_bool is_rect_on_screen(SDL_Rect* rect)
 	}
 }
 
+void print_rect(SDL_Rect* rect)
+{
+	printf("[Rect] %4d %4d %4d %4d\n", rect->x, rect->y, rect->w, rect->h);
+}
+
+void state_color_mod(SDL_Texture* tex, State state)
+{
+	switch (state) {
+		case STATE_IDLE:
+			break;
+		case STATE_CLICKED:
+			SDL_SetTextureColorMod(tex, 200, 200, 200);
+			break;
+		case STATE_HOVERED:
+			SDL_SetTextureColorMod(tex, 220, 220, 220);
+			break;
+		case STATE_DISABLED:
+			SDL_SetTextureColorMod(tex, 220, 220, 220);
+			break;
+	}
+}
+
+// EXIT
 void exit_with_error(const char *message)
 {
 	// Affiche un message d'erreur et quitte le programme

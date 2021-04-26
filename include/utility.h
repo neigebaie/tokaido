@@ -12,12 +12,44 @@
 #define WINDOW_HEIGHT 1080
 #define FPS_LIMIT 60
 
+typedef enum
+{
+	STATE_IDLE,
+	STATE_HOVERED,
+	STATE_CLICKED,
+	STATE_DISABLED
+} State;
+
+typedef enum
+{
+	AT_TOP_LEFT,
+	AT_TOP_CENTER,
+	AT_BOTTOM_LEFT,
+	AT_BOTTOM_RIGHT,
+	AT_CENTER
+} At;
+
+typedef struct {
+	int x, y;
+} Offset;
+
+typedef struct {
+	int w, h;
+} Size;
 
 typedef struct
 {
-		SDL_Texture* tex; // spritesheet/texture
-		SDL_Rect* texPos; // position in the spritesheet (px) (NULL if texture)
-		SDL_Rect* rect;   // where to draw it onscreen
+	At at;
+	Offset offset;
+	Size size;
+} AnchorInfo;
+
+typedef struct
+{
+		SDL_Texture* tex;
+		SDL_Rect* crop;
+		AnchorInfo* parent;
+		AnchorInfo ai;
 } Sprite;
 
 typedef struct
@@ -31,27 +63,48 @@ typedef struct
 	SDL_Texture* iconTex;
 	SDL_Texture* guiTex;
 
+	Sprite title;
+	Sprite button;
+	Sprite bundleTkIcon;
+	Sprite coinIcon;
+	Sprite itemCatIcons[4];
+	Sprite templeCoinIcon;
+	Sprite frame;
+
 } TextureMgr;
 
-extern SDL_Window 	*window;
-extern SDL_Renderer *renderer;
-extern TTF_Font			*font;
+extern SDL_Window*   window;
+extern SDL_Renderer* renderer;
+extern TTF_Font*     font;
+extern TextureMgr*   textureMgr;
+extern AnchorInfo    windowAnchor;
+
+extern SDL_bool program_launched;
+
+extern int k, debugMode, fps;
 
 void init(void);
 
 void shuffle(int *array, size_t n);
+float min(float f1, float f2);
 
 void limit_fps(unsigned int limit);
 void init_fps_counter();
 void update_fps_counter();
 
 SDL_Texture* load_texture(const char *path);
-TextureMgr* load_textures();
+void load_textures();
 
-Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* texPos);
+SDL_Rect anchored_rect(AnchorInfo ai, AnchorInfo* parentAi);
+SDL_bool is_ai_on_screen(AnchorInfo* ai);
+
+Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* crop);
+
 SDL_Rect* new_rect(int x, int y, int w, int h);
-
 SDL_bool is_rect_on_screen(SDL_Rect* rect);
+void print_rect(SDL_Rect* rect);
+
+void state_color_mod(SDL_Texture* tex, State state);
 
 void exit_with_success(void);
 void exit_with_error(const char *message);

@@ -5,12 +5,14 @@
 #include <SDL2/SDL_ttf.h>
 
 #include <utility.h>
+#include <game.h>
+#include <gui.h>
 
 // camera
 #define CAMERA_MIN_ZOOM 0.5
 #define CAMERA_MAX_ZOOM 1.25
 
-// ressources
+// resources
 #define SQUARES 10
 #define FOODS 14
 #define ITEMS 24
@@ -22,16 +24,20 @@
 #define BOARD_PLAYERS 5
 #define BOARD_SQUARES 55
 
-// SQUARE TYPES
-#define SQUARE_INN       0
-#define SQUARE_SHOP      1
-#define SQUARE_HOTSPRING 2
-#define SQUARE_TEMPLE    3
-#define SQUARE_ENCOUNTER 4
-#define SQUARE_FARM      5
-#define SQUARE_PAN_RICE  6
-#define SQUARE_PAN_MOUNT 7
-#define SQUARE_PAN_SEA   8
+// SQUARE ID
+typedef enum
+{
+	SQUARE_INN,
+	SQUARE_SHOP,
+	SQUARE_HOTSPRING,
+	SQUARE_TEMPLE,
+	SQUARE_ENCOUNTER,
+	SQUARE_FARM,
+	SQUARE_PAN_RICE,
+	SQUARE_PAN_MOUNT,
+	SQUARE_PAN_SEA,
+} SquareId;
+
 
 typedef struct
 {
@@ -68,15 +74,15 @@ typedef struct
 typedef struct
 {
 	char name[100];  // nom de la case
-	int id;
-	Sprite* sprite;
+	SquareId id;
+	Sprite sprite;
 	SDL_Color color;
 } SquareType;
 
 typedef struct
 {
 	char name[100]; // nom de la categorie de souvenir
-	Sprite* sprite;
+	Sprite sprite;
 	int startCoins;
 } Traveler;
 
@@ -88,16 +94,17 @@ typedef struct
 	ItemCategory* itemCats[ITEM_CATS];     // catégories
 	SquareType*		squareTypes[SQUARES];    // Cases
 	Traveler*			travelers[TRAVELERS];    // voyageurs
-} Ressources;
+} Resources;
 
 
 typedef struct
 {
-	Traveler* traveler;     // personnage choisi
-	Sprite* nameTag;
+	Traveler traveler;     // personnage choisi
+	Text* nameTag;
 
 	char nickname[100];			// pseudo du joueur si jeu en LAN/WAN
 	SDL_bool isHuman;				// joueur IA ou humain
+	// SDL_bool isLocal;				// joueur local ou réseau
 
 	int position;						// position du joueur sur le plateau
 	int roadDist;						// éloignement de la route
@@ -120,19 +127,16 @@ typedef struct
 	int panMount;						// cartes panorama Montagne
 	int panSea;							// cartes panorama Mer
 
-	SDL_bool hovered;
-	int      clicked;
+	State state;
 } Player;
 
 typedef struct
 {
-	SquareType* type;    // pointeur vers le type de case
+	SquareType type;    // pointeur vers le type de case
 	int position;
 	int capacity;        // Nb de joueurs pouvant être sur la case
-	int offsetY;         // Elevation aléatoire de la case pour donner un côté organique au plateau
 
-	SDL_bool hovered;
-	int      clicked;
+	State state;
 } Square;
 
 typedef struct
@@ -141,9 +145,9 @@ typedef struct
 	float scale;
 } Camera;
 
-extern Ressources ressources;
+extern Resources resources;
 
-void load_ressources(TextureMgr* textureMgr);
+void load_resources();
 
 #endif
 

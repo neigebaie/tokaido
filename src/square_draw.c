@@ -1,312 +1,201 @@
 #include <square_draw.h>
 
-// SQUARE GUI INIT
-
-// todo
-SquareGui* init_square_gui(char* nick, TextureMgr* textureMgr)
+SquareGui* new_inn_gui(Food* foods)
 {
-	SquareGui* squareGui = (SquareGui*)malloc(sizeof(SquareGui));
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+	Menu* menu = base_menu(1, 1, 0, 1);
+	ContentType ct = CONTENT_FOOD;
 
-	SquareGuiRes* res = (SquareGuiRes*)malloc(sizeof(SquareGuiRes));
+	menu->texts[0] = new_text("Relai", 0, 0, 0, 1);
+	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 
-	Sprite* btn = new_sprite(textureMgr->guiTex, new_rect(0, 0, 1319, 307));
-	btn->rect->w *= 0.25;
-	btn->rect->h *= 0.25;
+	sgui->frames = (Frame*)malloc(sizeof(Frame) * INN_FRAMES);
+	AnchorInfo ai;
+	ai.at = AT_CENTER;
+	ai.size = {200, 300};
 
-	res->bundleTkIcon = new_sprite(textureMgr->iconTex, new_rect(256, 0, 256, 256));
-	res->coinIcon = new_sprite(textureMgr->iconTex, new_rect(0, 0, 256, 256));
-	for (int i = 0; i < ITEM_CATS; i++) {
-		res->itemCatIcons[i] = new_sprite(textureMgr->iconTex, new_rect(128 * i, 384, 128, 128));
-	}
-	res->templeCoinIcon = new_sprite(textureMgr->iconTex, new_rect(0, 265, 128, 128));
-	res->frameBg = new_sprite(textureMgr->guiTex, new_rect(1320, 0, 643, 882));
-
-	res->backBtn = new_button("Retour", 255, 255, 255, btn, 0.5);
-
-	squareGui->hud = new_hud(res, nick);
-
-	squareGui->innGui       = new_inn_gui(res);
-	squareGui->shopGui      = new_shop_gui(res);
-	squareGui->hotSpringGui = new_hot_spring_gui(res);
-	squareGui->templeGui    = new_temple_gui(res);
-	squareGui->encounterGui = new_encounter_gui(res);
-	squareGui->farmGui      = new_farm_gui(res);
-	squareGui->panRiceGui   = new_pan_rice_gui(res);
-	squareGui->panMountGui  = new_pan_mount_gui(res);
-	squareGui->panSeaGui    = new_pan_sea_gui(res);
-
-	printf("\e[36m [DEBUG] SquareGui loaded !\e[37m\n");
-	return squareGui;
-}
-
-// NEW FRAME
-
-ItemFrame* new_item_frame(SquareGuiRes* res)
-{
-	ItemFrame* itemFrame = (ItemFrame*)malloc(sizeof(ItemFrame));
-	return itemFrame;
-}
-
-void set_item_in_frame(ItemFrame* itemFrame, Item* item)
-{
-	itemFrame->item = item;
-}
-
-FoodFrame* new_food_frame(SquareGuiRes* res, SDL_Rect* frameRect)
-{
-	FoodFrame* foodFrame = (FoodFrame*)malloc(sizeof(FoodFrame));
-
-	foodFrame->frameRect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
-	foodFrame->frameRect->x = frameRect->x;
-	foodFrame->frameRect->y = frameRect->y;
-	foodFrame->frameRect->w = frameRect->w;
-	foodFrame->frameRect->h = frameRect->h;
-	foodFrame->title = NULL;
-	foodFrame->bg = sprite_copy(res->frameBg);
-	foodFrame->bg->rect->x = foodFrame->frameRect->x - 23;
-	foodFrame->bg->rect->y = foodFrame->frameRect->y - 20;
-	foodFrame->bg->rect->w = foodFrame->frameRect->w + 40;
-	foodFrame->bg->rect->h = foodFrame->frameRect->h + 40;
-
-	foodFrame->coinIcon = sprite_copy(res->coinIcon);
-	foodFrame->coinIcon->rect->x = foodFrame->frameRect->x + 16 + 100;
-	foodFrame->coinIcon->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 45;
-	foodFrame->coinIcon->rect->w = 32;
-	foodFrame->coinIcon->rect->h = 32;
-
-	foodFrame->coinText = new_text_info(255, 255, 255, 1);
-	foodFrame->coinText->sprite->rect->x = foodFrame->frameRect->x + 16 + 40 + 100;
-	foodFrame->coinText->sprite->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 50;
-
-	foodFrame->bundleTkIcon = sprite_copy(res->bundleTkIcon);
-	foodFrame->bundleTkIcon->rect->x = foodFrame->frameRect->x + 16;
-	foodFrame->bundleTkIcon->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 45;
-	foodFrame->bundleTkIcon->rect->w = 32;
-	foodFrame->bundleTkIcon->rect->h = 32;
-
-	foodFrame->bundleTkText = new_text_info(255, 255, 255, 1);
-	foodFrame->bundleTkText->sprite->rect->x = foodFrame->frameRect->x + 16 + 35;
-	foodFrame->bundleTkText->sprite->rect->y = foodFrame->frameRect->y + foodFrame->frameRect->h - 50;
-
-	foodFrame->food = (Food*)malloc(sizeof(Food));
-
-	return foodFrame;
-}
-
-void set_food_in_frame(FoodFrame* foodFrame, Food* food)
-{
-	foodFrame->title = new_sprite_from_str(food->name, 255, 255, 255, 0.4);
-	center_rect(foodFrame->title->rect, new_rect(foodFrame->frameRect->x, foodFrame->frameRect->y + foodFrame->frameRect->w, foodFrame->frameRect->w, 50));
-	// foodFrame->food = food;
-	foodFrame->food->sprite = sprite_copy(food->sprite);
-	center_rect(foodFrame->food->sprite->rect, new_rect(foodFrame->frameRect->x + 20, foodFrame->frameRect->y + 20, foodFrame->frameRect->w - 40, foodFrame->frameRect->w - 40));
-}
-
-// NEW GUI FOR EACH SQUARE TYPE
-
-Hud* new_hud(SquareGuiRes* res, char* nick)
-{
-	Hud* hud = (Hud*)malloc(sizeof(Hud));
-
-	hud->nick = new_sprite_from_str(nick, 250, 250, 250, 0.4);
-	hud->nick->rect->x = 10;
-	hud->nick->rect->y = 10;
-
-	hud->coinIcon       = sprite_copy(res->coinIcon);
-	hud->coinText       = new_text_info(0, 0, 0, 1);
-
-	hud->bundleTkIcon   = sprite_copy(res->bundleTkIcon);
-	hud->bundleTkText   = new_text_info(0, 0, 0, 1);
-
-	hud->templeCoinIcon = sprite_copy(res->templeCoinIcon);
-	hud->templeCoinText = new_text_info(0, 0, 0, 1);
-
-	return hud;
-}
-
-// todo
-InnGui* new_inn_gui(SquareGuiRes* res)
-{
-	InnGui* innGui = (InnGui*)malloc(sizeof(InnGui));
-	innGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
-	center_rect(innGui->title->rect, new_rect(0, 0, 1920, 300));
 	for (int i = 0; i < INN_FRAMES; i++) {
-		SDL_Rect frameRect = {WINDOW_WIDTH/2 - (1 - i) * 320 - 320 * 3 * (int)(i/3) - 200/2, 100 + WINDOW_HEIGHT/2 - 360 * (1 - (int)(i/3)), 200, 300};
-		innGui->foodFrames[i] = new_food_frame(res, &frameRect);
+		ai.offset.x = ((i % 3) - 1) * 320;
+		ai.offset.y = 360 * (1 - (int)(i/3));
+		sgui->frames[i] = new_frame(ai, ct, foods[i]);
 
 		char price[2];
-		sprintf(price, "%d", rand() % 3 + 1);
+		sprintf(price, "%d", foods[i].price);
 		strcpy(innGui->foodFrames[i]->coinText->text, price);
-		text_info_update(innGui->foodFrames[i]->coinText);
-		innGui->foodFrames[i]->coinText->sprite->rect->w *= 0.75;
-		innGui->foodFrames[i]->coinText->sprite->rect->h *= 0.75;
+		update_text(innGui->foodFrames[i]->coinText);
 
 		strcpy(innGui->foodFrames[i]->bundleTkText->text, "+6");
-		text_info_update(innGui->foodFrames[i]->bundleTkText);
-		innGui->foodFrames[i]->bundleTkText->sprite->rect->w *= 0.75;
-		innGui->foodFrames[i]->bundleTkText->sprite->rect->h *= 0.75;
+		update_text(innGui->foodFrames[i]->bundleTkText);
 	}
 
 	innGui->backBtn = res->backBtn;
 	innGui->backBtn->bg->rect->x = WINDOW_WIDTH - innGui->backBtn->bg->rect->w - 20;
 	innGui->backBtn->bg->rect->y = WINDOW_HEIGHT - innGui->backBtn->bg->rect->h - 20;
 	center_rect(innGui->backBtn->text->rect, innGui->backBtn->bg->rect);
-
-	return innGui;
 }
 
-// todo
-ShopGui* new_shop_gui(SquareGuiRes* res)
+// SquareGui* new_shop_gui();
+//
+// SquareGui* new_hot_spring_gui();
+//
+// SquareGui* new_temple_gui();
+//
+// SquareGui* new_encounter_gui();
+//
+// SquareGui* new_farm_gui();
+//
+// SquareGui* new_pan_rice_gui();
+//
+// SquareGui* new_pan_mount_gui();
+//
+// SquareGui* new_pan_sea_gui();
+
+// HUD
+Hud* new_hud()
 {
-	ShopGui* shopGui = (ShopGui*)malloc(sizeof(ShopGui));
-	shopGui->title = new_sprite_from_str("Échoppe", 0, 0, 0, 1);
-	for (int i = 0; i < 3; i++) {
-		shopGui->itemFrames[i] = new_item_frame(res);
-	}
-	return shopGui;
+	Hud* hud = (Hud*)malloc(sizeof(Hud));
+
+	hud->travelerIcon = (Sprite*)malloc(sizeof(Sprite));
+	hud->travelerIcon->rect = new_rect(10, 10, 50, 50);
+
+	hud->nick = (Sprite*)malloc(sizeof(Sprite));
+
+	hud->coinIcon = textureMgr->coinIcon;
+	// hud->coinIcon->rect->y = 10;
+	// hud->coinIcon->rect->w = 50;
+	// hud->coinIcon->rect->h = 50;
+
+	hud->coinText = new_text(255, 255, 255, 1);
+	// hud->coinText->sprite->rect->y = 10;
+
+	hud->bundleTkIcon   = textureMgr->bundleTkIcon;
+	// hud->bundleTkIcon->rect->y = 10;
+	// hud->bundleTkIcon->rect->w = 50;
+	// hud->bundleTkIcon->rect->h = 50;
+
+	hud->bundleTkText   = new_text_info(255, 255, 255, 1);
+	// hud->bundleTkText->sprite->rect->y = 10;
+
+	hud->templeCoinIcon = textureMgr->templeCoinIcon;
+	// hud->templeCoinIcon->rect->y = 10;
+	// hud->templeCoinIcon->rect->w = 50;
+	// hud->templeCoinIcon->rect->h = 50;
+
+	hud->templeCoinText = new_text(255, 255, 255, 1);
+	// hud->templeCoinText->sprite->rect->y = 10;
+
+	return hud;
+}
+void update_hud(Hud* hud, Player* player);
+
+// FRAME
+Frame new_frame(AnchorInfo ai, ContentType contentType, Content content)
+{
+	Frame frame;
+
+	frame.ai = ai;
+
+	frame.state = STATE_IDLE;
+
+	frame.bg = textureMgr.frame;
+	frame.bg.parentAi = &frame.ai;
+	frame.bg.ai.at = AT_TOP_LEFT;
+	frame.bg.ai.offset.x = -23;
+	frame.bg.ai.offset.y = -20;
+	frame.bg.ai.size.w = frame.frameRect->w + 40;
+	frame.bg.ai.size.h = frame.frameRect->h + 40;
+
+	frame.coinIcon = textureMgr.frame;
+	frame.coinIcon.parentAi = &frame.ai;
+	// frame.coinIcon->rect->x = frame.frameRect->x + 16 + 100;
+	// frame.coinIcon->rect->y = frame.frameRect->y + frame.frameRect->h - 45;
+	// frame.coinIcon->rect->w = 32;
+	// frame.coinIcon->rect->h = 32;
+
+	frame.coinText = new_text_info(255, 255, 255, 1);
+	frame.coinText.parentAi = &frame.ai;
+	// frame.coinText->sprite->rect->x = frame.frameRect->x + 16 + 40 + 100;
+	// frame.coinText->sprite->rect->y = frame.frameRect->y + frame.frameRect->h - 50;
+
+	frame.bundleTkIcon = sprite_copy(res->bundleTkIcon);
+	frame.bundleTkIcon.parentAi = &frame.ai;
+	// frame.bundleTkIcon->rect->x = frame.frameRect->x + 16;
+	// frame.bundleTkIcon->rect->y = frame.frameRect->y + frame.frameRect->h - 45;
+	// frame.bundleTkIcon->rect->w = 32;
+	// frame.bundleTkIcon->rect->h = 32;
+
+	frame.bundleTkText = new_text_info(255, 255, 255, 1);
+	frame.bundleTkText.parentAi = &frame.ai;
+	// frame.bundleTkText->sprite->rect->x = frame.frameRect->x + 16 + 35;
+	// frame.bundleTkText->sprite->rect->y = frame.frameRect->y + frame.frameRect->h - 50;
+
+	return &frame;
 }
 
-// todo
-HotSpringGui* new_hot_spring_gui(SquareGuiRes* res)
+void draw_frame(Frame* frame)
 {
-	HotSpringGui* hotSpringGui = (HotSpringGui*)malloc(sizeof(HotSpringGui));
-	hotSpringGui->title = new_sprite_from_str("Source Chaude", 0, 0, 0, 1);
-	return hotSpringGui;
-}
+	state_color_mod(frame->bg->tex, frame->state);
+	draw_sprite(frame->bg);
+	SDL_SetTextureColorMod(frame->bg->tex, 255, 255, 255);
 
-// todo
-TempleGui* new_temple_gui(SquareGuiRes* res)
-{
-	TempleGui* templeGui = (TempleGui*)malloc(sizeof(TempleGui));
-	templeGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
-	return templeGui;
-}
+	draw_sprite(frame->title);
 
-// todo
-EncounterGui* new_encounter_gui(SquareGuiRes* res)
-{
-	EncounterGui* encounterGui = (EncounterGui*)malloc(sizeof(EncounterGui));
-	encounterGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
-	return encounterGui;
-}
+	draw_sprite(frame->coinIcon);
+	draw_sprite(frame->coinText->sprite);
 
-// todo
-FarmGui* new_farm_gui(SquareGuiRes* res)
-{
-	FarmGui* farmGui = (FarmGui*)malloc(sizeof(FarmGui));
-	farmGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
-	return farmGui;
-}
+	draw_sprite(frame->bundleTkIcon);
+	draw_sprite(frame->bundleTkText->sprite);
 
-// todo
-PanRiceGui* new_pan_rice_gui(SquareGuiRes* res)
-{
-	PanRiceGui* panRiceGui = (PanRiceGui*)malloc(sizeof(PanRiceGui));
-	panRiceGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
-	return panRiceGui;
-}
-
-// todo
-PanMountGui* new_pan_mount_gui(SquareGuiRes* res)
-{
-	PanMountGui* panMountGui = (PanMountGui*)malloc(sizeof(PanMountGui));
-	panMountGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
-	return panMountGui;
-}
-
-// todo
-PanSeaGui* new_pan_sea_gui(SquareGuiRes* res)
-{
-	PanSeaGui* panSeaGui = (PanSeaGui*)malloc(sizeof(PanSeaGui));
-	panSeaGui->title = new_sprite_from_str("Relai", 0, 0, 0, 1);
-	return panSeaGui;
-}
-
-// DRAW FRAME
-
-void draw_item_frame(ItemFrame* itemFrame)
-{
-
-}
-
-void draw_food_frame(FoodFrame* foodFrame)
-{
-	draw_sprite(foodFrame->bg);
-	draw_sprite(foodFrame->title);
-
-	draw_sprite(foodFrame->coinIcon);
-	draw_sprite(foodFrame->coinText->sprite);
-
-	draw_sprite(foodFrame->bundleTkIcon);
-	draw_sprite(foodFrame->bundleTkText->sprite);
-
-	if (foodFrame->food)
+	if (frame->food)
 	{
-		draw_sprite(foodFrame->food->sprite);
+		draw_sprite(frame->food->sprite);
 	}
-
-	// SDL_Rect debugRect = {0, 0, 0, 0};
-	// debugRect.x = foodFrame->frameRect->x;
-	// debugRect.y = foodFrame->frameRect->y;
-	// debugRect.w = foodFrame->frameRect->w;
-	// debugRect.h = foodFrame->frameRect->h;
-	// SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	// SDL_RenderDrawRect(renderer, &debugRect);
-	// debugRect.x = foodFrame->bg->rect->x;
-	// debugRect.y = foodFrame->bg->rect->y;
-	// debugRect.w = foodFrame->bg->rect->w;
-	// debugRect.h = foodFrame->bg->rect->h;
-	// SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-	// SDL_RenderDrawRect(renderer, &debugRect);
 }
 
-// DRAW FOR EACH SQUARE TYPE
-
-void draw_inn(InnGui* innGui)
+void draw_square_gui(SquareGui* sgui)
 {
-	draw_sprite(innGui->title);
-	for (int i = 0; i < INN_FRAMES; i++) {
-		draw_food_frame(innGui->foodFrames[i]);
-	}
-	draw_button(innGui->backBtn);
+	draw_menu(sgui->menu);
 }
 
-void draw_shop(ShopGui* shopGui)
-{
-	draw_sprite(shopGui->title);
-}
 
-void draw_hot_spring(HotSpringGui* hotSpringGui)
-{
-	draw_sprite(hotSpringGui->title);
-}
+// void set_content_in_frame(Frame* frame, Content* content)
+// {
+// 	frame.title = new_sprite_from_str(food->name, 255, 255, 255, 0.4);
+// 	center_rect(frame.title->rect, new_rect(frame.frameRect->x, frame.frameRect->y + frame.frameRect->w, frame.frameRect->w, 50));
+// 	// frame.food = food;
+// 	frame.content->sprite = sprite_copy(food->sprite);
+// 	center_rect(frame.food->sprite->rect, new_rect(frame.frameRect->x + 20, frame.frameRect->y + 20, frame.frameRect->w - 40, frame.frameRect->w - 40));
+// }
 
-void draw_temple(TempleGui* templeGui)
-{
-	draw_sprite(templeGui->title);
-}
+// NEW GUI FOR EACH SQUARE TYPE
 
-void draw_encounter(EncounterGui* encounterGui)
-{
-	draw_sprite(encounterGui->title);
-}
-
-void draw_farm(FarmGui* farmGui)
-{
-	draw_sprite(farmGui->title);
-}
-
-void draw_pan_rice(PanRiceGui* panRiceGui)
-{
-	draw_sprite(panRiceGui->title);
-}
-
-void draw_pan_mount(PanMountGui* panMountGui)
-{
-	draw_sprite(panMountGui->title);
-}
-
-void draw_pan_sea(PanRiceGui* panSeaGui)
-{
-	draw_sprite(panSeaGui->title);
-}
+// ShopGui* new_shop_gui(SquareGuiRes* res)
+// {
+// 	ShopGui* shopGui = (ShopGui*)malloc(sizeof(ShopGui));
+// 	shopGui->title = new_sprite_from_str("Échoppe", 0, 0, 0, 1);
+// 	center_rect(shopGui->title->rect, new_rect(0, 0, WINDOW_WIDTH, 300));
+//
+// 	for (int i = 0; i < 3; i++) {
+// 		SDL_Rect frameRect = {WINDOW_WIDTH/2 - (1 - i) * 320 - 200/2, WINDOW_HEIGHT/2 - 100, 200, 300};
+// 		shopGui->itemFrames[i] = new_item_frame(res, &frameRect);
+//
+// 		char price[2];
+// 		sprintf(price, "%d", rand() % 3 + 1);
+// 		strcpy(shopGui->itemFrames[i]->coinText->text, price);
+// 		text_info_update(shopGui->itemFrames[i]->coinText);
+// 		shopGui->itemFrames[i]->coinText->sprite->rect->w *= 0.75;
+// 		shopGui->itemFrames[i]->coinText->sprite->rect->h *= 0.75;
+//
+// 		strcpy(shopGui->itemFrames[i]->bundleTkText->text, "1/3/5/7");
+// 		text_info_update(shopGui->itemFrames[i]->bundleTkText);
+// 		shopGui->itemFrames[i]->bundleTkText->sprite->rect->w *= 0.75;
+// 		shopGui->itemFrames[i]->bundleTkText->sprite->rect->h *= 0.75;
+// 	}
+//
+// 	shopGui->backBtn = res->backBtn;
+// 	shopGui->backBtn->bg->rect->x = WINDOW_WIDTH - shopGui->backBtn->bg->rect->w - 20;
+// 	shopGui->backBtn->bg->rect->y = WINDOW_HEIGHT - shopGui->backBtn->bg->rect->h - 20;
+// 	center_rect(shopGui->backBtn->text->rect, shopGui->backBtn->bg->rect);
+//
+// 	return shopGui;
+// }

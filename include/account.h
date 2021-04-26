@@ -21,6 +21,7 @@ typedef struct
 		int score;
 } Account;
 
+Account* guest_account();
 int account_create(const char* nick, const char* pswd, char* outputMessage);
 int account_delete(int id);
 int account_login(Account* loggedAccount, const char* nick, const char* pswd, char* outputMessage);
