@@ -18,7 +18,8 @@ typedef enum
 	ACTION_SIGNUP,
 	ACTION_JOIN_LAN,
 	ACTION_BUY,
-	ACTION_TEMPLE
+	ACTION_TEMPLE,
+	ACTION_END_TURN
 } Action;
 
 typedef enum
@@ -56,7 +57,7 @@ typedef struct
 
 typedef struct
 {
-	Sprite* bg;
+	Sprite bg;
 	Text* text;
 	int textLen;
 	State state;
@@ -86,11 +87,15 @@ typedef struct
 	Menu* signupMenu;
 	Menu* archivesMenu;
 	Menu* settingsMenu;
+
+	Menu* menus[MENU_BOARD];
 } Gui;
 
 Gui* init_gui();
 
 // MENU
+Menu* base_menu(int s, int t, int tb, int b);
+
 Menu* new_main_menu();
 Menu* new_login_menu();
 Menu* new_signup_menu();
@@ -116,7 +121,7 @@ void update_text(Text* text);
 void destroy_text(Text* text);
 
 // TEXTBOX
-Textbox* new_textbox(Sprite* bg);
+Textbox* new_textbox(SDL_bool isPassword, int nextTextboxId);
 void textbox_event(Textbox *textbox, SDL_Event* event);
 void draw_textbox(Textbox* textbox);
 void destroy_textbox(Textbox* textbox);

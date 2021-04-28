@@ -21,15 +21,6 @@ typedef enum
 	BM_SQUARE
 } BoardMode;
 
-typedef enum
-{
-	GP_INIT,
-	GP_WAIT_LOCAL,
-	GP_WAIT_LAN,
-	GP_COOLDOWN,
-	GP_GAME_OVER
-} GamePhase;
-
 typedef struct
 {
 	Camera camera;
@@ -40,11 +31,12 @@ typedef struct
 	Square squares[BOARD_SQUARES];
 	int squareCount;
 
-	GamePhase phase;
 	BoardMode mode;
 
 	SquareId squareId;
-	SquareGui sgui;
+	SquareGui* sgui;
+
+	Hud* hud;
 } Board;
 
 extern Board board;
@@ -60,18 +52,20 @@ void board_update();
 void board_event(SDL_Event* event, SDL_Point* mousePos);
 void board_mouse(SDL_Point* mousePos, SDL_bool click);
 
-int whos_turn_is_it(void);
-void random_move(void);
+int whos_turn_is_it();
+int highlight_possible_moves(Player player);
+SDL_bool is_move_allowed(int position, Player player);
+void random_move();
 
 void update_player_ai(Player* player);
 void camera_ai(AnchorInfo* ai, Camera camera);
 void camera_draw_sprite(Sprite* sprite, Camera camera);
 
-void draw_bg(void);
-void draw_board(void);
-void draw_squares(Board* board);
-void draw_hud(Hud* hud);
+void draw_bg();
+void draw_board();
+void draw_squares();
 
+void end_turn();
 void square_action(Square* square);
 
 #endif

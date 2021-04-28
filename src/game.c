@@ -34,17 +34,11 @@ void load_resources()
 	strcpy(resources.items[22]->name, "Sumie");
 	strcpy(resources.items[23]->name, "Ukiyoe");
 
+	int priceItem[] = {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3};
 	for (int i = 0; i < ITEMS; i++)
 	{
-		resources.items[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
-		resources.items[i]->sprite->tex = textureMgr->itemTex;
-		resources.items[i]->sprite->crop = (SDL_Rect*)malloc(sizeof(SDL_Rect));
-		resources.items[i]->sprite->crop->x = i * 128;
-		resources.items[i]->sprite->crop->y = 0;
-		resources.items[i]->sprite->crop->w = 128;
-		resources.items[i]->sprite->crop->h = 128;
-		resources.items[i]->sprite->ai.size.w = 128;
-		resources.items[i]->sprite->ai.size.h = 128;
+		resources.items[i]->price = priceItem[i];
+		resources.items[i]->sprite = new_sprite(textureMgr->itemTex, new_rect(i * 128, 0, 128, 128));
 	}
 
 	// FOODS
@@ -69,8 +63,10 @@ void load_resources()
 	strcpy(resources.foods[12]->name, "Tai Meshi");
 	strcpy(resources.foods[13]->name, "Sashimi");
 
+	int priceFood[] = {1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3};
 	for (int i = 0; i < FOODS; i++)
 	{
+		resources.foods[i]->price = priceFood[i];
 		resources.foods[i]->sprite = (Sprite*)malloc(sizeof(Sprite));
 		resources.foods[i]->sprite->tex = textureMgr->foodTex;
 		resources.foods[i]->sprite->crop = (SDL_Rect*)malloc(sizeof(SDL_Rect));
@@ -106,40 +102,20 @@ void load_resources()
 	}
 
 	strcpy(resources.travelers[0]->name,  "Satsuki");
-	resources.travelers[0]->startCoins = 2;
-
 	strcpy(resources.travelers[1]->name,  "Hiroshige");
-	resources.travelers[1]->startCoins = 3;
-
 	strcpy(resources.travelers[2]->name,  "Chuubei");
-	resources.travelers[2]->startCoins = 4;
-
 	strcpy(resources.travelers[3]->name,  "Mitsukuni");
-	resources.travelers[3]->startCoins = 6;
-
 	strcpy(resources.travelers[4]->name,  "Sasayakko");
-	resources.travelers[4]->startCoins = 5;
-
 	strcpy(resources.travelers[5]->name,  "Umegae");
-	resources.travelers[5]->startCoins = 5;
-
 	strcpy(resources.travelers[6]->name,  "Kinko");
-	resources.travelers[6]->startCoins = 7;
-
 	strcpy(resources.travelers[7]->name,  "Hirotada");
-	resources.travelers[7]->startCoins = 8;
-
-	strcpy(resources.travelers[8]->name,  "Len-emon");
-	resources.travelers[8]->startCoins = 6;
-
+	strcpy(resources.travelers[8]->name,  "Zen-emon");
 	strcpy(resources.travelers[9]->name,  "Yoshiyasu");
-	resources.travelers[9]->startCoins = 9;
 
-	// strcpy(resources.travelers[10]->name,  "Unknown");
-	// resources.travelers[10]->startCoins = 2;
-
+	int startCoins[] = {2, 3, 4, 6, 5, 5, 7, 8, 6, 9};
 	for (int i = 0; i < TRAVELERS; i++)
 	{
+		resources.travelers[i]->startCoins = startCoins[i];
 		resources.travelers[i]->sprite = *new_sprite(textureMgr->travelerTex, new_rect(i * 256, 0, 256, 256));
 		resources.travelers[i]->sprite.ai.size.w *= 0.85;
 		resources.travelers[i]->sprite.ai.size.h *= 0.85;

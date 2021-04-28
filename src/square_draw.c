@@ -1,40 +1,92 @@
 #include <square_draw.h>
 
-SquareGui* new_inn_gui(Food* foods)
+SquareGui* new_inn_gui(Food* foods[], int foodCount)
 {
 	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
-	Menu* menu = base_menu(1, 1, 0, 1);
-	ContentType ct = CONTENT_FOOD;
+	sgui->menu = base_menu(0, 1, 0, 1);
+	ContentType contentType = CONTENT_FOOD;
+	Content content;
 
-	menu->texts[0] = new_text("Relai", 0, 0, 0, 1);
-	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0] = new_text("Relai", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
 
-	sgui->frames = (Frame*)malloc(sizeof(Frame) * INN_FRAMES);
+	sgui->frameCount = foodCount;
+
+	sgui->frames = (Frame**)malloc(sizeof(Frame*) * foodCount);
 	AnchorInfo ai;
 	ai.at = AT_CENTER;
-	ai.size = {200, 300};
+	ai.size = (Size){220, 330};
 
-	for (int i = 0; i < INN_FRAMES; i++) {
+	for (int i = 0; i < foodCount; i++) {
 		ai.offset.x = ((i % 3) - 1) * 320;
-		ai.offset.y = 360 * (1 - (int)(i/3));
-		sgui->frames[i] = new_frame(ai, ct, foods[i]);
+		ai.offset.y = 400 * (int)(i/3) - 200;
+		content.food = *foods[i];
 
-		char price[2];
-		sprintf(price, "%d", foods[i].price);
-		strcpy(innGui->foodFrames[i]->coinText->text, price);
-		update_text(innGui->foodFrames[i]->coinText);
+		sgui->frames[i] = new_frame(&ai, contentType, content);
 
-		strcpy(innGui->foodFrames[i]->bundleTkText->text, "+6");
-		update_text(innGui->foodFrames[i]->bundleTkText);
+		sprintf(sgui->frames[i]->title->content, "%s", foods[i]->name);
+		update_text(sgui->frames[i]->title);
+
+		sprintf(sgui->frames[i]->coinText->content, "%d", foods[i]->price);
+		update_text(sgui->frames[i]->coinText);
+
+		strcpy(sgui->frames[i]->bundleTkText->content, "+6");
+		update_text(sgui->frames[i]->bundleTkText);
+
 	}
 
-	innGui->backBtn = res->backBtn;
-	innGui->backBtn->bg->rect->x = WINDOW_WIDTH - innGui->backBtn->bg->rect->w - 20;
-	innGui->backBtn->bg->rect->y = WINDOW_HEIGHT - innGui->backBtn->bg->rect->h - 20;
-	center_rect(innGui->backBtn->text->rect, innGui->backBtn->bg->rect);
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
 }
 
-// SquareGui* new_shop_gui();
+SquareGui* new_shop_gui(Item* items[]/*, Player* player*/)
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+	sgui->menu = base_menu(0, 1, 0, 1);
+	ContentType contentType = CONTENT_ITEM;
+	Content content;
+
+	sgui->menu->texts[0] = new_text("Échoppe", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+
+	sgui->frameCount = 3;
+
+	sgui->frames = (Frame**)malloc(sizeof(Frame*) * sgui->frameCount);
+	AnchorInfo ai;
+	ai.at = AT_CENTER;
+	ai.size = (Size){220, 330};
+
+	for (int i = 0; i < sgui->frameCount; i++) {
+		ai.offset.x = (i - 1) * 320;
+		ai.offset.y = 0;
+		content.item = *items[i];
+
+		sgui->frames[i] = new_frame(&ai, contentType, content);
+
+		sprintf(sgui->frames[i]->title->content, "%s", items[i]->name);
+		update_text(sgui->frames[i]->title);
+
+		sprintf(sgui->frames[i]->coinText->content, "%d", items[i]->price);
+		update_text(sgui->frames[i]->coinText);
+
+		// todo, points en fonction de la collection
+		strcpy(sgui->frames[i]->bundleTkText->content, "+1");
+		update_text(sgui->frames[i]->bundleTkText);
+	}
+	//
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
+
 //
 // SquareGui* new_hot_spring_gui();
 //
@@ -51,110 +103,195 @@ SquareGui* new_inn_gui(Food* foods)
 // SquareGui* new_pan_sea_gui();
 
 // HUD
-Hud* new_hud()
+Hud* new_hud(Player player)
 {
 	Hud* hud = (Hud*)malloc(sizeof(Hud));
+	int x = 20;
 
-	hud->travelerIcon = (Sprite*)malloc(sizeof(Sprite));
-	hud->travelerIcon->rect = new_rect(10, 10, 50, 50);
+	hud->travelerIcon = player.traveler.sprite;
+	hud->travelerIcon.ai = (AnchorInfo){AT_TOP_LEFT, {x, 10}, {50, 50}};
+	x += hud->travelerIcon.ai.size.w + 10;
 
-	hud->nick = (Sprite*)malloc(sizeof(Sprite));
+
+	hud->nick = new_text(player.nickname, 0, 0, 0, 0.5);
+	hud->nick->sprite->ai = (AnchorInfo){AT_TOP_LEFT, {x, 5}, {hud->nick->sprite->ai.size.w, hud->nick->sprite->ai.size.h}};
+	x += hud->nick->sprite->ai.size.w + 30;
 
 	hud->coinIcon = textureMgr->coinIcon;
-	// hud->coinIcon->rect->y = 10;
-	// hud->coinIcon->rect->w = 50;
-	// hud->coinIcon->rect->h = 50;
+	hud->coinIcon.ai = (AnchorInfo){AT_TOP_LEFT, {x, 10}, {50, 50}};
+	x += hud->coinIcon.ai.size.w + 5;
 
-	hud->coinText = new_text(255, 255, 255, 1);
-	// hud->coinText->sprite->rect->y = 10;
+	hud->coinText = new_text("0", 0, 0, 0, 0.5);
+	sprintf(hud->coinText->content, "%d", player.coins);
+	update_text(hud->coinText);
+	hud->coinText->sprite->ai = (AnchorInfo){AT_TOP_LEFT, {x, 5}, {hud->coinText->sprite->ai.size.w, hud->coinText->sprite->ai.size.h}};
+	x += hud->coinText->sprite->ai.size.w + 30;
 
 	hud->bundleTkIcon   = textureMgr->bundleTkIcon;
-	// hud->bundleTkIcon->rect->y = 10;
-	// hud->bundleTkIcon->rect->w = 50;
-	// hud->bundleTkIcon->rect->h = 50;
+	hud->bundleTkIcon.ai = (AnchorInfo){AT_TOP_LEFT, {x, 0}, {70, 70}};
+	x += hud->bundleTkIcon.ai.size.w + 5;
 
-	hud->bundleTkText   = new_text_info(255, 255, 255, 1);
-	// hud->bundleTkText->sprite->rect->y = 10;
+	hud->bundleTkText   = new_text("0", 0, 0, 0, 0.5);
+	sprintf(hud->bundleTkText->content, "%d", player.bundleToken);
+	update_text(hud->bundleTkText);
+	hud->bundleTkText->sprite->ai = (AnchorInfo){AT_TOP_LEFT, {x, 5}, {hud->bundleTkText->sprite->ai.size.w, hud->bundleTkText->sprite->ai.size.h}};
+	x += hud->bundleTkText->sprite->ai.size.w + 30;
 
 	hud->templeCoinIcon = textureMgr->templeCoinIcon;
-	// hud->templeCoinIcon->rect->y = 10;
-	// hud->templeCoinIcon->rect->w = 50;
-	// hud->templeCoinIcon->rect->h = 50;
+	hud->templeCoinIcon.ai = (AnchorInfo){AT_TOP_LEFT, {x, 0}, {70, 70}};
+	x += hud->templeCoinIcon.ai.size.w + 5;
 
-	hud->templeCoinText = new_text(255, 255, 255, 1);
-	// hud->templeCoinText->sprite->rect->y = 10;
+	hud->templeCoinText = new_text("0", 0, 0, 0, 0.5);
+	sprintf(hud->templeCoinText->content, "%d", player.templeCoins);
+	update_text(hud->templeCoinText);
+	hud->templeCoinText->sprite->ai = (AnchorInfo){AT_TOP_LEFT, {x, 5}, {hud->templeCoinText->sprite->ai.size.w, hud->templeCoinText->sprite->ai.size.h}};
+	x += hud->templeCoinText->sprite->ai.size.w;
 
 	return hud;
 }
-void update_hud(Hud* hud, Player* player);
+
+void draw_hud(Hud* hud)
+{
+	AnchorInfo ai = {AT_TOP_LEFT, {0, 0}, {0, 70}};
+	SDL_Rect rect = anchored_rect(ai, NULL);
+	rect.w = windowAnchor.size.w;
+	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
+	SDL_RenderFillRect(renderer, &rect);
+	draw_sprite(&hud->travelerIcon);
+	draw_sprite(hud->nick->sprite);
+
+	draw_sprite(&hud->coinIcon);
+	draw_sprite(hud->coinText->sprite);
+
+	draw_sprite(&hud->bundleTkIcon);
+	draw_sprite(hud->bundleTkText->sprite);
+
+	draw_sprite(&hud->templeCoinIcon);
+	draw_sprite(hud->templeCoinText->sprite);
+}
+
+void destroy_hud(Hud* hud)
+{
+	free(hud);
+}
 
 // FRAME
-Frame new_frame(AnchorInfo ai, ContentType contentType, Content content)
+Frame* new_frame(AnchorInfo* ai, ContentType contentType, Content content)
 {
-	Frame frame;
+	Frame* frame = (Frame*)malloc(sizeof(Frame));
 
-	frame.ai = ai;
+	frame->ai = *ai;
 
-	frame.state = STATE_IDLE;
+	frame->state = STATE_IDLE;
+	frame->contentType = contentType;
+	frame->content = content;
+	if (frame->contentType == CONTENT_FOOD)
+	{
+		frame->content.food.sprite->parent = &frame->ai;
+		frame->content.food.sprite->ai.offset.x = 0;
+		frame->content.food.sprite->ai.offset.y = 35;
+		frame->content.food.sprite->ai.at = AT_TOP_CENTER;
+	}
+	else if (frame->contentType == CONTENT_ITEM)
+	{
+		frame->content.item.sprite->parent = &frame->ai;
+		frame->content.item.sprite->ai.offset.x = 0;
+		frame->content.item.sprite->ai.offset.y = 35;
+		frame->content.item.sprite->ai.at = AT_TOP_CENTER;
+	}
 
-	frame.bg = textureMgr.frame;
-	frame.bg.parentAi = &frame.ai;
-	frame.bg.ai.at = AT_TOP_LEFT;
-	frame.bg.ai.offset.x = -23;
-	frame.bg.ai.offset.y = -20;
-	frame.bg.ai.size.w = frame.frameRect->w + 40;
-	frame.bg.ai.size.h = frame.frameRect->h + 40;
+	frame->bg = textureMgr->frame;
+	frame->bg.parent = &frame->ai;
+	frame->bg.ai.at = AT_TOP_CENTER;
+	frame->bg.ai.offset.x = -3;
+	frame->bg.ai.offset.y = -20;
+	frame->bg.ai.size.w = frame->ai.size.w + 40;
+	frame->bg.ai.size.h = frame->ai.size.h + 40;
 
-	frame.coinIcon = textureMgr.frame;
-	frame.coinIcon.parentAi = &frame.ai;
-	// frame.coinIcon->rect->x = frame.frameRect->x + 16 + 100;
-	// frame.coinIcon->rect->y = frame.frameRect->y + frame.frameRect->h - 45;
-	// frame.coinIcon->rect->w = 32;
-	// frame.coinIcon->rect->h = 32;
+	frame->title = new_text("Lorem Ipsum", 255, 255, 255, 0.5);
+	frame->title->sprite->parent = &frame->ai;
+	frame->title->sprite->ai.offset.y = 70;
+	frame->title->sprite->ai.at = AT_CENTER;
 
-	frame.coinText = new_text_info(255, 255, 255, 1);
-	frame.coinText.parentAi = &frame.ai;
-	// frame.coinText->sprite->rect->x = frame.frameRect->x + 16 + 40 + 100;
-	// frame.coinText->sprite->rect->y = frame.frameRect->y + frame.frameRect->h - 50;
+	frame->coinIcon = textureMgr->coinIcon;
+	frame->coinIcon.parent = &frame->ai;
+	frame->coinIcon.ai.at = AT_BOTTOM_LEFT;
+	frame->coinIcon.ai.offset.x = 20;
+	frame->coinIcon.ai.offset.y = -10;
 
-	frame.bundleTkIcon = sprite_copy(res->bundleTkIcon);
-	frame.bundleTkIcon.parentAi = &frame.ai;
-	// frame.bundleTkIcon->rect->x = frame.frameRect->x + 16;
-	// frame.bundleTkIcon->rect->y = frame.frameRect->y + frame.frameRect->h - 45;
-	// frame.bundleTkIcon->rect->w = 32;
-	// frame.bundleTkIcon->rect->h = 32;
+	frame->coinText = new_text("0", 255, 255, 255, 0.4);
+	frame->coinText->sprite->parent = &frame->ai;
+	frame->coinText->sprite->ai.at = AT_BOTTOM_LEFT;
+	frame->coinText->sprite->ai.offset.x = frame->coinIcon.ai.offset.x + 50;
+	frame->coinText->sprite->ai.offset.y = 10;
 
-	frame.bundleTkText = new_text_info(255, 255, 255, 1);
-	frame.bundleTkText.parentAi = &frame.ai;
-	// frame.bundleTkText->sprite->rect->x = frame.frameRect->x + 16 + 35;
-	// frame.bundleTkText->sprite->rect->y = frame.frameRect->y + frame.frameRect->h - 50;
+	frame->bundleTkIcon = textureMgr->bundleTkIcon;
+	frame->bundleTkIcon.parent = &frame->ai;
+	frame->bundleTkIcon.ai.at = AT_BOTTOM_LEFT;
+	frame->bundleTkIcon.ai.offset.y = -10;
+	frame->bundleTkIcon.ai.offset.x = frame->coinIcon.ai.offset.x + 90;
 
-	return &frame;
+	frame->bundleTkText = new_text("0", 255, 255, 255, 0.4);
+	frame->bundleTkText->sprite->parent = &frame->ai;
+	frame->bundleTkText->sprite->ai.at = AT_BOTTOM_LEFT;
+	frame->bundleTkText->sprite->ai.offset.x = frame->bundleTkIcon.ai.offset.x + 50;
+	frame->bundleTkText->sprite->ai.offset.y = 10;
+
+	return frame;
 }
 
 void draw_frame(Frame* frame)
 {
-	state_color_mod(frame->bg->tex, frame->state);
-	draw_sprite(frame->bg);
-	SDL_SetTextureColorMod(frame->bg->tex, 255, 255, 255);
+	// printf("food\n");
+	// print_ai(&frame->content.food.sprite->ai);
+	// printf("bg\n");
+	// print_ai(&frame->bg.ai);
+	// printf("coinIcon\n");
+	// print_ai(&frame->coinIcon.ai);
+	// printf("coinText\n");
+	// print_ai(&frame->coinText->sprite->ai);
+	// printf("bundleTkIcon\n");
+	// print_ai(&frame->bundleTkIcon.ai);
+	// printf("bundleTkText\n");
+	// print_ai(&frame->bundleTkText->sprite->ai);
+	// printf("title\n");
+	// print_ai(&frame->title->sprite->ai);
 
-	draw_sprite(frame->title);
+	state_color_mod(frame->bg.tex, frame->state);
+	draw_sprite(&frame->bg);
+	SDL_SetTextureColorMod(frame->bg.tex, 255, 255, 255);
 
-	draw_sprite(frame->coinIcon);
+	draw_sprite(frame->title->sprite);
+
+	draw_sprite(&frame->coinIcon);
 	draw_sprite(frame->coinText->sprite);
 
-	draw_sprite(frame->bundleTkIcon);
+	draw_sprite(&frame->bundleTkIcon);
 	draw_sprite(frame->bundleTkText->sprite);
 
-	if (frame->food)
+	if (frame->contentType == CONTENT_FOOD)
 	{
-		draw_sprite(frame->food->sprite);
+		draw_sprite(frame->content.food.sprite);
+		// print_ai(&frame->content.food.sprite->ai);
+	}
+	else if (frame->contentType == CONTENT_ITEM)
+	{
+		draw_sprite(frame->content.item.sprite);
 	}
 }
 
 void draw_square_gui(SquareGui* sgui)
 {
+	// printf("%d %d %d %d\n", sgui->menu->spriteCount, sgui->menu->textCount, sgui->menu->textboxCount, sgui->menu->buttonCount);
 	draw_menu(sgui->menu);
+
+	if (sgui->frames != NULL)
+	{
+		for (int i = 0; i < sgui->frameCount; i++)
+		{
+			draw_frame(sgui->frames[i]);
+		}
+	}
 }
 
 

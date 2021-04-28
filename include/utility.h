@@ -65,6 +65,7 @@ typedef struct
 
 	Sprite title;
 	Sprite button;
+	Sprite textbox;
 	Sprite bundleTkIcon;
 	Sprite coinIcon;
 	Sprite itemCatIcons[4];
@@ -94,6 +95,7 @@ void update_fps_counter();
 
 SDL_Texture* load_texture(const char *path);
 void load_textures();
+void destroy_textures();
 
 SDL_Rect anchored_rect(AnchorInfo ai, AnchorInfo* parentAi);
 SDL_bool is_ai_on_screen(AnchorInfo* ai);
@@ -103,6 +105,7 @@ Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* crop);
 SDL_Rect* new_rect(int x, int y, int w, int h);
 SDL_bool is_rect_on_screen(SDL_Rect* rect);
 void print_rect(SDL_Rect* rect);
+void print_ai(AnchorInfo* ai);
 
 void state_color_mod(SDL_Texture* tex, State state);
 

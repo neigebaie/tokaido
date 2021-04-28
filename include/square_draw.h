@@ -21,8 +21,8 @@ typedef enum
 } ContentType;
 
 typedef union {
-	Food* food;
-	Item* item;
+	Food food;
+	Item item;
 } Content;
 
 
@@ -59,7 +59,8 @@ typedef struct
 	Menu* menu;
 	SquareId squareId;
 
-	Frame* frames;
+	Frame** frames;
+	int frameCount;
 
 	union {
 		CollectionFrame colFrame;
@@ -86,8 +87,8 @@ typedef struct
 
 // SquareGui
 
-SquareGui* new_inn_gui();
-SquareGui* new_shop_gui();
+SquareGui* new_inn_gui(Food** foods, int foodCount);
+SquareGui* new_shop_gui(Item* items[]);
 SquareGui* new_hot_spring_gui();
 SquareGui* new_temple_gui();
 SquareGui* new_encounter_gui();
@@ -97,11 +98,11 @@ SquareGui* new_pan_mount_gui();
 SquareGui* new_pan_sea_gui();
 
 // HUD
-Hud* new_hud();
-void update_hud(Hud* hud, Player* player);
+Hud* new_hud(Player player);
+void draw_hud(Hud* hud);
 
 // FRAME
-Frame new_frame(AnchorInfo ai, ContentType contentType, Content content);
+Frame* new_frame(AnchorInfo* ai, ContentType contentType, Content content);
 void draw_frame(Frame* frame);
 
 void draw_square_gui(SquareGui* sgui);

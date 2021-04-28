@@ -5,6 +5,12 @@ Gui* init_gui()
 	Gui* gui = (Gui*)malloc(sizeof(Gui));
 
 	gui->mainMenu     = new_main_menu();
+	gui->loginMenu    = new_login_menu();
+	gui->signupMenu    = new_signup_menu();
+
+	gui->menus[MENU_MAIN] = gui->mainMenu;
+	gui->menus[MENU_LOGIN] = gui->loginMenu;
+	gui->menus[MENU_SIGNUP] = gui->signupMenu;
 
 	printf("\e[32m [DEBUG] Gui initialized !\e[37m\n");
 	return gui;
@@ -56,6 +62,86 @@ Menu* new_main_menu(Gui* gui)
 	return menu;
 }
 
+Menu* new_login_menu()
+{
+	Menu* menu = base_menu(0, 3, 2, 3);
+
+	menu->texts[0] = new_text("Connexion", 0, 0, 0, 1);
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+
+	menu->texts[1] = new_text("Nom d'utilisateur", 0, 0, 0, 0.5);
+	menu->texts[1]->sprite->ai.offset = (Offset){-300, -200};
+	menu->texts[1]->sprite->ai.at = AT_CENTER;
+
+	menu->texts[2] = new_text("Mot de passe", 0, 0, 0, 0.5);
+	menu->texts[2]->sprite->ai.offset = (Offset){-300, -100};
+	menu->texts[2]->sprite->ai.at = AT_CENTER;
+
+	menu->textboxes[0] = new_textbox(SDL_FALSE, 1);
+	menu->textboxes[0]->bg.ai.offset = (Offset){150, -200};
+	menu->textboxes[0]->bg.ai.at = AT_CENTER;
+
+	menu->textboxes[1] = new_textbox(SDL_TRUE, 0);
+	menu->textboxes[1]->bg.ai.offset = (Offset){150, -100};
+	menu->textboxes[1]->bg.ai.at = AT_CENTER;
+
+
+	menu->buttons[0] = new_button("Suivant",         0.5, ACTION_LOGIN,  MENU_NONE);
+	menu->buttons[1] = new_button("Créer un compte", 0.5, ACTION_NONE,   MENU_SIGNUP);
+	menu->buttons[2] = new_button("Retour",          0.5, ACTION_NONE,   MENU_MAIN);
+
+	int y = 100;
+	for (int i = 0; i < menu->buttonCount; i++) {
+		menu->buttons[i]->bg.ai.at = AT_CENTER;
+		menu->buttons[i]->bg.ai.offset.y = y;
+		y += menu->buttons[i]->bg.ai.size.h + 30;
+	}
+
+	return menu;
+}
+
+Menu* new_signup_menu()
+{
+	Menu* menu = base_menu(0, 3, 2, 2);
+
+	menu->texts[0] = new_text("Création d'un compte", 0, 0, 0, 1);
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+
+	menu->texts[1] = new_text("Nom d'utilisateur", 0, 0, 0, 0.5);
+	menu->texts[1]->sprite->ai.offset = (Offset){-300, -200};
+	menu->texts[1]->sprite->ai.at = AT_CENTER;
+
+	menu->texts[2] = new_text("Mot de passe", 0, 0, 0, 0.5);
+	menu->texts[2]->sprite->ai.offset = (Offset){-300, -100};
+	menu->texts[2]->sprite->ai.at = AT_CENTER;
+
+	menu->textboxes[0] = new_textbox(SDL_FALSE, 1);
+	menu->textboxes[0]->bg.ai.offset = (Offset){150, -200};
+	menu->textboxes[0]->bg.ai.at = AT_CENTER;
+
+	menu->textboxes[1] = new_textbox(SDL_TRUE, 0);
+	menu->textboxes[1]->bg.ai.offset = (Offset){150, -100};
+	menu->textboxes[1]->bg.ai.at = AT_CENTER;
+
+
+	menu->buttons[0] = new_button("Suivant", 0.5, ACTION_SIGNUP, MENU_NONE);
+	menu->buttons[1] = new_button("Retour",  0.5, ACTION_NONE,   MENU_LOGIN);
+
+	int y = 100;
+	for (int i = 0; i < menu->buttonCount; i++) {
+		menu->buttons[i]->bg.ai.at = AT_CENTER;
+		menu->buttons[i]->bg.ai.offset.y = y;
+		y += menu->buttons[i]->bg.ai.size.h + 30;
+	}
+
+	return menu;
+}
+
+// Menu* new_archives_menu();
+// Menu* new_settings_menu();
+
 void draw_menu(Menu* menu)
 {
 	// bg or decorative sprites
@@ -80,7 +166,7 @@ void draw_menu(Menu* menu)
 	// printf("\n\n");
 }
 
-void update_menu(Menu* menu);
+void update_menu(Menu* menu); // :thinking: Hmmm...
 
 void destroy_menu(Menu* menu)
 {
@@ -129,6 +215,8 @@ void draw_button(Button* button)
 
 void button_action(Button* button, MenuId* menuId)
 {
+	printf("\e[33m [INFO] : Le bouton %s a été cliqué ! ✨\e[37m\n", button->text->content);
+
 	switch (button->action) {
 		case ACTION_NONE:
 			break;
@@ -148,6 +236,9 @@ void button_action(Button* button, MenuId* menuId)
 		case ACTION_TEMPLE:
 			break;
 		case ACTION_BUY:
+			break;
+		case ACTION_END_TURN:
+			end_turn();
 			break;
 	}
 
@@ -169,6 +260,11 @@ Text* new_text(char* content, int r, int g, int b, float scale)
 	text->sprite = (Sprite*)malloc(sizeof(Sprite));
 	text->sprite->tex = NULL;
 	text->sprite->crop = NULL;
+	text->sprite->parent = NULL;
+	text->sprite->ai.offset.x = 0;
+	text->sprite->ai.offset.y = 0;
+	text->sprite->ai.at = AT_TOP_LEFT;
+
 
 	strcpy(text->content, content);
 	text->color = color;
@@ -192,6 +288,8 @@ void update_text(Text* text)
 
 	Sprite* sprite = new_sprite(texture, new_rect(0, 0, 0, 0));
 	SDL_QueryTexture(sprite->tex, NULL, NULL, &sprite->crop->w, &sprite->crop->h);
+	sprite->parent = text->sprite->parent;
+	sprite->ai = text->sprite->ai;
 	sprite->ai.size.w = sprite->crop->w * text->scale;
 	sprite->ai.size.h = sprite->crop->h * text->scale;
 
@@ -205,9 +303,21 @@ void destroy_text(Text* text)
 }
 
 // TEXTBOX
-Textbox* new_textbox(Sprite* bg)
+Textbox* new_textbox(SDL_bool isPassword, int nextTextboxId)
 {
 	Textbox* textbox = (Textbox*)malloc(sizeof(Textbox));
+	textbox->bg = textureMgr->textbox;
+
+	textbox->text = new_text("", 255, 255, 255, 1);
+	textbox->text->sprite->ai.offset = (Offset){10, 10};
+	textbox->text->sprite->ai.at = AT_TOP_LEFT;
+	textbox->text->sprite->parent = &textbox->bg.ai;
+
+	textbox->textLen = 0;
+	textbox->state = STATE_IDLE;
+	textbox->isPassword = isPassword;
+	textbox->nextTextboxId = nextTextboxId;
+
 	return textbox;
 }
 
@@ -249,7 +359,7 @@ void textbox_event(Textbox *textbox, SDL_Event* event)
 
 void draw_textbox(Textbox* textbox)
 {
-
+	draw_sprite(&textbox->bg);
 }
 
 void destroy_textbox(Textbox* textbox)

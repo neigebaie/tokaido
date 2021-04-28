@@ -85,6 +85,36 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	board.squareId = SQUARE_INN;
 	board.mode     = BM_BOARD;
 
+	// Food* foods[6];
+	// int ids[FOODS];
+  // for(int i = 0; i < FOODS; i++)
+  // {
+  //   ids[i] = i;
+  // }
+	// shuffle(ids, FOODS);
+	//
+	// for(int i = 0; i < 6; i++)
+	// {
+	// 	foods[i] = resources.foods[ids[i]];
+	// }
+
+	Item* items[3];
+	int ids[ITEMS];
+  for(int i = 0; i < ITEMS; i++)
+  {
+    ids[i] = i;
+  }
+	shuffle(ids, ITEMS);
+
+	for(int i = 0; i < 3; i++)
+	{
+		items[i] = resources.items[ids[i]];
+	}
+
+	board.sgui = NULL;
+	// board.sgui = new_inn_gui(foods, 6);
+	board.sgui = new_shop_gui(items);
+
 	// Initialisation des joueurs
 	int travId[TRAVELERS];
 	for (int i = 0; i < TRAVELERS; i++)
@@ -100,7 +130,7 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	}
 	shuffle(roadDist, BOARD_PLAYERS);
 
-	printf(" \e[32m◁ Liste des Joueurs ▷\e[37m\n");
+	printf(" \e[34m◁ Liste des Joueurs ▷\e[37m\n");
 	for (int i = 0; i < BOARD_PLAYERS; i++)
 	{
 		board.players[i].traveler = *resources.travelers[travId[i]];
@@ -130,7 +160,7 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].state = STATE_IDLE;
 		// printf("[%d] %d %d %d %d\n", i, board.players[i].traveler.sprite.ai.offset.x, board.players[i].traveler.sprite.ai.offset.y, board.players[i].traveler.sprite.ai.size.w, board.players[i].traveler.sprite.ai.size.h);
 
-		printf(" \e[32m · %s\t: %s\e[37m\n", board.players[i].nickname, board.players[i].traveler.name);
+		printf(" \e[34m · %s\t: %s\e[37m\n", board.players[i].nickname, board.players[i].traveler.name);
 		board.playerCount++;
 	}
 
@@ -166,6 +196,10 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].traveler.sprite.ai.size.h = 100;
 		update_player_ai(&board.players[i]);
 	}
+
+	board.hud = new_hud(board.players[whos_turn_is_it()]);
+	highlight_possible_moves(board.players[whos_turn_is_it()]);
+	printf("here3\n");
 }
 
 void board_update()
@@ -229,10 +263,12 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 	{
 		for (int i = 0; i < board.playerCount; i++)
 		{
+			if (board.players[i].state == STATE_DISABLED)
+				continue;
 			AnchorInfo ai = board.players[i].traveler.sprite.ai;
 			camera_ai(&ai, board.camera);
 			rect = anchored_rect(ai, NULL);
-			if (SDL_PointInRect(mousePos, &rect) && board.players[i].state != STATE_DISABLED)
+			if (SDL_PointInRect(mousePos, &rect))
 			{
 				if (click)
 					board.players[i].state = STATE_CLICKED;
@@ -244,11 +280,14 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 				board.players[i].state = STATE_IDLE;
 			}
 		}
-		for (int position = 0; position < BOARD_SQUARES; position++) {
+		for (int position = 0; position < BOARD_SQUARES; position++)
+		{
+			if (board.squares[position].state == STATE_DISABLED)
+				continue;
 			AnchorInfo ai = board.squares[position].type.sprite.ai;
 			camera_ai(&ai, board.camera);
 			rect = anchored_rect(ai, NULL);
-			if (SDL_PointInRect(mousePos, &rect)  && board.squares[position].state != STATE_DISABLED)
+			if (SDL_PointInRect(mousePos, &rect))
 			{
 				if (click)
 				{
@@ -268,58 +307,51 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 	}
 	else
 	{
-		// if (SDL_PointInRect(mousePos, board.squareGui->res->backBtn->bg->rect) && !board.squareGui->res->backBtn->clicked)
-		// {
-		// 	if (click)
-		// 	{
-		// 		board.squareGui->res->backBtn->clicked = 10;
-		// 		board.mode = BM_BOARD;
-		// 	}
-		// 	board.squareGui->res->backBtn->hovered = SDL_TRUE;
-		// }
-		// else
-		// {
-		// 	board.squareGui->res->backBtn->hovered = SDL_FALSE;
-		// }
+		for (int i = 0; i < board.sgui->frameCount; i++)
+		{
+			printf("here\n");
+			SDL_Rect rect = anchored_rect(board.sgui->frames[i]->ai, NULL);
+			if (SDL_PointInRect(mousePos, &rect))
+			{
+				if (click)
+				{
+					board.sgui->frames[i]->state = STATE_CLICKED;
+					printf("\e[31m [DEBUG] BUY : %s\e[37m\n", board.sgui->frames[i]->content.food.name);
+					// buy some shit
+					// button_action(board.sgui->menu->buttons[i], &mid);
+				}
+				else
+				{
+					board.sgui->frames[i]->state = STATE_HOVERED;
+				}
+			}
+			else
+			{
+				board.sgui->frames[i]->state = STATE_IDLE;
+			}
+		}
 
-		// switch (board.squareId) {
-		// 	case SQUARE_INN:
-		// 		for (int i = 0; i < INN_FRAMES; i++)
-		// 		{
-		// 			if (SDL_PointInRect(mousePos, board.squareGui->innGui->foodFrames[i]->frameRect) && !board.squareGui->innGui->foodFrames[i]->clicked)
-		// 			{
-		// 				if (click)
-		// 				{
-		// 					board.squareGui->innGui->foodFrames[i]->clicked = 10;
-		//
-		// 				}
-		// 				board.squareGui->innGui->foodFrames[i]->hovered = SDL_TRUE;
-		// 			}
-		// 			else
-		// 			{
-		// 				board.squareGui->innGui->foodFrames[i]->hovered = SDL_FALSE;
-		// 			}
-		// 		}
-		// 		break;
-		// 	case SQUARE_SHOP:
-		// 		for (int i = 0; i < SHOP_FRAMES; i++)
-		// 		{
-		// 			if (SDL_PointInRect(mousePos, board.squareGui->shopGui->itemFrames[i]->frameRect) && !board.squareGui->shopGui->itemFrames[i]->clicked)
-		// 			{
-		// 				if (click)
-		// 				{
-		// 					board.squareGui->shopGui->itemFrames[i]->clicked = 10;
-		//
-		// 				}
-		// 				board.squareGui->shopGui->itemFrames[i]->hovered = SDL_TRUE;
-		// 			}
-		// 			else
-		// 			{
-		// 				board.squareGui->shopGui->itemFrames[i]->hovered = SDL_FALSE;
-		// 			}
-		// 		}
-		// 		break;
-		// }
+		for (int btnId = 0; btnId < board.sgui->menu->buttonCount; btnId++)
+		{
+			SDL_Rect rect = anchored_rect(board.sgui->menu->buttons[btnId]->bg.ai, board.sgui->menu->buttons[btnId]->bg.parent);
+			MenuId mid = MENU_NONE;
+			if (SDL_PointInRect(mousePos, &rect))
+			{
+				if (click)
+				{
+					board.sgui->menu->buttons[btnId]->state = STATE_CLICKED;
+					button_action(board.sgui->menu->buttons[btnId], &mid);
+				}
+				else
+				{
+					board.sgui->menu->buttons[btnId]->state = STATE_HOVERED;
+				}
+			}
+			else
+			{
+				board.sgui->menu->buttons[btnId]->state = STATE_IDLE;
+			}
+		}
 	}
 }
 
@@ -393,85 +425,68 @@ void draw_lines(int squareCount)
 				SDL_RenderCopy(renderer, resources.squareTypes[9]->sprite.tex, resources.squareTypes[9]->sprite.crop, &rect);
 				SDL_SetTextureColorMod(board.squares[position].type.sprite.tex, 255, 255, 255);
 			}
-			// SDL_RenderFillRect(renderer, &rect);
 		}
 	}
 }
 
-void draw_squares(Board* board)
+void draw_squares()
 {
-	for (int position = 0; position < board->squareCount; position++)
+	for (int position = 0; position < board.squareCount; position++)
 	{
-		if (board->squares[position].state == STATE_CLICKED)
-		{
-			SDL_SetTextureColorMod(board->squares[position].type.sprite.tex, 150, 150, 150);
-		}
-		else if (board->squares[position].state == STATE_HOVERED)
-			SDL_SetTextureColorMod(board->squares[position].type.sprite.tex, 200, 200, 200);
-		camera_draw_sprite(&board->squares[position].type.sprite, board->camera);
-		SDL_SetTextureColorMod(board->squares[position].type.sprite.tex, 255, 255, 255);
+		state_color_mod(board.squares[position].type.sprite.tex, board.squares[position].state);
+		camera_draw_sprite(&board.squares[position].type.sprite, board.camera);
+		SDL_SetTextureColorMod(board.squares[position].type.sprite.tex, 255, 255, 255);
 	}
 }
 
 void draw_players()
 {
 	// SDL_Rect rect;
-	AnchorInfo ai;
 	for (int i = 0; i < board.playerCount; i++)
 	{
-		if (board.players[i].state == STATE_HOVERED)
-			SDL_SetTextureColorMod(board.players[i].traveler.sprite.tex, 200, 200, 200);
+		state_color_mod(board.players[i].traveler.sprite.tex, board.players[i].state);
 		camera_draw_sprite(&board.players[i].traveler.sprite, board.camera);
 		SDL_SetTextureColorMod(board.players[i].traveler.sprite.tex, 255, 255, 255);
 	}
 	for (int i = 0; i < board.playerCount; i++)
 	{
-		if (board.players[i].state == STATE_HOVERED)
+		if (board.players[i].state == STATE_HOVERED || board.players[i].state == STATE_CLICKED)
 		{
+			board.players[i].nameTag->sprite->ai.at = AT_CENTER;
+			board.players[i].nameTag->sprite->ai.offset.x = board.players[i].traveler.sprite.ai.offset.x - board.players[i].nameTag->sprite->ai.size.w - 10;
+			board.players[i].nameTag->sprite->ai.offset.y = board.players[i].traveler.sprite.ai.offset.y;
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
+			AnchorInfo ai = board.players[i].nameTag->sprite->ai;
+			camera_ai(&ai, board.camera);
 			SDL_Rect rect = anchored_rect(ai, NULL);
 			SDL_RenderFillRect(renderer, &rect);
-			draw_sprite(board.players[i].nameTag->sprite);
+			camera_draw_sprite(board.players[i].nameTag->sprite, board.camera);
 		}
 	}
-}
-
-void draw_hud(Hud* hud)
-{
-	SDL_Rect rect = {0, 0, WINDOW_WIDTH, 70};
-	SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
-	SDL_RenderFillRect(renderer, &rect);
-
-	// draw_sprite(board.squareGui->hud->travelerIcon);
-	// draw_sprite(board.squareGui->hud->nick);
-	//
-	// draw_sprite(board.squareGui->hud->coinIcon);
-	// draw_sprite(board.squareGui->hud->coinText->sprite);
-	//
-	// draw_sprite(board.squareGui->hud->bundleTkIcon);
-	// draw_sprite(board.squareGui->hud->bundleTkText->sprite);
-	//
-	// draw_sprite(board.squareGui->hud->templeCoinIcon);
-	// draw_sprite(board.squareGui->hud->templeCoinText->sprite);
-
 }
 
 void draw_board()
 {
 	// draw_char_sel_gui();
-	if (board.mode == BM_SQUARE)
-	{
+	switch (board.mode) {
+		case BM_SQUARE:
+			printf("here\n");
 
+			draw_square_gui(board.sgui);
+			break;
+		case BM_BOARD:
+			// draw_bg(); // Affiche l'arrière plan du plateau
+			draw_lines(board.squareCount);
+			draw_squares(&board);
+			draw_players();
+			break;
+		case BM_LEADER_BOARD:
+			break;
+		case BM_INVENTORY:
+			break;
 	}
-	else if (board.mode == BM_BOARD)
-	{
-		// draw_bg(); // Affiche l'arrière plan du plateau
-		draw_lines(board.squareCount);
-		draw_squares(&board);
-		draw_players();
-		// draw_points();
-	}
-	// draw_hud();
+
+	draw_hud(board.hud);
 }
 
 int whos_turn_is_it()
@@ -495,6 +510,25 @@ int whos_turn_is_it()
 	}
 	// printf("Next move : %s\n", resources.travelers[board.players[playerId].traveler].name);
 	return playerId;
+}
+
+int highlight_possible_moves(Player player)
+{
+	int possibilities = 0;
+	for (int position = 0; position < BOARD_SQUARES; position++)
+	{
+		if (is_move_allowed(position, player))
+		{
+			possibilities++;
+			board.squares[position].state = STATE_IDLE;
+		}
+		else
+		{
+			board.squares[position].state = STATE_DISABLED;
+		}
+	}
+
+	return possibilities;
 }
 
 SDL_bool is_move_allowed(int position, Player player)
@@ -537,7 +571,6 @@ void random_move()
 	int possibilities = 0;
 	for (int position = board.players[playerId].position + 1; position < BOARD_SQUARES; position++)
 	{
-
 		if (is_move_allowed(position, board.players[playerId]))
 		{
 			possibleSquares[possibilities] = position;
@@ -561,17 +594,30 @@ void random_move()
 	board.players[playerId].position = position;
 	board.players[playerId].roadDist = board.squares[position].capacity - space;
 	update_player_ai(&board.players[playerId]);
-	// printf("new pos : %d %d\n", position, board.players[playerId].roadDist);
-	return;
+	end_turn();
+}
+
+void end_turn()
+{
+	// printf("END TURN\n");
+	board.mode = BM_BOARD;
+	highlight_possible_moves(board.players[whos_turn_is_it()]);
+	destroy_hud(board.hud);
+	board.hud = new_hud(board.players[whos_turn_is_it()]);
 }
 
 void square_action(Square* square)
 {
 	Player* player = &board.players[whos_turn_is_it()];
 	printf("SQUARE ACTION = %s\n", player->nickname);
+	board.squareId = square->type.id;
+	board.mode = BM_SQUARE;
+	switch (square->type.id) {
+		case SQUARE_INN:
+			break;
+	}
 	// switch (square->type.id)
 	// {
-	// 	board.squareId = SQUARE_INN;
 	//
 	// 	case SQUARE_INN:
 	// 		printf("TYPE = INN\n");

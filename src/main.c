@@ -23,8 +23,8 @@ int main(int argc, const char *argv[])
 	load_resources();
 
 	Gui* gui = init_gui();
-	Menu* menu = gui->mainMenu;
-	MenuId menuId = MENU_MAIN;
+	MenuId menuId = MENU_LOGIN;
+	Menu* menu = gui->menus[menuId];
 	if (logged) // à décaler évidemment
 		init_board(loggedAccount, textureMgr);
 
@@ -34,7 +34,8 @@ int main(int argc, const char *argv[])
 
 	// debug
 	k = 0; // debug
-	Text* debugText = new_text("", 255, 255, 255, 0.45);
+	Text* debugText = new_text("Loading debug info...", 255, 255, 255, 0.45);
+	debugText->sprite->ai.at = AT_BOTTOM_LEFT;
 	debugText->sprite->ai.offset.x = 10;
 	debugText->sprite->ai.offset.y = 10;
 
@@ -56,7 +57,9 @@ int main(int argc, const char *argv[])
 					if (SDL_PointInRect(&mousePos, &rect))
 					{
 						menu->buttons[btnId]->state = STATE_HOVERED;
-					} else {
+					}
+					else
+					{
 						menu->buttons[btnId]->state = STATE_IDLE;
 					}
 				}
@@ -68,7 +71,8 @@ int main(int argc, const char *argv[])
 			switch (event.type)
 			{
 				case SDL_KEYDOWN:
-					if (focusedTextbox) {
+					if (focusedTextbox)
+					{
 						textbox_event(focusedTextbox, &event);
 						break;
 					}
@@ -97,13 +101,16 @@ int main(int argc, const char *argv[])
 				case SDL_MOUSEBUTTONDOWN:
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
-						for (int btnId = 0; btnId < menu->buttonCount; btnId++)
+						if (menuId != MENU_BOARD)
 						{
-							SDL_Rect rect = anchored_rect(menu->buttons[btnId]->bg.ai, menu->buttons[btnId]->bg.parent);
-							if (SDL_PointInRect(&mousePos, &rect))
+							for (int btnId = 0; btnId < menu->buttonCount; btnId++)
 							{
-								menu->buttons[btnId]->state = STATE_CLICKED;
-								button_action(menu->buttons[btnId], &menuId);
+								SDL_Rect rect = anchored_rect(menu->buttons[btnId]->bg.ai, menu->buttons[btnId]->bg.parent);
+								if (SDL_PointInRect(&mousePos, &rect))
+								{
+									menu->buttons[btnId]->state = STATE_CLICKED;
+									button_action(menu->buttons[btnId], &menuId);
+								}
 							}
 						}
 					}
@@ -123,36 +130,6 @@ int main(int argc, const char *argv[])
 				// 		}
 				// 		switch (menu)
 				// 		{
-				// 			case MENU_MAIN:
-				// 				if (SDL_PointInRect(&mousePos, gui->btnSolo->bg->rect))
-				// 				{
-				// 					printf("\e[31m [INFO] : Le bouton Solo a été cliqué ! ✨\e[37m\n");
-				// 					if (logged)
-				// 					{
-				// 						init_board(loggedAccount, textureMgr);
-				// 						menu = MENU_BOARD;
-				// 					}
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->btnMultiplayer->bg->rect))
-				// 				{
-				// 					printf("\e[32m [INFO] : Le bouton Multi a été cliqué ! ✨\e[37m\n");
-				// 					menu = MENU_LOGIN;
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->btnArchives->bg->rect))
-				// 				{
-				// 					printf("\e[33m [INFO] : Le bouton Archives a été cliqué ! ✨\e[37m\n");
-				// 					menu = MENU_SIGNUP;
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->btnSettings->bg->rect))
-				// 				{
-				// 					printf("\e[34m [INFO] : Le bouton Options a été cliqué ! ✨\e[37m\n");
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->btnQuit->bg->rect))
-				// 				{
-				// 					printf("\e[35m [INFO] : Le bouton Quitter a été cliqué ! ✨\e[37m\n");
-				// 					program_launched = SDL_FALSE;
-				// 				}
-				// 				break;
 				// 			case MENU_LOGIN:
 				// 			focusedTextbox = NULL;
 				// 				if (SDL_PointInRect(&mousePos, gui->btnSignUp->bg->rect))
@@ -241,11 +218,13 @@ int main(int argc, const char *argv[])
 					break;
 			}
 			if (menuId == MENU_BOARD)
+			{
 				board_event(&event, &mousePos);
+			}
 		}
 
 		// RENDER MGR
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 100);
 		SDL_RenderClear(renderer);
 		k = 0;
 
@@ -257,6 +236,8 @@ int main(int argc, const char *argv[])
 		else
 		{
 			draw_menu(menu);
+			printf("%d\n", menuId);
+			menu = gui->menus[menuId];
 		}
 
 		clock_t end = clock();
@@ -266,7 +247,6 @@ int main(int argc, const char *argv[])
 		debug_aff(debugMode, debugText, time_spent);
 
 		SDL_RenderPresent(renderer);
-
 	}
 
 	exit_with_success();
@@ -307,7 +287,7 @@ void debug_aff(int debugMode, Text* debugText, double time_spent)
 		case 1:
 			if (frameCount % 50 == 0)
 			{
-				sprintf(debugText->content, "  time elapsed (ms) = %.2lf   debug int k = %d  FPS = %d", time_spent, k, fps);
+				sprintf(debugText->content, "  time elapsed (ms) = %.2lf   debug int k = %d  FPS = %d  ", time_spent, k, fps);
 				frameCount = 0;
 			}
 

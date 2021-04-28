@@ -30,8 +30,9 @@ void init(void)
 		"Tokaido",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		WINDOW_WIDTH, WINDOW_HEIGHT,
-		SDL_WINDOW_FULLSCREEN // SDL_WINDOW_SHOWN : pour la version fenêtrée
+		1280, 720,
+		SDL_WINDOW_SHOWN // SDL_WINDOW_SHOWN : pour la version fenêtrée
+		 // SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS
 	);
 
 	if (window == NULL)
@@ -53,12 +54,13 @@ void init(void)
 		exit_with_error("Création du Renderer échouée");
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_setenv("SDL_VIDEODRIVER", "directx", 1);
 
 	// Initialisation SDL_TTF
 	TTF_Init();
 	font = TTF_OpenFont("resources/fonts/Buried K9.ttf", 80);
 	if (font == NULL)
-		exit_with_error("\resources/fonts/Buried K9.ttf\" n'a pas pu être chargé");
+		exit_with_error("\"resources/fonts/Buried K9.ttf\" n'a pas pu être chargé");
 }
 
 void shuffle(int *array, size_t n)
@@ -140,18 +142,42 @@ void load_textures()
 
 	textureMgr->title  = *new_sprite(textureMgr->guiTex, new_rect(0, 308, 888, 335));
 	textureMgr->button = *new_sprite(textureMgr->guiTex, new_rect(0, 0, 1319, 307));
+	textureMgr->textbox = *new_sprite(textureMgr->guiTex, new_rect(0, 647, 1319, 307));
 	textureMgr->button.ai.size.w *= 0.3;
 	textureMgr->button.ai.size.h *= 0.3;
+	textureMgr->textbox.ai.size.w *= 0.5;
+	textureMgr->textbox.ai.size.h *= 0.3;
 
 	textureMgr->bundleTkIcon = *new_sprite(textureMgr->iconTex, new_rect(256, 0, 256, 256));
+	textureMgr->bundleTkIcon.ai.size.w = 40;
+	textureMgr->bundleTkIcon.ai.size.h = 40;
 	textureMgr->coinIcon = *new_sprite(textureMgr->iconTex, new_rect(0, 0, 256, 256));
+	textureMgr->coinIcon.ai.size.w = 40;
+	textureMgr->coinIcon.ai.size.h = 40;
 	for (int i = 0; i < 4 /*ITEM_CATS*/; i++) {
 		textureMgr->itemCatIcons[i] = *new_sprite(textureMgr->iconTex, new_rect(128 * i, 384, 128, 128));
+		textureMgr->itemCatIcons[i].ai.size.w = 40;
+		textureMgr->itemCatIcons[i].ai.size.h = 40;
 	}
 	textureMgr->templeCoinIcon = *new_sprite(textureMgr->iconTex, new_rect(0, 256, 128, 128));
+	textureMgr->templeCoinIcon.ai.size.w = 40;
+	textureMgr->templeCoinIcon.ai.size.h = 40;
 	textureMgr->frame = *new_sprite(textureMgr->guiTex, new_rect(1320, 0, 643, 882));
+	textureMgr->frame.ai.size.w = 200;
+	textureMgr->frame.ai.size.h = 300;
 
 	printf("\e[32m [DEBUG] Textures loaded !\e[37m\n");
+}
+
+void destroy_textures()
+{
+	SDL_DestroyTexture(textureMgr->squareTex);
+	SDL_DestroyTexture(textureMgr->foodTex);
+	SDL_DestroyTexture(textureMgr->travelerTex);
+	SDL_DestroyTexture(textureMgr->itemTex);
+	// SDL_DestroyTexture(textureMgr->encounterTex);
+	SDL_DestroyTexture(textureMgr->iconTex);
+	SDL_DestroyTexture(textureMgr->guiTex);
 }
 
 Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* crop)
@@ -239,6 +265,7 @@ SDL_Rect* new_rect(int x, int y, int w, int h)
 
 SDL_bool is_rect_on_screen(SDL_Rect* rect)
 {
+	return 1;
 	SDL_DisplayMode DM;
 	SDL_GetCurrentDisplayMode(0, &DM);
 	SDL_Rect screenRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
@@ -269,6 +296,14 @@ void print_rect(SDL_Rect* rect)
 	printf("[Rect] %4d %4d %4d %4d\n", rect->x, rect->y, rect->w, rect->h);
 }
 
+void print_ai(AnchorInfo* ai)
+{
+	if (ai == NULL)
+		printf("[DEBUG] NULL\n");
+	else
+		printf("[DEBUG] %d : %d %d %d %d\n", ai->at, ai->offset.x, ai->offset.y, ai->size.w, ai->size.h);
+}
+
 void state_color_mod(SDL_Texture* tex, State state)
 {
 	switch (state) {
@@ -281,7 +316,7 @@ void state_color_mod(SDL_Texture* tex, State state)
 			SDL_SetTextureColorMod(tex, 220, 220, 220);
 			break;
 		case STATE_DISABLED:
-			SDL_SetTextureColorMod(tex, 220, 220, 220);
+			SDL_SetTextureColorMod(tex, 120, 100, 100);
 			break;
 	}
 }
@@ -297,6 +332,7 @@ void exit_with_error(const char *message)
 void exit_with_success(void)
 {
 	// Nettoyage à la sortie du programme
+	destroy_textures();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	TTF_Quit();

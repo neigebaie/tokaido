@@ -52,13 +52,13 @@ typedef struct
 
 typedef struct
 {
-	char name[100];        // nom de la catégorie
+	char name[100]; // nom de la catégorie
 	Sprite* sprite;
 } ItemCategory;
 
 typedef struct
 {
-	char name[100];					// nom du souvenir
+	char name[100]; // nom du souvenir
 	Sprite* sprite;
 	int price;
 	ItemCategory category;
@@ -66,14 +66,14 @@ typedef struct
 
 typedef struct
 {
-	char name[100];        // nom du repas
+	char name[100]; // nom du repas
 	Sprite* sprite;
 	int price;
 } Food;
 
 typedef struct
 {
-	char name[100];  // nom de la case
+	char name[100]; // nom de la case
 	SquareId id;
 	Sprite sprite;
 	SDL_Color color;
