@@ -649,6 +649,21 @@ void square_action(Square* square)
 				init_inn(board.innFoods);
 				board.lastInnPos = board.playing->position;
 			}
+			if (board.playing->traveler.id == TRAVELER_HIROSHIGE) 	//Menu Custom pour choix du panorama
+			{
+
+			}
+			if (board.playing->traveler.id == TRAVELER_SATSUKI) 	//Menu Custom pour accepter ou non le repas gratuit
+			{
+
+			}
+			if (board.playing->traveler.id == TRAVELER_KINKO) 	//Prix réduit
+			{
+				for(int i=0;i<board.playerCount+1;i++)
+				{
+					board.sgui->frames[i].content.food.price -- ;
+				}
+			}			
 			board.sgui = new_inn_gui(board.innFoods, board.playerCount + 1);
 			break;
 		case SQUARE_SHOP:
@@ -663,13 +678,17 @@ void square_action(Square* square)
 			action_hot_spring(board.playing, tk);
 			break;
 		case SQUARE_TEMPLE:
+			if (board.playing->traveler.id == TRAVELER_HIROTADA) 	//Piece gratuite au temple
+			{
+				board.playing->templeCoins += 1 ;
+			}
 			board.sgui = new_temple_gui();
 			break;
 		case SQUARE_ENCOUNTER:
-			if (board.playing->traveler.id == TRAVELER_UMEGAE)
+			if (board.playing->traveler.id == TRAVELER_UMEGAE)		//+1 Coins et +1 Point de victoire pour les recontres
 			{
-			board.playing->coins +=1;
-			board.playing->bundleToken +=1;
+				board.playing->coins +=1;
+				board.playing->bundleToken +=1;
 			}
 			board.sgui = new_encounter_gui();
 			break;

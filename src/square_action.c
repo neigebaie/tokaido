@@ -42,7 +42,7 @@ SDL_bool buy_from_frame(Player* player, Frame* frame)
 		if (player->coins >= frame->content.food.price)
 		{
 			player->coins -= frame->content.food.price;
-			player->food[player->foodCount] = frame->content.food;
+			player->foods[player->foodCount] = frame->content.food;
 			player->bundleToken += 6;
 			player->foodCount++;
 			printf("FOODCOUNT = %d\n", player->foodCount);
