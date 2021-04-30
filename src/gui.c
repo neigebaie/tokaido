@@ -6,11 +6,15 @@ Gui* init_gui()
 
 	gui->mainMenu     = new_main_menu();
 	gui->loginMenu    = new_login_menu();
-	gui->signupMenu    = new_signup_menu();
+	gui->signupMenu   = new_signup_menu();
+	gui->archivesMenu = new_archives_menu();
+	gui->settingsMenu = new_settings_menu();
 
 	gui->menus[MENU_MAIN] = gui->mainMenu;
 	gui->menus[MENU_LOGIN] = gui->loginMenu;
 	gui->menus[MENU_SIGNUP] = gui->signupMenu;
+	gui->menus[MENU_ARCHIVES] = gui->archivesMenu;
+	gui->menus[MENU_SETTINGS] = gui->settingsMenu;
 
 	printf("\e[32m [DEBUG] Gui initialized !\e[37m\n");
 	return gui;
@@ -35,13 +39,16 @@ Menu* base_menu(int s, int t, int tb, int b)
 
 Menu* new_main_menu(Gui* gui)
 {
-	Menu* menu = base_menu(1, 1, 0, 5);
+	Menu* menu = base_menu(2, 1, 0, 5);
 	int y = -350;
 
-	menu->sprites[0] = &textureMgr->title;
+	menu->sprites[0] = &textureMgr->bgSprite[0];
 	menu->sprites[0]->ai.at = AT_CENTER;
-	menu->sprites[0]->ai.offset.y = y;
-	y += menu->sprites[0]->ai.size.h;
+
+	menu->sprites[1] = &textureMgr->title;
+	menu->sprites[1]->ai.at = AT_CENTER;
+	menu->sprites[1]->ai.offset.y = y;
+	y += menu->sprites[1]->ai.size.h;
 
 	menu->texts[0] = new_text("Tokaido v0.1.0", 100, 100, 100, 0.35);
 	menu->texts[0]->sprite->ai.offset = (Offset){10, 10};
@@ -139,8 +146,45 @@ Menu* new_signup_menu()
 	return menu;
 }
 
-// Menu* new_archives_menu();
-// Menu* new_settings_menu();
+Menu* new_archives_menu()
+{
+	Menu* menu = base_menu(0, 1, 0, 1);
+
+	menu->texts[0] = new_text("Archives", 0, 0, 0, 1);
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+
+	menu->buttons[0] = new_button("Retour",  0.5, ACTION_NONE,   MENU_MAIN);
+
+	int y = 100;
+	for (int i = 0; i < menu->buttonCount; i++) {
+		menu->buttons[i]->bg.ai.at = AT_CENTER;
+		menu->buttons[i]->bg.ai.offset.y = y;
+		y += menu->buttons[i]->bg.ai.size.h + 30;
+	}
+
+	return menu;
+}
+
+Menu* new_settings_menu()
+{
+	Menu* menu = base_menu(0, 1, 0, 1);
+
+	menu->texts[0] = new_text("Options", 0, 0, 0, 1);
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+
+	menu->buttons[0] = new_button("Retour",  0.5, ACTION_NONE,   MENU_MAIN);
+
+	int y = 100;
+	for (int i = 0; i < menu->buttonCount; i++) {
+		menu->buttons[i]->bg.ai.at = AT_CENTER;
+		menu->buttons[i]->bg.ai.offset.y = y;
+		y += menu->buttons[i]->bg.ai.size.h + 30;
+	}
+
+	return menu;
+}
 
 void draw_menu(Menu* menu)
 {
@@ -204,10 +248,7 @@ Button* new_button(char* content, float scale, Action action, MenuId nextMenuId)
 
 void draw_button(Button* button)
 {
-	if (button->state == STATE_CLICKED)
-		SDL_SetTextureColorMod(button->bg.tex, 150, 150, 150);
-	else if (button->state == STATE_HOVERED)
-		SDL_SetTextureColorMod(button->bg.tex, 200, 200, 200);
+	state_color_mod(button->bg.tex, &button->state);
 	draw_sprite(&button->bg);
 	SDL_SetTextureColorMod(button->bg.tex, 255, 255, 255);
 	draw_sprite(button->text->sprite);
@@ -308,7 +349,7 @@ Textbox* new_textbox(SDL_bool isPassword, int nextTextboxId)
 	Textbox* textbox = (Textbox*)malloc(sizeof(Textbox));
 	textbox->bg = textureMgr->textbox;
 
-	textbox->text = new_text("", 255, 255, 255, 1);
+	textbox->text = new_text("", 255, 255, 255, 0.5);
 	textbox->text->sprite->ai.offset = (Offset){10, 10};
 	textbox->text->sprite->ai.at = AT_TOP_LEFT;
 	textbox->text->sprite->parent = &textbox->bg.ai;
@@ -324,42 +365,58 @@ Textbox* new_textbox(SDL_bool isPassword, int nextTextboxId)
 void textbox_event(Textbox *textbox, SDL_Event* event)
 {
 	char keycode = event->key.keysym.sym;
+	char passwordBuffer[TEXT_LEN];
 
 	if (keycode == SDLK_RETURN)
 	{
-		textbox->textLen = 0;
-		return;
+		// unfocus textbox
 	}
-
-	if (keycode == SDLK_BACKSPACE && textbox->textLen > 0)
+	else if (keycode == SDLK_TAB)
+	{
+		// focus on next textbox
+	}
+	else if (keycode == SDLK_BACKSPACE && textbox->textLen > 0)
 	{
 		textbox->textLen -= 1;
 		textbox->text->content[textbox->textLen] = '\0';
-		update_text(textbox->text);
-		return;
 	}
-	else if (((keycode < 97 || keycode > 121) && keycode != SDLK_SPACE) || textbox->textLen == TEXT_LEN - 1)
+	else
 	{
-		return;
+
+		if (((keycode < 97 || keycode > 121) && keycode != SDLK_SPACE) || textbox->textLen == TEXT_LEN - 1)
+		{
+			return;
+		}
+		SDL_Keymod mod = SDL_GetModState();
+		if (((mod & KMOD_CAPS) || (mod & KMOD_SHIFT)) && keycode != SDLK_SPACE)
+		{
+			keycode -= 32;
+		}
+
+		textbox->text->content[textbox->textLen] = keycode;
+		textbox->textLen++;
+		textbox->text->content[textbox->textLen] = '\0';
 	}
 
-	SDL_Keymod mod = SDL_GetModState();
-	if (((mod & KMOD_CAPS) || (mod & KMOD_SHIFT)) && keycode != SDLK_SPACE)
+	if (textbox->isPassword)
 	{
-		keycode -= 32;
+		strcpy(passwordBuffer, textbox->text->content);
+		for (int i = 0; i < textbox->textLen; i++) {
+			textbox->text->content[i] = '*';
+		}
+		textbox->text->content[textbox->textLen] = '\0';
 	}
-
-	textbox->text->content[textbox->textLen] = keycode;
-	textbox->textLen++;
-	textbox->text->content[textbox->textLen] = '\0';
-
-	// printf("keypress : %c    -    len : %d\n", keycode, textbox->textLen);
 	update_text(textbox->text);
+	if (textbox->isPassword)
+		strcpy(textbox->text->content, passwordBuffer);
 }
 
 void draw_textbox(Textbox* textbox)
 {
+	state_color_mod(textbox->bg.tex, &textbox->state);
 	draw_sprite(&textbox->bg);
+	SDL_SetTextureColorMod(textbox->bg.tex, 255, 255, 255);
+	draw_sprite(textbox->text->sprite);
 }
 
 void destroy_textbox(Textbox* textbox)

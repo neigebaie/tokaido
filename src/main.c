@@ -23,7 +23,7 @@ int main(int argc, const char *argv[])
 	load_resources();
 
 	Gui* gui = init_gui();
-	MenuId menuId = MENU_LOGIN;
+	MenuId menuId = MENU_MAIN;
 	Menu* menu = gui->menus[menuId];
 	if (logged) // à décaler évidemment
 		init_board(loggedAccount, textureMgr);
@@ -31,6 +31,7 @@ int main(int argc, const char *argv[])
 	SDL_Point mousePos;
 
 	Textbox* focusedTextbox = NULL;
+	Button* clickedButton = NULL;
 
 	// debug
 	k = 0; // debug
@@ -64,6 +65,21 @@ int main(int argc, const char *argv[])
 					}
 				}
 			}
+			for (int id = 0; id < menu->textboxCount; id++)
+			{
+				if (menu->textboxes[id]->state != STATE_CLICKED)
+				{
+					SDL_Rect rect = anchored_rect(menu->textboxes[id]->bg.ai, menu->textboxes[id]->bg.parent);
+					if (SDL_PointInRect(&mousePos, &rect))
+					{
+						menu->textboxes[id]->state = STATE_HOVERED;
+					}
+					else
+					{
+						menu->textboxes[id]->state = STATE_IDLE;
+					}
+				}
+			}
 		}
 
 		while (SDL_PollEvent(&event))
@@ -74,6 +90,7 @@ int main(int argc, const char *argv[])
 					if (focusedTextbox)
 					{
 						textbox_event(focusedTextbox, &event);
+						printf("textbox_event\n");
 						break;
 					}
 					switch (event.key.keysym.sym)
@@ -103,13 +120,24 @@ int main(int argc, const char *argv[])
 					{
 						if (menuId != MENU_BOARD)
 						{
+							focusedTextbox = NULL;
 							for (int btnId = 0; btnId < menu->buttonCount; btnId++)
 							{
 								SDL_Rect rect = anchored_rect(menu->buttons[btnId]->bg.ai, menu->buttons[btnId]->bg.parent);
 								if (SDL_PointInRect(&mousePos, &rect))
 								{
 									menu->buttons[btnId]->state = STATE_CLICKED;
-									button_action(menu->buttons[btnId], &menuId);
+									clickedButton = menu->buttons[btnId];
+								}
+							}
+							for (int id = 0; id < menu->textboxCount; id++)
+							{
+								SDL_Rect rect = anchored_rect(menu->textboxes[id]->bg.ai, menu->textboxes[id]->bg.parent);
+								if (SDL_PointInRect(&mousePos, &rect))
+								{
+									menu->textboxes[id]->state = STATE_CLICKED;
+									focusedTextbox = menu->textboxes[id];
+									printf("new focusedTextbox\n");
 								}
 							}
 						}
@@ -223,6 +251,14 @@ int main(int argc, const char *argv[])
 			}
 		}
 
+		if (SDL_GetTicks() > clickedUntil && clickedUntil && clickedButton != NULL)
+		{
+			button_action(clickedButton, &menuId);
+			clickedButton->state = STATE_IDLE;
+			clickedButton = NULL;
+			clickedUntil = 0;
+		}
+
 		// RENDER MGR
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 100);
 		SDL_RenderClear(renderer);
@@ -230,13 +266,16 @@ int main(int argc, const char *argv[])
 
 		if (menuId == MENU_BOARD)
 		{
+			if (!is_game_started())
+			{
+				begin_turn();
+			}
 			board_update();
 			draw_board();
 		}
 		else
 		{
 			draw_menu(menu);
-			printf("%d\n", menuId);
 			menu = gui->menus[menuId];
 		}
 

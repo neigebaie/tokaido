@@ -2,6 +2,22 @@
 
 void load_resources()
 {
+	// ITEM CATS
+
+	for (int i = 0 ; i< ITEM_CATS; i++)
+	{
+		resources.itemCats[i] = (ItemCategory*)malloc(sizeof(ItemCategory));
+	}
+
+	strcpy(resources.itemCats[0]->name,  "objet d'art");
+	resources.itemCats[0]->id = 0;
+	strcpy(resources.itemCats[1]->name,  "nourriture");
+	resources.itemCats[1]->id = 1;
+	strcpy(resources.itemCats[2]->name,  "accessoire");
+	resources.itemCats[2]->id = 2;
+	strcpy(resources.itemCats[3]->name,  "vêtement");
+	resources.itemCats[3]->id = 3;
+
 	// ITEMS
 
 	for (int i = 0 ; i< ITEMS; i++)
@@ -34,9 +50,11 @@ void load_resources()
 	strcpy(resources.items[22]->name, "Sumie");
 	strcpy(resources.items[23]->name, "Ukiyoe");
 
-	int priceItem[] = {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3};
+	int itemCatsId[] = {2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0};
+	int priceItem[] =  {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3};
 	for (int i = 0; i < ITEMS; i++)
 	{
+		resources.items[i]->category = *resources.itemCats[itemCatsId[i]];
 		resources.items[i]->price = priceItem[i];
 		resources.items[i]->sprite = new_sprite(textureMgr->itemTex, new_rect(i * 128, 0, 128, 128));
 	}
@@ -102,15 +120,25 @@ void load_resources()
 	}
 
 	strcpy(resources.travelers[0]->name,  "Satsuki");
+	resources.travelers[0]->id = TRAVELER_SATSUKI;
 	strcpy(resources.travelers[1]->name,  "Hiroshige");
+	resources.travelers[1]->id = TRAVELER_HIROSHIGE;
 	strcpy(resources.travelers[2]->name,  "Chuubei");
+	resources.travelers[2]->id = TRAVELER_CHUUBEI;
 	strcpy(resources.travelers[3]->name,  "Mitsukuni");
+	resources.travelers[3]->id = TRAVELER_MITSUKUNI;
 	strcpy(resources.travelers[4]->name,  "Sasayakko");
+	resources.travelers[4]->id = TRAVELER_SASAYAKKO;
 	strcpy(resources.travelers[5]->name,  "Umegae");
+	resources.travelers[5]->id = TRAVELER_UMEGAE;
 	strcpy(resources.travelers[6]->name,  "Kinko");
+	resources.travelers[6]->id = TRAVELER_KINKO;
 	strcpy(resources.travelers[7]->name,  "Hirotada");
+	resources.travelers[7]->id = TRAVELER_HIROTADA;
 	strcpy(resources.travelers[8]->name,  "Zen-emon");
+	resources.travelers[8]->id = TRAVELER_ZEN_EMON;
 	strcpy(resources.travelers[9]->name,  "Yoshiyasu");
+	resources.travelers[9]->id = TRAVELER_YOSHIYASU;
 
 	int startCoins[] = {2, 3, 4, 6, 5, 5, 7, 8, 6, 9};
 	for (int i = 0; i < TRAVELERS; i++)

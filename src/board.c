@@ -85,35 +85,8 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	board.squareId = SQUARE_INN;
 	board.mode     = BM_BOARD;
 
-	// Food* foods[6];
-	// int ids[FOODS];
-  // for(int i = 0; i < FOODS; i++)
-  // {
-  //   ids[i] = i;
-  // }
-	// shuffle(ids, FOODS);
-	//
-	// for(int i = 0; i < 6; i++)
-	// {
-	// 	foods[i] = resources.foods[ids[i]];
-	// }
-
-	Item* items[3];
-	int ids[ITEMS];
-  for(int i = 0; i < ITEMS; i++)
-  {
-    ids[i] = i;
-  }
-	shuffle(ids, ITEMS);
-
-	for(int i = 0; i < 3; i++)
-	{
-		items[i] = resources.items[ids[i]];
-	}
-
 	board.sgui = NULL;
-	// board.sgui = new_inn_gui(foods, 6);
-	board.sgui = new_shop_gui(items);
+	board.lastInnPos = 0;
 
 	// Initialisation des joueurs
 	int travId[TRAVELERS];
@@ -137,11 +110,12 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		if (i == 0)
 		{
 			sprintf(board.players[i].nickname, "%s", loggedAccount->nick);
-			board.players[i].isHuman = SDL_FALSE;
+			board.players[i].isHuman = SDL_TRUE;
 		}
 		else
 		{
-			sprintf(board.players[i].nickname, "Joueur %d", i + 1);
+			// sprintf(board.players[i].nickname, "Joueur %d", i + 1);
+			sprintf(board.players[i].nickname, "%s", board.players[i].traveler.name);
 			board.players[i].isHuman = SDL_FALSE;
 		}
 		board.players[i].nameTag = new_text(board.players[i].nickname, 255, 255, 255, 0.5);
@@ -164,22 +138,6 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.playerCount++;
 	}
 
-	// board.squareGui = init_square_gui(textureMgr);
-	// update_hud(board.squareGui->hud, &board.players[0]);
-
-	// int foods[FOODS];
-  // for(int i = 0; i < FOODS; i++)
-  // {
-  //   foods[i] = i;
-  // }
-	//
-	// shuffle(foods, FOODS);
-	//
-	// for (int i = 0; i < INN_FRAMES; i++) {
-	// 	set_food_in_frame(board.squareGui->innGui->foodFrames[i], resources.foods[foods[i]]);
-	// 	print_rect(resources.foods[foods[i]]->sprite->rect);
-	// }
-
 	load_squares(board.squares, board.playerCount);
 	board.squareCount = BOARD_SQUARES;
 
@@ -196,10 +154,12 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].traveler.sprite.ai.size.h = 100;
 		update_player_ai(&board.players[i]);
 	}
+	board.started = SDL_FALSE;
+}
 
-	board.hud = new_hud(board.players[whos_turn_is_it()]);
-	highlight_possible_moves(board.players[whos_turn_is_it()]);
-	printf("here3\n");
+SDL_bool is_game_started()
+{
+	return board.started;
 }
 
 void board_update()
@@ -232,6 +192,12 @@ void board_update()
 		board.camera.origin.x += scrollX * (10/board.camera.scale);
 		board.camera.origin.y += scrollY * (10/board.camera.scale);
 	}
+
+	if (SDL_GetTicks() > board.waitUntil && board.waitUntil)
+	{
+		board.waitUntil = 0;
+		begin_turn();
+	}
 }
 
 void board_event(SDL_Event* event, SDL_Point* mousePos)
@@ -242,14 +208,22 @@ void board_event(SDL_Event* event, SDL_Point* mousePos)
 			board_mouse(mousePos, SDL_FALSE);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			board_mouse(mousePos, SDL_TRUE);
+			if (board.playing != NULL && !board.waitUntil)
+			{
+				if (board.playing->isHuman)
+					board_mouse(mousePos, SDL_TRUE);
+			}
 			break;
 		case SDL_KEYDOWN:
 			switch (event->key.keysym.sym)
 			{
 				case SDLK_RETURN:
 					if (board.mode == BM_BOARD)
+					{
+						if (board.playing != NULL)
+							update_hud(board.hud, *board.playing);
 						random_move();
+					}
 			}
 			break;
 	}
@@ -309,16 +283,28 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 	{
 		for (int i = 0; i < board.sgui->frameCount; i++)
 		{
-			printf("here\n");
+			if (board.sgui->frames[i]->state == STATE_DISABLED)
+				continue;
 			SDL_Rect rect = anchored_rect(board.sgui->frames[i]->ai, NULL);
 			if (SDL_PointInRect(mousePos, &rect))
 			{
 				if (click)
 				{
 					board.sgui->frames[i]->state = STATE_CLICKED;
-					printf("\e[31m [DEBUG] BUY : %s\e[37m\n", board.sgui->frames[i]->content.food.name);
-					// buy some shit
-					// button_action(board.sgui->menu->buttons[i], &mid);
+					// printf("\e[31m [DEBUG] BUY : %s\e[37m\n", board.sgui->frames[i]->content.food.name);
+					if (buy_from_frame(board.playing, board.sgui->frames[i]))
+					{
+						board.sgui->frames[i]->state = STATE_DISABLED;
+						board.innFoods[i] = NULL;
+						board.sgui->frames[i]->sold = SDL_TRUE;
+						if (board.sgui->frames[i]->contentType == CONTENT_FOOD)
+						{
+							for (int j = 0; j < board.sgui->frameCount; j++) {
+								board.sgui->frames[j]->state = STATE_DISABLED;
+							}
+						}
+					}
+					update_hud(board.hud, *board.playing);
 				}
 				else
 				{
@@ -334,13 +320,14 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 		for (int btnId = 0; btnId < board.sgui->menu->buttonCount; btnId++)
 		{
 			SDL_Rect rect = anchored_rect(board.sgui->menu->buttons[btnId]->bg.ai, board.sgui->menu->buttons[btnId]->bg.parent);
-			MenuId mid = MENU_NONE;
 			if (SDL_PointInRect(mousePos, &rect))
 			{
 				if (click)
 				{
 					board.sgui->menu->buttons[btnId]->state = STATE_CLICKED;
-					button_action(board.sgui->menu->buttons[btnId], &mid);
+					// button_action(board.sgui->menu->buttons[btnId], &mid);
+					board.mode = BM_BOARD;
+					end_turn();
 				}
 				else
 				{
@@ -433,7 +420,7 @@ void draw_squares()
 {
 	for (int position = 0; position < board.squareCount; position++)
 	{
-		state_color_mod(board.squares[position].type.sprite.tex, board.squares[position].state);
+		state_color_mod(board.squares[position].type.sprite.tex, &board.squares[position].state);
 		camera_draw_sprite(&board.squares[position].type.sprite, board.camera);
 		SDL_SetTextureColorMod(board.squares[position].type.sprite.tex, 255, 255, 255);
 	}
@@ -444,7 +431,7 @@ void draw_players()
 	// SDL_Rect rect;
 	for (int i = 0; i < board.playerCount; i++)
 	{
-		state_color_mod(board.players[i].traveler.sprite.tex, board.players[i].state);
+		state_color_mod(board.players[i].traveler.sprite.tex, &board.players[i].state);
 		camera_draw_sprite(&board.players[i].traveler.sprite, board.camera);
 		SDL_SetTextureColorMod(board.players[i].traveler.sprite.tex, 255, 255, 255);
 	}
@@ -470,8 +457,6 @@ void draw_board()
 	// draw_char_sel_gui();
 	switch (board.mode) {
 		case BM_SQUARE:
-			printf("here\n");
-
 			draw_square_gui(board.sgui);
 			break;
 		case BM_BOARD:
@@ -561,6 +546,14 @@ SDL_bool is_move_allowed(int position, Player player)
 
 	if ((board.squares[position].type.id == SQUARE_SHOP || board.squares[position].type.id == SQUARE_TEMPLE) && player.coins == 0)
 		return SDL_FALSE;
+
+	if (board.squares[position].type.id == SQUARE_PAN_RICE && player.panRice == 3)
+		return SDL_FALSE;
+	if (board.squares[position].type.id == SQUARE_PAN_MOUNT && player.panMount == 4)
+		return SDL_FALSE;
+	if (board.squares[position].type.id == SQUARE_PAN_SEA && player.panSea == 5)
+		return SDL_FALSE;
+
 	return SDL_TRUE;
 }
 
@@ -597,53 +590,100 @@ void random_move()
 	end_turn();
 }
 
+void move_player(Square* square)
+{
+	int space = square->capacity;
+	for (int i = 0; i < board.playerCount; i++) {
+		if (board.players[i].position == square->position)
+			space--;
+	}
+	board.playing->position = square->position;
+	board.playing->roadDist = square->capacity - space;
+	update_player_ai(board.playing);
+}
+
+void begin_turn()
+{
+	printf(" BEGIN TURN\n");
+	board.playing = &board.players[whos_turn_is_it()];
+	board.hud = new_hud(*board.playing);
+	highlight_possible_moves(*board.playing);
+	if (!board.started)
+	{
+		board.started = SDL_TRUE;
+		board.waitUntil = SDL_GetTicks() + 8000;
+		return;
+	}
+	if (!board.playing->isHuman)
+	{
+		random_move();
+	}
+}
+
 void end_turn()
 {
-	// printf("END TURN\n");
+	printf(" END TURN\n");
 	board.mode = BM_BOARD;
-	highlight_possible_moves(board.players[whos_turn_is_it()]);
+	// board.playing = &board.players[whos_turn_is_it()];
+	highlight_possible_moves(*board.playing);
 	destroy_hud(board.hud);
-	board.hud = new_hud(board.players[whos_turn_is_it()]);
+	board.hud = new_hud(*board.playing);
+	board.waitUntil = SDL_GetTicks() + 5000;
 }
 
 void square_action(Square* square)
 {
-	Player* player = &board.players[whos_turn_is_it()];
-	printf("SQUARE ACTION = %s\n", player->nickname);
+	Item* items[3];
+	int tk;
+	printf("SQUARE ACTION = %s\n", board.playing->nickname);
+
+	move_player(square);
+
 	board.squareId = square->type.id;
 	board.mode = BM_SQUARE;
-	switch (square->type.id) {
+	switch (square->type.id)
+	{
 		case SQUARE_INN:
+			if (board.lastInnPos != board.playing->position)
+			{
+				init_inn(board.innFoods);
+				board.lastInnPos = board.playing->position;
+			}
+			board.sgui = new_inn_gui(board.innFoods, board.playerCount + 1);
+			break;
+		case SQUARE_SHOP:
+			init_shop(items);
+			board.sgui = new_shop_gui(items);
+			break;
+		case SQUARE_HOTSPRING:
+			tk = init_hot_spring();
+			if (board.playing->traveler.id == TRAVELER_MITSUKUNI)
+				tk++;
+			board.sgui = new_hot_spring_gui(tk);
+			action_hot_spring(board.playing, tk);
+			break;
+		case SQUARE_TEMPLE:
+			board.sgui = new_temple_gui();
+			break;
+		case SQUARE_ENCOUNTER:
+			board.sgui = new_encounter_gui();
+			break;
+		case SQUARE_FARM:
+			board.sgui = new_farm_gui();
+			action_farm(board.playing);
+			break;
+		case SQUARE_PAN_RICE:
+			action_pan_rice(board.playing);
+			board.sgui = new_pan_rice_gui(board.playing->panRice);
+			break;
+		case SQUARE_PAN_MOUNT:
+			action_pan_mount(board.playing);
+			board.sgui = new_pan_mount_gui(board.playing->panMount);
+			break;
+		case SQUARE_PAN_SEA:
+			action_pan_sea(board.playing);
+			board.sgui = new_pan_sea_gui(board.playing->panSea);
 			break;
 	}
-	// switch (square->type.id)
-	// {
-	//
-	// 	case SQUARE_INN:
-	// 		printf("TYPE = INN\n");
-	// 		break;
-	// 	case SQUARE_SHOP:
-	// 		board.squareId = SQUARE_SHOP;
-	// 		printf("TYPE = SHOP\n");
-	// 		int items[ITEMS];
-	// 	  for(int i = 0; i < ITEMS; i++)
-	// 	  {
-	// 	    items[i] = i;
-	// 	  }
-	// 		shuffle(items, ITEMS);
-	// 		for (int i = 0; i < SHOP_FRAMES; i++) {
-	// 			// set_item_in_frame(board.squareGui->shopGui->itemFrames[i], resources.items[items[i]]);
-	// 		}
-	// 		break;
-	// 	case SQUARE_HOTSPRING:
-	// 		board.squareId = SQUARE_HOTSPRING;
-	// 		printf("TYPE = HOTSPRING\n");
-	// 		// sprintf(board.squareGui->hotSpringGui->obtained.content, "Vous avez obtenu %d points de victoire.", init_hotspring());
-	// 		// update_text(board.squareGui->hotSpringGui->obtained);
-	// 		break;
-	// 	case SQUARE_FARM:
-	// 		board.squareId = SQUARE_FARM;
-	// 		printf("TYPE = FARM\n");
-	// 		break;
-	// }
+	update_hud(board.hud, *board.playing);
 }

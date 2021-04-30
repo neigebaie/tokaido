@@ -35,9 +35,22 @@ typedef enum
 	SQUARE_FARM,
 	SQUARE_PAN_RICE,
 	SQUARE_PAN_MOUNT,
-	SQUARE_PAN_SEA,
+	SQUARE_PAN_SEA
 } SquareId;
 
+typedef enum
+{
+	TRAVELER_SATSUKI,
+	TRAVELER_HIROSHIGE,
+	TRAVELER_CHUUBEI,
+	TRAVELER_MITSUKUNI,
+	TRAVELER_SASAYAKKO,
+	TRAVELER_UMEGAE,
+	TRAVELER_KINKO,
+	TRAVELER_HIROTADA,
+	TRAVELER_ZEN_EMON,
+	TRAVELER_YOSHIYASU
+} TravelerId;
 
 typedef struct
 {
@@ -54,6 +67,7 @@ typedef struct
 {
 	char name[100]; // nom de la catégorie
 	Sprite* sprite;
+	int id;
 } ItemCategory;
 
 typedef struct
@@ -84,6 +98,7 @@ typedef struct
 	char name[100]; // nom de la categorie de souvenir
 	Sprite sprite;
 	int startCoins;
+	TravelerId id;
 } Traveler;
 
 typedef struct
@@ -114,13 +129,13 @@ typedef struct
 	int templeCoins;				// pièces données au temple
 	int hotSpring;					// nombre de passages à une source chaude
 
-	Food* foods[50];
+	Food foods[50];
 	int   foodCount;
 
-	Item* items[50];
+	Item items[50];
 	int   itemCount;
 
-	Encounter* encounters[50];
+	Encounter encounters[50];
 	int        encounterCount;
 
 	int panRice;						// cartes panorama Rizière

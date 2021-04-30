@@ -1,11 +1,14 @@
 #include <square_draw.h>
 
-SquareGui* new_inn_gui(Food* foods[], int foodCount)
+SquareGui* new_inn_gui(Food** foods, int foodCount)
 {
 	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
-	sgui->menu = base_menu(0, 1, 0, 1);
+	sgui->menu = base_menu(1, 1, 0, 1);
 	ContentType contentType = CONTENT_FOOD;
 	Content content;
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Relai", 0, 0, 0, 1);
 	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
@@ -18,22 +21,40 @@ SquareGui* new_inn_gui(Food* foods[], int foodCount)
 	ai.at = AT_CENTER;
 	ai.size = (Size){220, 330};
 
-	for (int i = 0; i < foodCount; i++) {
+	int j = 0;
+	for (int i = 0; i < foodCount; i++)
+	{
+		printf("DEBUG FRAME : i=%d j=%d \n", i, j);
 		ai.offset.x = ((i % 3) - 1) * 320;
 		ai.offset.y = 400 * (int)(i/3) - 200;
-		content.food = *foods[i];
 
-		sgui->frames[i] = new_frame(&ai, contentType, content);
+		if (foods[i] == NULL)
+		{
+			sgui->frameCount--;
+			content.food = *resources.foods[0];
+			sgui->frames[j] = new_frame(&ai, contentType, content);
+			sgui->frames[j]->sold = SDL_TRUE;
+			sgui->frames[j]->state = STATE_DISABLED;
+			printf("continue\n");
+		}
+		else
+		{
+			printf("new_frame\n");
+			content.food = *foods[i];
 
-		sprintf(sgui->frames[i]->title->content, "%s", foods[i]->name);
-		update_text(sgui->frames[i]->title);
+			sgui->frames[j] = new_frame(&ai, contentType, content);
 
-		sprintf(sgui->frames[i]->coinText->content, "%d", foods[i]->price);
-		update_text(sgui->frames[i]->coinText);
+			sprintf(sgui->frames[j]->title->content, "%s", foods[i]->name);
+			update_text(sgui->frames[j]->title);
 
-		strcpy(sgui->frames[i]->bundleTkText->content, "+6");
-		update_text(sgui->frames[i]->bundleTkText);
+			sprintf(sgui->frames[j]->coinText->content, "%d", foods[i]->price);
+			update_text(sgui->frames[j]->coinText);
 
+			strcpy(sgui->frames[j]->bundleTkText->content, "+6");
+			update_text(sgui->frames[j]->bundleTkText);
+
+			j++;
+		}
 	}
 
 	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
@@ -46,9 +67,12 @@ SquareGui* new_inn_gui(Food* foods[], int foodCount)
 SquareGui* new_shop_gui(Item* items[]/*, Player* player*/)
 {
 	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
-	sgui->menu = base_menu(0, 1, 0, 1);
+	sgui->menu = base_menu(1, 1, 0, 1);
 	ContentType contentType = CONTENT_ITEM;
 	Content content;
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Échoppe", 0, 0, 0, 1);
 	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
@@ -76,7 +100,7 @@ SquareGui* new_shop_gui(Item* items[]/*, Player* player*/)
 		update_text(sgui->frames[i]->coinText);
 
 		// todo, points en fonction de la collection
-		strcpy(sgui->frames[i]->bundleTkText->content, "+1");
+		strcpy(sgui->frames[i]->bundleTkText->content, "1/3/5/7");
 		update_text(sgui->frames[i]->bundleTkText);
 	}
 	//
@@ -87,20 +111,196 @@ SquareGui* new_shop_gui(Item* items[]/*, Player* player*/)
 	return sgui;
 }
 
-//
-// SquareGui* new_hot_spring_gui();
-//
-// SquareGui* new_temple_gui();
-//
-// SquareGui* new_encounter_gui();
-//
-// SquareGui* new_farm_gui();
-//
-// SquareGui* new_pan_rice_gui();
-//
-// SquareGui* new_pan_mount_gui();
-//
-// SquareGui* new_pan_sea_gui();
+SquareGui* new_hot_spring_gui(int bundleToken)
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+	char obtained[256];
+
+	sprintf(obtained, "Vous avez obtenu %d points de victoire.", bundleToken);
+
+	sgui->menu = base_menu(1, 2, 0, 1);
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
+
+	sgui->menu->texts[0] = new_text("Source Chaude", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->menu->texts[1] = new_text(obtained, 0, 0, 0, 0.8);
+	sgui->menu->texts[1]->sprite->ai.at = AT_CENTER;
+
+	sgui->frameCount = 0;
+	sgui->frames = NULL;
+
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
+
+SquareGui* new_temple_gui()
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+
+	sgui->menu = base_menu(1, 1, 0, 1);
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
+
+	sgui->menu->texts[0] = new_text("Temple", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->frameCount = 0;
+	sgui->frames = NULL;
+
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
+
+SquareGui* new_encounter_gui()
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+
+	sgui->menu = base_menu(1, 1, 0, 1);
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
+
+	sgui->menu->texts[0] = new_text("Rencontre", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->frameCount = 0;
+	sgui->frames = NULL;
+
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
+
+SquareGui* new_farm_gui()
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+
+	sgui->menu = base_menu(1, 2, 0, 1);
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
+
+	sgui->menu->texts[0] = new_text("Ferme", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->menu->texts[1] = new_text("Vous avez obtenu 3 pièces.", 0, 0, 0, 0.8);
+	sgui->menu->texts[1]->sprite->ai.at = AT_CENTER;
+
+	sgui->frameCount = 0;
+	sgui->frames = NULL;
+
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
+
+SquareGui* new_pan_rice_gui(int nb)
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+	char obtained[256];
+
+	sprintf(obtained, "Rizière : %d/3", nb);
+
+	sgui->menu = base_menu(1, 2, 0, 1);
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
+
+	sgui->menu->texts[0] = new_text("Panorama", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->menu->texts[1] = new_text(obtained, 0, 0, 0, 0.8);
+	sgui->menu->texts[1]->sprite->ai.at = AT_CENTER;
+	sgui->menu->texts[1]->sprite->ai.offset.y = 200;
+
+	sgui->frameCount = 0;
+	sgui->frames = NULL;
+
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
+
+SquareGui* new_pan_mount_gui(int nb)
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+	char obtained[256];
+
+	sprintf(obtained, "Montagne : %d/4", nb);
+
+	sgui->menu = base_menu(1, 2, 0, 1);
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
+
+	sgui->menu->texts[0] = new_text("Panorama", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->menu->texts[1] = new_text(obtained, 0, 0, 0, 0.8);
+	sgui->menu->texts[1]->sprite->ai.at = AT_CENTER;
+	sgui->menu->texts[1]->sprite->ai.offset.y = 200;
+
+	sgui->frameCount = 0;
+	sgui->frames = NULL;
+
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
+
+SquareGui* new_pan_sea_gui(int nb)
+{
+	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
+	char obtained[256];
+
+	sprintf(obtained, "Mer : %d/5", nb);
+
+	sgui->menu = base_menu(1, 2, 0, 1);
+
+	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0]->ai.at = AT_CENTER;
+
+	sgui->menu->texts[0] = new_text("Panorama", 0, 0, 0, 1);
+	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
+	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->menu->texts[1] = new_text(obtained, 0, 0, 0, 0.8);
+	sgui->menu->texts[1]->sprite->ai.at = AT_CENTER;
+	sgui->menu->texts[1]->sprite->ai.offset.y = 200;
+
+	sgui->frameCount = 0;
+	sgui->frames = NULL;
+
+	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return sgui;
+}
 
 // HUD
 Hud* new_hud(Player player)
@@ -150,6 +350,16 @@ Hud* new_hud(Player player)
 	return hud;
 }
 
+void update_hud(Hud* hud, Player player)
+{
+	sprintf(hud->coinText->content, "%d", player.coins);
+	sprintf(hud->bundleTkText->content, "%d", player.bundleToken);
+	sprintf(hud->templeCoinText->content, "%d", player.templeCoins);
+	update_text(hud->coinText);
+	update_text(hud->bundleTkText);
+	update_text(hud->templeCoinText);
+}
+
 void draw_hud(Hud* hud)
 {
 	AnchorInfo ai = {AT_TOP_LEFT, {0, 0}, {0, 70}};
@@ -183,6 +393,7 @@ Frame* new_frame(AnchorInfo* ai, ContentType contentType, Content content)
 	frame->ai = *ai;
 
 	frame->state = STATE_IDLE;
+	frame->sold = SDL_FALSE;
 	frame->contentType = contentType;
 	frame->content = content;
 	if (frame->contentType == CONTENT_FOOD)
@@ -242,22 +453,10 @@ Frame* new_frame(AnchorInfo* ai, ContentType contentType, Content content)
 
 void draw_frame(Frame* frame)
 {
-	// printf("food\n");
-	// print_ai(&frame->content.food.sprite->ai);
-	// printf("bg\n");
-	// print_ai(&frame->bg.ai);
-	// printf("coinIcon\n");
-	// print_ai(&frame->coinIcon.ai);
-	// printf("coinText\n");
-	// print_ai(&frame->coinText->sprite->ai);
-	// printf("bundleTkIcon\n");
-	// print_ai(&frame->bundleTkIcon.ai);
-	// printf("bundleTkText\n");
-	// print_ai(&frame->bundleTkText->sprite->ai);
-	// printf("title\n");
-	// print_ai(&frame->title->sprite->ai);
+	if (frame->sold)
+		return;
 
-	state_color_mod(frame->bg.tex, frame->state);
+	state_color_mod(frame->bg.tex, &frame->state);
 	draw_sprite(&frame->bg);
 	SDL_SetTextureColorMod(frame->bg.tex, 255, 255, 255);
 
@@ -293,46 +492,3 @@ void draw_square_gui(SquareGui* sgui)
 		}
 	}
 }
-
-
-// void set_content_in_frame(Frame* frame, Content* content)
-// {
-// 	frame.title = new_sprite_from_str(food->name, 255, 255, 255, 0.4);
-// 	center_rect(frame.title->rect, new_rect(frame.frameRect->x, frame.frameRect->y + frame.frameRect->w, frame.frameRect->w, 50));
-// 	// frame.food = food;
-// 	frame.content->sprite = sprite_copy(food->sprite);
-// 	center_rect(frame.food->sprite->rect, new_rect(frame.frameRect->x + 20, frame.frameRect->y + 20, frame.frameRect->w - 40, frame.frameRect->w - 40));
-// }
-
-// NEW GUI FOR EACH SQUARE TYPE
-
-// ShopGui* new_shop_gui(SquareGuiRes* res)
-// {
-// 	ShopGui* shopGui = (ShopGui*)malloc(sizeof(ShopGui));
-// 	shopGui->title = new_sprite_from_str("Échoppe", 0, 0, 0, 1);
-// 	center_rect(shopGui->title->rect, new_rect(0, 0, WINDOW_WIDTH, 300));
-//
-// 	for (int i = 0; i < 3; i++) {
-// 		SDL_Rect frameRect = {WINDOW_WIDTH/2 - (1 - i) * 320 - 200/2, WINDOW_HEIGHT/2 - 100, 200, 300};
-// 		shopGui->itemFrames[i] = new_item_frame(res, &frameRect);
-//
-// 		char price[2];
-// 		sprintf(price, "%d", rand() % 3 + 1);
-// 		strcpy(shopGui->itemFrames[i]->coinText->text, price);
-// 		text_info_update(shopGui->itemFrames[i]->coinText);
-// 		shopGui->itemFrames[i]->coinText->sprite->rect->w *= 0.75;
-// 		shopGui->itemFrames[i]->coinText->sprite->rect->h *= 0.75;
-//
-// 		strcpy(shopGui->itemFrames[i]->bundleTkText->text, "1/3/5/7");
-// 		text_info_update(shopGui->itemFrames[i]->bundleTkText);
-// 		shopGui->itemFrames[i]->bundleTkText->sprite->rect->w *= 0.75;
-// 		shopGui->itemFrames[i]->bundleTkText->sprite->rect->h *= 0.75;
-// 	}
-//
-// 	shopGui->backBtn = res->backBtn;
-// 	shopGui->backBtn->bg->rect->x = WINDOW_WIDTH - shopGui->backBtn->bg->rect->w - 20;
-// 	shopGui->backBtn->bg->rect->y = WINDOW_HEIGHT - shopGui->backBtn->bg->rect->h - 20;
-// 	center_rect(shopGui->backBtn->text->rect, shopGui->backBtn->bg->rect);
-//
-// 	return shopGui;
-// }

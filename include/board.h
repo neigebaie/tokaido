@@ -25,6 +25,8 @@ typedef struct
 {
 	Camera camera;
 
+	SDL_bool started;
+
 	Player players[BOARD_PLAYERS];
 	int playerCount;
 
@@ -35,6 +37,12 @@ typedef struct
 
 	SquareId squareId;
 	SquareGui* sgui;
+
+	int lastInnPos;
+	Food* innFoods[6];
+
+	double waitUntil;
+	Player* playing;
 
 	Hud* hud;
 } Board;
@@ -47,6 +55,7 @@ Board load_board(const char* path);
 void save_board(Board board, const char* path);
 
 void init_board(Account* loggedAccount, TextureMgr* textureMgr);
+SDL_bool is_game_started();
 
 void board_update();
 void board_event(SDL_Event* event, SDL_Point* mousePos);
@@ -65,6 +74,7 @@ void draw_bg();
 void draw_board();
 void draw_squares();
 
+void begin_turn();
 void end_turn();
 void square_action(Square* square);
 

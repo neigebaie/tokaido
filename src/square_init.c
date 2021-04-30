@@ -1,38 +1,37 @@
 #include <square_action.h>
 
-void init_inn(int* innFoods, int playerCount)
+void init_inn(Food** foods)
 {
-  int foods[FOODS];
-  for (int i = 0; i < FOODS; i++)
-  {
-    foods[i] = i;
-  }
+	int ids[FOODS];
 
-  shuffle(foods, FOODS);
-
-  for (int j = 0; j < playerCount + 1; j++)
+  for(int i = 0; i < FOODS; i++)
   {
-    innFoods[j] = foods[j];
+    ids[i] = i;
   }
+	shuffle(ids, FOODS);
+
+	for(int i = 0; i < 6; i++)
+	{
+		foods[i] = resources.foods[ids[i]];
+	}
 }
 
-void init_shop(int* shopItems)
+void init_shop(Item** items)
 {
-  int items[ITEMS];
-  for (int i = 0; i < ITEMS; i++)
-  {
-    items[i] = i;
-  }
+	int ids[ITEMS];
+	for(int i = 0; i < ITEMS; i++)
+	{
+		ids[i] = i;
+	}
+	shuffle(ids, ITEMS);
 
-  shuffle(items, ITEMS);
-
-  for (int j = 0 ; j < 3; j++)
-  {
-    shopItems[j] = items[j];
-  }
+	for(int i = 0; i < 3; i++)
+	{
+		items[i] = resources.items[ids[i]];
+	}
 }
 
-int init_hotspring()
+int init_hot_spring()
 {
   return 2 + rand() % 2;
 }

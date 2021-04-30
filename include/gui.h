@@ -126,4 +126,7 @@ void textbox_event(Textbox *textbox, SDL_Event* event);
 void draw_textbox(Textbox* textbox);
 void destroy_textbox(Textbox* textbox);
 
+// FONCTION DEFINIE DANS BOARD.C
+void end_turn();
+
 #endif

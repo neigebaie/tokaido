@@ -33,6 +33,7 @@ typedef struct
 	Sprite bg;
 
 	State state;
+	SDL_bool sold;
 
 	Sprite coinIcon;
 	Text* coinText;
@@ -93,13 +94,15 @@ SquareGui* new_hot_spring_gui();
 SquareGui* new_temple_gui();
 SquareGui* new_encounter_gui();
 SquareGui* new_farm_gui();
-SquareGui* new_pan_rice_gui();
-SquareGui* new_pan_mount_gui();
-SquareGui* new_pan_sea_gui();
+SquareGui* new_pan_rice_gui(int nb);
+SquareGui* new_pan_mount_gui(int nb);
+SquareGui* new_pan_sea_gui(int nb);
 
 // HUD
 Hud* new_hud(Player player);
+void update_hud(Hud* hud, Player player);
 void draw_hud(Hud* hud);
+void destroy_hud(Hud* hud);
 
 // FRAME
 Frame* new_frame(AnchorInfo* ai, ContentType contentType, Content content);

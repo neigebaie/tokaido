@@ -3,7 +3,9 @@
 
 #include <stdlib.h>
 
-void init_inn(int* innFoods, int playerCount);
-int init_hotspring();
+void init_inn(Food** foods);
+void init_shop(Item** items);
+
+int init_hot_spring();
 
 #endif

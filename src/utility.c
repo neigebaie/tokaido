@@ -8,6 +8,8 @@ SDL_bool program_launched = SDL_TRUE;
 int debugMode = 0;
 int k = 0;
 
+double clickedUntil = 0;
+
 char title[100];
 int freq;
 int curr_count;
@@ -132,6 +134,8 @@ void load_textures()
 	textureMgr = (TextureMgr*)malloc(sizeof(TextureMgr));
 	// TEXTURES
 
+	textureMgr->bg[0]        = load_texture("resources/gfx/bg/menu_main.png");
+
 	textureMgr->squareTex    = load_texture("resources/gfx/square_spritesheet.png");
 	textureMgr->foodTex      = load_texture("resources/gfx/food_spritesheet.png");
 	textureMgr->travelerTex  = load_texture("resources/gfx/traveler_spritesheet.png");
@@ -147,6 +151,8 @@ void load_textures()
 	textureMgr->button.ai.size.h *= 0.3;
 	textureMgr->textbox.ai.size.w *= 0.5;
 	textureMgr->textbox.ai.size.h *= 0.3;
+
+	textureMgr->bgSprite[0] = *new_sprite(textureMgr->bg[0], new_rect(0, 0, 1920, 1080));
 
 	textureMgr->bundleTkIcon = *new_sprite(textureMgr->iconTex, new_rect(256, 0, 256, 256));
 	textureMgr->bundleTkIcon.ai.size.w = 40;
@@ -304,12 +310,14 @@ void print_ai(AnchorInfo* ai)
 		printf("[DEBUG] %d : %d %d %d %d\n", ai->at, ai->offset.x, ai->offset.y, ai->size.w, ai->size.h);
 }
 
-void state_color_mod(SDL_Texture* tex, State state)
+void state_color_mod(SDL_Texture* tex, State* state)
 {
-	switch (state) {
+	switch (*state) {
 		case STATE_IDLE:
 			break;
 		case STATE_CLICKED:
+			if (!clickedUntil)
+				clickedUntil = SDL_GetTicks() + 100;
 			SDL_SetTextureColorMod(tex, 200, 200, 200);
 			break;
 		case STATE_HOVERED:

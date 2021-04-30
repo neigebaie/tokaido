@@ -55,6 +55,7 @@ typedef struct
 typedef struct
 {
 	// All the textures in the game
+	SDL_Texture* bg[10];
 	SDL_Texture* squareTex;
 	SDL_Texture* foodTex;
 	SDL_Texture* travelerTex;
@@ -63,6 +64,7 @@ typedef struct
 	SDL_Texture* iconTex;
 	SDL_Texture* guiTex;
 
+	Sprite bgSprite[10];
 	Sprite title;
 	Sprite button;
 	Sprite textbox;
@@ -81,6 +83,7 @@ extern TextureMgr*   textureMgr;
 extern AnchorInfo    windowAnchor;
 
 extern SDL_bool program_launched;
+extern double clickedUntil;
 
 extern int k, debugMode, fps;
 
@@ -107,7 +110,7 @@ SDL_bool is_rect_on_screen(SDL_Rect* rect);
 void print_rect(SDL_Rect* rect);
 void print_ai(AnchorInfo* ai);
 
-void state_color_mod(SDL_Texture* tex, State state);
+void state_color_mod(SDL_Texture* tex, State* state);
 
 void exit_with_success(void);
 void exit_with_error(const char *message);
