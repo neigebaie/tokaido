@@ -26,7 +26,7 @@ SDL_bool buy_from_frame(Player* player, Frame* frame)
 	SDL_bool bought = SDL_FALSE;
 	if (frame->contentType == CONTENT_ITEM)
 	{
-		if (player->coins >= frame->content.food.price)
+		if (player->coins >= frame->content.item.price)
 		{
 			player->coins -= frame->content.item.price;
 			player->bundleToken -= tk_from_collection(player);
@@ -37,12 +37,12 @@ SDL_bool buy_from_frame(Player* player, Frame* frame)
 			bought = SDL_TRUE;
 		}
 	}
-	else
+	else if (frame->contentType == CONTENT_FOOD)
 	{
-		if (player->coins >= frame->content.item.price)
+		if (player->coins >= frame->content.food.price)
 		{
-			player->coins -= frame->content.item.price;
-			player->foods[player->foodCount] = frame->content.food;
+			player->coins -= frame->content.food.price;
+			player->food[player->foodCount] = frame->content.food;
 			player->bundleToken += 6;
 			player->foodCount++;
 			printf("FOODCOUNT = %d\n", player->foodCount);

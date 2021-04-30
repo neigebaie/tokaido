@@ -666,6 +666,11 @@ void square_action(Square* square)
 			board.sgui = new_temple_gui();
 			break;
 		case SQUARE_ENCOUNTER:
+			if (board.playing->traveler.id == TRAVELER_UMEGAE)
+			{
+			board.playing->coins +=1;
+			board.playing->bundleToken +=1;
+			}
 			board.sgui = new_encounter_gui();
 			break;
 		case SQUARE_FARM:
