@@ -7,10 +7,10 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 	ContentType contentType = CONTENT_FOOD;
 	Content content;
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[4];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
-	sgui->menu->texts[0] = new_text("Relai", 0, 0, 0, 1);
+	sgui->menu->texts[0] = new_text("Relai", 255, 255, 255, 0.9);
 	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
 
@@ -26,7 +26,7 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 	{
 		printf("DEBUG FRAME : i=%d j=%d \n", i, j);
 		ai.offset.x = ((i % 3) - 1) * 320;
-		ai.offset.y = 400 * (int)(i/3) - 200;
+		ai.offset.y = 400 * (int)(i/3) - 180;
 
 		if (foods[i] == NULL)
 		{
@@ -43,6 +43,7 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 			content.food = *foods[i];
 
 			sgui->frames[j] = new_frame(&ai, contentType, content);
+			sgui->frames[j]->sold = SDL_FALSE;
 
 			sprintf(sgui->frames[j]->title->content, "%s", foods[i]->name);
 			update_text(sgui->frames[j]->title);
@@ -64,17 +65,17 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 	return sgui;
 }
 
-SquareGui* new_shop_gui(Item* items[]/*, Player* player*/)
+SquareGui* new_shop_gui(Item* items[], Player* player)
 {
 	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
 	sgui->menu = base_menu(1, 1, 0, 1);
 	ContentType contentType = CONTENT_ITEM;
 	Content content;
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[4];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
-	sgui->menu->texts[0] = new_text("Échoppe", 0, 0, 0, 1);
+	sgui->menu->texts[0] = new_text("Échoppe", 255, 255, 255, 0.9);
 	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
 
@@ -86,12 +87,14 @@ SquareGui* new_shop_gui(Item* items[]/*, Player* player*/)
 	ai.at = AT_CENTER;
 	ai.size = (Size){220, 330};
 
-	for (int i = 0; i < sgui->frameCount; i++) {
+	for (int i = 0; i < sgui->frameCount; i++)
+	{
 		ai.offset.x = (i - 1) * 320;
 		ai.offset.y = 0;
 		content.item = *items[i];
 
 		sgui->frames[i] = new_frame(&ai, contentType, content);
+		sgui->frames[i]->sold = SDL_FALSE;
 
 		sprintf(sgui->frames[i]->title->content, "%s", items[i]->name);
 		update_text(sgui->frames[i]->title);
@@ -99,8 +102,7 @@ SquareGui* new_shop_gui(Item* items[]/*, Player* player*/)
 		sprintf(sgui->frames[i]->coinText->content, "%d", items[i]->price);
 		update_text(sgui->frames[i]->coinText);
 
-		// todo, points en fonction de la collection
-		strcpy(sgui->frames[i]->bundleTkText->content, "1/3/5/7");
+		sprintf(sgui->frames[i]->bundleTkText->content, "%d", tk_from_collection(*items[i], player->items, player->itemCount));
 		update_text(sgui->frames[i]->bundleTkText);
 	}
 	//
@@ -120,7 +122,7 @@ SquareGui* new_hot_spring_gui(int bundleToken)
 
 	sgui->menu = base_menu(1, 2, 0, 1);
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[0];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Source Chaude", 0, 0, 0, 1);
@@ -146,7 +148,7 @@ SquareGui* new_temple_gui()
 
 	sgui->menu = base_menu(1, 1, 0, 1);
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[0];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Temple", 0, 0, 0, 1);
@@ -169,7 +171,7 @@ SquareGui* new_encounter_gui()
 
 	sgui->menu = base_menu(1, 1, 0, 1);
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[0];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Rencontre", 0, 0, 0, 1);
@@ -192,7 +194,7 @@ SquareGui* new_farm_gui()
 
 	sgui->menu = base_menu(1, 2, 0, 1);
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[0];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Ferme", 0, 0, 0, 1);
@@ -221,7 +223,7 @@ SquareGui* new_pan_rice_gui(int nb)
 
 	sgui->menu = base_menu(1, 2, 0, 1);
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[1];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Panorama", 0, 0, 0, 1);
@@ -251,7 +253,7 @@ SquareGui* new_pan_mount_gui(int nb)
 
 	sgui->menu = base_menu(1, 2, 0, 1);
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[2];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Panorama", 0, 0, 0, 1);
@@ -281,7 +283,7 @@ SquareGui* new_pan_sea_gui(int nb)
 
 	sgui->menu = base_menu(1, 2, 0, 1);
 
-	sgui->menu->sprites[0] = &textureMgr->bgSprite[0];
+	sgui->menu->sprites[0] = &textureMgr->bg[3];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
 
 	sgui->menu->texts[0] = new_text("Panorama", 0, 0, 0, 1);

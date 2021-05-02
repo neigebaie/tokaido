@@ -147,6 +147,29 @@ typedef struct
 
 typedef struct
 {
+	// Cette structure résume tous les gains d'un joueur lors de son tour.
+	// Elle permet d'afficher le petit résumé sur la droite de l'écran pour les
+	// PNJ ainsi que les joueurs humains jouant en LAN sur une autre machine.
+	int bundleToken;
+	int coins;
+	int templeCoins;
+
+	Food foods[5];
+	int foodCount;
+
+	Item items[5];
+	int itemCount;
+
+	Encounter encounters[50];
+	int encounterCount;
+
+	int panRice;
+	int panMount;
+	int panSea;
+} Recap;
+
+typedef struct
+{
 	SquareType type;    // pointeur vers le type de case
 	int position;
 	int capacity;        // Nb de joueurs pouvant être sur la case
@@ -162,6 +185,8 @@ typedef struct
 
 extern Resources resources;
 
+int tk_from_collection(Item newItem, Item* items, int itemCount);
+void reset_recap(Recap* recap);
 void load_resources();
 
 #endif

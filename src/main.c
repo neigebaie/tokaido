@@ -13,8 +13,10 @@ int frameCount = 0;
 
 int main(int argc, const char *argv[])
 {
+	double startedAt = SDL_GetTicks();
 	init();
 	init_fps_counter();
+	show_splash_screen();
 	// SDL_SetCursor(init_system_cursor(arrow));
 	Account* loggedAccount = guest_account();
 	SDL_bool logged = SDL_TRUE; // SDL_FALSE debug
@@ -39,6 +41,11 @@ int main(int argc, const char *argv[])
 	debugText->sprite->ai.at = AT_BOTTOM_LEFT;
 	debugText->sprite->ai.offset.x = 10;
 	debugText->sprite->ai.offset.y = 10;
+
+	while (SDL_GetTicks() - startedAt < 500)
+	{
+		SDL_Delay(100);
+	}
 
 	while (program_launched)
 	{
@@ -150,7 +157,8 @@ int main(int argc, const char *argv[])
 				// case SDL_MOUSEBUTTONDOWN:
 				// 	if (event.button.button == SDL_BUTTON_LEFT)
 				// 	{
-				// 		for (int btnId = 0; btnId < BTN_NB; btnId++) {
+				// 		for (int btnId = 0; btnId < BTN_NB; btnId++)
+				// 		{
 				// 			if (SDL_PointInRect(&mousePos, gui->btnList[btnId]->bg->rect))
 				// 			{
 				// 				; // gui->btnList[btnId]->clicked = 1;
@@ -295,7 +303,8 @@ int main(int argc, const char *argv[])
 void debug_aff(int debugMode, Text* debugText, double time_spent)
 {
 	SDL_Rect rect;
-	switch (debugMode) {
+	switch (debugMode)
+	{
 		case 3:
 			SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 			for (int i = 0; i < windowAnchor.size.w; i += windowAnchor.size.w / 10)

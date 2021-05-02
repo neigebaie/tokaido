@@ -76,6 +76,7 @@ void load_squares(Square *squares, int playerCount)
 
 void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 {
+	char nameTagText[110];
 	srand(time(NULL));
 
 	board.camera.origin.x = 0;
@@ -84,9 +85,10 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 
 	board.squareId = SQUARE_INN;
 	board.mode     = BM_BOARD;
+	reset_recap(&board.recap);
 
 	board.sgui = NULL;
-	board.lastInnPos = 0;
+	board.lastInnPos = -1;
 
 	// Initialisation des joueurs
 	int travId[TRAVELERS];
@@ -115,10 +117,11 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		else
 		{
 			// sprintf(board.players[i].nickname, "Joueur %d", i + 1);
-			sprintf(board.players[i].nickname, "%s", board.players[i].traveler.name);
+			strcpy(board.players[i].nickname, board.players[i].traveler.name);
 			board.players[i].isHuman = SDL_FALSE;
 		}
-		board.players[i].nameTag = new_text(board.players[i].nickname, 255, 255, 255, 0.5);
+		sprintf(nameTagText, "  %s  ", board.players[i].nickname);
+		board.players[i].nameTag = new_text(nameTagText, 255, 255, 255, 0.5);
 		board.players[i].position = 0;
 		board.players[i].roadDist = roadDist[i];
 		board.players[i].bundleToken = 0;
@@ -267,6 +270,7 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 				{
 					board.squares[position].state = STATE_CLICKED;
 					square_action(&board.squares[position]);
+					move_player(&board.squares[position]);
 				}
 				else
 				{
@@ -299,8 +303,22 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 						board.sgui->frames[i]->sold = SDL_TRUE;
 						if (board.sgui->frames[i]->contentType == CONTENT_FOOD)
 						{
-							for (int j = 0; j < board.sgui->frameCount; j++) {
+							board.recap.foods[board.recap.foodCount] = board.sgui->frames[i]->content.food;
+							board.recap.foodCount++;
+							for (int j = 0; j < board.sgui->frameCount; j++)
+							{
 								board.sgui->frames[j]->state = STATE_DISABLED;
+							}
+						}
+						else if (board.sgui->frames[i]->contentType == CONTENT_ITEM)
+						{
+							board.recap.items[board.recap.itemCount] = board.sgui->frames[i]->content.item;
+							board.recap.itemCount++;
+							for (int j = 0; j < board.sgui->frameCount; j++)
+							{
+								sprintf(board.sgui->frames[j]->bundleTkText->content, "%d", tk_from_collection(board.sgui->frames[j]->content.item, board.playing->items, board.playing->itemCount));
+								update_text(board.sgui->frames[j]->bundleTkText);
+								printf("TK UPDATE %s\n", board.sgui->frames[j]->bundleTkText->content);
 							}
 						}
 					}
@@ -373,7 +391,8 @@ void camera_draw_sprite(Sprite* sprite, Camera camera)
 // todo
 void draw_char_sel_gui()
 {
-	for (int i = 0; i < TRAVELERS; i++) {
+	for (int i = 0; i < TRAVELERS; i++)
+	{
 		draw_sprite(&resources.travelers[i]->sprite);
 	}
 }
@@ -455,7 +474,8 @@ void draw_players()
 void draw_board()
 {
 	// draw_char_sel_gui();
-	switch (board.mode) {
+	switch (board.mode)
+	{
 		case BM_SQUARE:
 			draw_square_gui(board.sgui);
 			break;
@@ -479,11 +499,13 @@ int whos_turn_is_it()
 	int minPos = BOARD_SQUARES;
 	int maxRoadDist = -1;
 	int playerId;
-	for (int i = 0; i < board.playerCount; i++) {
+	for (int i = 0; i < board.playerCount; i++)
+	{
 		if (board.players[i].position < minPos)
 			minPos = board.players[i].position;
 	}
-	for (int i = 0; i < board.playerCount; i++) {
+	for (int i = 0; i < board.playerCount; i++)
+	{
 		if (board.players[i].position == minPos)
 		{
 			if (board.players[i].roadDist > maxRoadDist)
@@ -537,7 +559,8 @@ SDL_bool is_move_allowed(int position, Player player)
 	if (position <= player.position)
 		return SDL_FALSE;
 
-	for (int i = 0; i < board.playerCount; i++) {
+	for (int i = 0; i < board.playerCount; i++)
+	{
 		if (board.players[i].position == position)
 			space--;
 	}
@@ -580,20 +603,23 @@ void random_move()
 	shuffle(possibleSquares, possibilities);
 	int position = possibleSquares[0];
 	int space = board.squares[position].capacity;
-	for (int i = 0; i < board.playerCount; i++) {
+	for (int i = 0; i < board.playerCount; i++)
+	{
 		if (board.players[i].position == position)
 			space--;
 	}
 	board.players[playerId].position = position;
 	board.players[playerId].roadDist = board.squares[position].capacity - space;
 	update_player_ai(&board.players[playerId]);
+	square_action(&board.squares[position]);
 	end_turn();
 }
 
 void move_player(Square* square)
 {
 	int space = square->capacity;
-	for (int i = 0; i < board.playerCount; i++) {
+	for (int i = 0; i < board.playerCount; i++)
+	{
 		if (board.players[i].position == square->position)
 			space--;
 	}
@@ -604,7 +630,6 @@ void move_player(Square* square)
 
 void begin_turn()
 {
-	printf(" BEGIN TURN\n");
 	board.playing = &board.players[whos_turn_is_it()];
 	board.hud = new_hud(*board.playing);
 	highlight_possible_moves(*board.playing);
@@ -618,6 +643,7 @@ void begin_turn()
 	{
 		random_move();
 	}
+	printf(" BEGIN TURN\n");
 }
 
 void end_turn()
@@ -629,6 +655,7 @@ void end_turn()
 	destroy_hud(board.hud);
 	board.hud = new_hud(*board.playing);
 	board.waitUntil = SDL_GetTicks() + 5000;
+	printf(" [RECAP] %d %d %d\n", board.recap.coins, board.recap.bundleToken, board.recap.templeCoins);
 }
 
 void square_action(Square* square)
@@ -636,8 +663,6 @@ void square_action(Square* square)
 	Item* items[3];
 	int tk;
 	printf("SQUARE ACTION = %s\n", board.playing->nickname);
-
-	move_player(square);
 
 	board.squareId = square->type.id;
 	board.mode = BM_SQUARE;
@@ -647,28 +672,30 @@ void square_action(Square* square)
 			if (board.lastInnPos != board.playing->position)
 			{
 				init_inn(board.innFoods);
+				printf("FOOD INITIALIZED \n");
 				board.lastInnPos = board.playing->position;
 			}
-			if (board.playing->traveler.id == TRAVELER_HIROSHIGE) 	//Menu Custom pour choix du panorama
+
+			if (board.playing->traveler.id == TRAVELER_HIROSHIGE) 	// Menu Custom pour choix du panorama
 			{
 
 			}
-			if (board.playing->traveler.id == TRAVELER_SATSUKI) 	//Menu Custom pour accepter ou non le repas gratuit
+			else if (board.playing->traveler.id == TRAVELER_SATSUKI) 	// Menu Custom pour accepter ou non le repas gratuit
 			{
 
 			}
-			if (board.playing->traveler.id == TRAVELER_KINKO) 	//Prix réduit
+			else if (board.playing->traveler.id == TRAVELER_KINKO) 	// Prix réduit
 			{
-				for(int i=0;i<board.playerCount+1;i++)
+				for(int i = 0; i < board.playerCount + 1; i++)
 				{
-					board.sgui->frames[i].content.food.price -- ;
+					board.sgui->frames[i]->content.food.price--;
 				}
-			}			
+			}
 			board.sgui = new_inn_gui(board.innFoods, board.playerCount + 1);
 			break;
 		case SQUARE_SHOP:
 			init_shop(items);
-			board.sgui = new_shop_gui(items);
+			board.sgui = new_shop_gui(items, board.playing);
 			break;
 		case SQUARE_HOTSPRING:
 			tk = init_hot_spring();
@@ -678,14 +705,14 @@ void square_action(Square* square)
 			action_hot_spring(board.playing, tk);
 			break;
 		case SQUARE_TEMPLE:
-			if (board.playing->traveler.id == TRAVELER_HIROTADA) 	//Piece gratuite au temple
+			if (board.playing->traveler.id == TRAVELER_HIROTADA) 	// Piece gratuite au temple
 			{
 				board.playing->templeCoins += 1 ;
 			}
 			board.sgui = new_temple_gui();
 			break;
 		case SQUARE_ENCOUNTER:
-			if (board.playing->traveler.id == TRAVELER_UMEGAE)		//+1 Coins et +1 Point de victoire pour les recontres
+			if (board.playing->traveler.id == TRAVELER_UMEGAE)		// +1 Coins et +1 Point de victoire pour les recontres
 			{
 				board.playing->coins +=1;
 				board.playing->bundleToken +=1;

@@ -1,5 +1,48 @@
 #include <game.h>
 
+int cmpfunc (const void * a, const void * b)
+{
+   return ( *(int*)a - *(int*)b );
+}
+
+int tk_from_collection(Item newItem, Item* items, int itemCount)
+{
+	int lastTk = 0;
+	int newTk  = 0;
+	int categorieQt[] = {0, 0, 0, 0};
+	for (int i = 0; i < itemCount; i++)
+	{
+		categorieQt[items[i].category.id]++;
+	}
+	qsort(categorieQt, 4, sizeof(int), cmpfunc);
+	lastTk += categorieQt[3] * 1;
+	lastTk += categorieQt[2] * 3;
+	lastTk += categorieQt[1] * 5;
+	lastTk += categorieQt[0] * 7;
+
+	categorieQt[newItem.category.id]++;
+	qsort(categorieQt, 4, sizeof(int), cmpfunc);
+	newTk  += categorieQt[3] * 1;
+	newTk  += categorieQt[2] * 3;
+	newTk  += categorieQt[1] * 5;
+	newTk  += categorieQt[0] * 7;
+
+	return newTk - lastTk;
+}
+
+void reset_recap(Recap* recap)
+{
+	recap->bundleToken = 0;
+	recap->coins = 0;
+	recap->templeCoins = 0;
+	recap->foodCount = 0;
+	recap->itemCount = 0;
+	recap->encounterCount = 0;
+	recap->panRice = 0;
+	recap->panMount = 0;
+	recap->panSea = 0;
+}
+
 void load_resources()
 {
 	// ITEM CATS

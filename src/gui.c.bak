@@ -56,17 +56,17 @@ TextInfo* new_text_info(int r, int g, int b, float textScale)
 	return textInfo;
 }
 
-Button* new_button(const char* text, int r, int g, int b, Sprite* bgSprite, float textScale)
+Button* new_button(const char* text, int r, int g, int b, Sprite* bg, float textScale)
 {
 	Button* button     = (Button*)malloc(sizeof(Button));
 	button->text       = new_sprite_from_str(text, r, g, b, textScale);
 	// button->text       = (Sprite*)malloc(sizeof(Sprite));
-	button->bg         = sprite_copy(bgSprite);
+	button->bg         = sprite_copy(bg);
 	// button->bg         = (Sprite*)malloc(sizeof(Sprite));
-	// memcpy(button->bg, bgSprite, sizeof(Sprite));
-	// button->bg->tex    = bgSprite->tex;
-	// button->bg->crop = bgSprite->crop;
-	// button->bg->rect   = new_rect(0, 0, bgSprite->rect->w, bgSprite->rect->h);
+	// memcpy(button->bg, bg, sizeof(Sprite));
+	// button->bg->tex    = bg->tex;
+	// button->bg->crop = bg->crop;
+	// button->bg->rect   = new_rect(0, 0, bg->rect->w, bg->rect->h);
 	button->hovered    = SDL_FALSE;
 	button->clicked    = 0;
 	center_rect(button->text->rect, button->bg->rect);
@@ -74,10 +74,10 @@ Button* new_button(const char* text, int r, int g, int b, Sprite* bgSprite, floa
 	return button;
 }
 
-Textbox* new_textbox(Sprite* bgSprite, SDL_bool isPassword)
+Textbox* new_textbox(Sprite* bg, SDL_bool isPassword)
 {
 	Textbox* textbox = (Textbox*)malloc(sizeof(Textbox));
-	textbox->box = new_button("", 255, 255, 255, bgSprite, 1);
+	textbox->box = new_button("", 255, 255, 255, bg, 1);
 	textbox->text = (char*)malloc(sizeof(char) * TEXTBOX_SIZE);
 	textbox->textLen = 0;
 	textbox->isPassword = isPassword;

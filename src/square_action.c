@@ -1,26 +1,5 @@
 #include <square_action.h>
 
-int cmpfunc (const void * a, const void * b) {
-   return ( *(int*)a - *(int*)b );
-}
-
-int tk_from_collection(Player* player)
-{
-	int totalTk = 0;
-	int categorieQt[] = {0, 0, 0, 0};
-	for (int i = 0; i < player->itemCount; i++)
-	{
-		categorieQt[player->items[i].category.id]++;
-	}
-	qsort(categorieQt, 4, sizeof(int), cmpfunc);
-	totalTk += categorieQt[3] * 1;
-	totalTk += categorieQt[2] * 3;
-	totalTk += categorieQt[1] * 5;
-	totalTk += categorieQt[0] * 7;
-	return totalTk;
-}
-
-
 SDL_bool buy_from_frame(Player* player, Frame* frame)
 {
 	SDL_bool bought = SDL_FALSE;
@@ -29,10 +8,9 @@ SDL_bool buy_from_frame(Player* player, Frame* frame)
 		if (player->coins >= frame->content.item.price)
 		{
 			player->coins -= frame->content.item.price;
-			player->bundleToken -= tk_from_collection(player);
+			player->bundleToken += tk_from_collection(frame->content.item, player->items, player->itemCount);
 			player->items[player->itemCount] = frame->content.item;
 			player->itemCount++;
-			player->bundleToken += tk_from_collection(player);
 			printf("ITEMCOUNT = %d\n", player->itemCount);
 			bought = SDL_TRUE;
 		}

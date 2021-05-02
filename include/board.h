@@ -37,12 +37,14 @@ typedef struct
 
 	SquareId squareId;
 	SquareGui* sgui;
+	SDL_bool specialGui;
 
 	int lastInnPos;
 	Food* innFoods[6];
 
 	double waitUntil;
 	Player* playing;
+	Recap recap;
 
 	Hud* hud;
 } Board;
@@ -64,7 +66,7 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click);
 int whos_turn_is_it();
 int highlight_possible_moves(Player player);
 SDL_bool is_move_allowed(int position, Player player);
-void random_move();
+
 
 void update_player_ai(Player* player);
 void camera_ai(AnchorInfo* ai, Camera camera);
@@ -73,6 +75,9 @@ void camera_draw_sprite(Sprite* sprite, Camera camera);
 void draw_bg();
 void draw_board();
 void draw_squares();
+
+void random_move();
+void move_player(Square* square);
 
 void begin_turn();
 void end_turn();

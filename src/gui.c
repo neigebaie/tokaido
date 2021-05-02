@@ -42,7 +42,7 @@ Menu* new_main_menu(Gui* gui)
 	Menu* menu = base_menu(2, 1, 0, 5);
 	int y = -350;
 
-	menu->sprites[0] = &textureMgr->bgSprite[0];
+	menu->sprites[0] = &textureMgr->bg[0];
 	menu->sprites[0]->ai.at = AT_CENTER;
 
 	menu->sprites[1] = &textureMgr->title;
@@ -50,7 +50,7 @@ Menu* new_main_menu(Gui* gui)
 	menu->sprites[1]->ai.offset.y = y;
 	y += menu->sprites[1]->ai.size.h;
 
-	menu->texts[0] = new_text("Tokaido v0.1.0", 100, 100, 100, 0.35);
+	menu->texts[0] = new_text("Tokaido v0.2.0", 100, 100, 100, 0.35);
 	menu->texts[0]->sprite->ai.offset = (Offset){10, 10};
 	menu->texts[0]->sprite->ai.at = AT_BOTTOM_LEFT;
 
@@ -60,7 +60,8 @@ Menu* new_main_menu(Gui* gui)
 	menu->buttons[3] = new_button("Options",     0.5, ACTION_NONE,       MENU_SETTINGS);
 	menu->buttons[4] = new_button("Quitter",     0.5, ACTION_QUIT,       MENU_NONE);
 
-	for (int i = 0; i < menu->buttonCount; i++) {
+	for (int i = 0; i < menu->buttonCount; i++)
+	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
 		menu->buttons[i]->bg.ai.offset.y = y;
 		y += menu->buttons[i]->bg.ai.size.h + 30;
@@ -99,7 +100,8 @@ Menu* new_login_menu()
 	menu->buttons[2] = new_button("Retour",          0.5, ACTION_NONE,   MENU_MAIN);
 
 	int y = 100;
-	for (int i = 0; i < menu->buttonCount; i++) {
+	for (int i = 0; i < menu->buttonCount; i++)
+	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
 		menu->buttons[i]->bg.ai.offset.y = y;
 		y += menu->buttons[i]->bg.ai.size.h + 30;
@@ -137,7 +139,8 @@ Menu* new_signup_menu()
 	menu->buttons[1] = new_button("Retour",  0.5, ACTION_NONE,   MENU_LOGIN);
 
 	int y = 100;
-	for (int i = 0; i < menu->buttonCount; i++) {
+	for (int i = 0; i < menu->buttonCount; i++)
+	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
 		menu->buttons[i]->bg.ai.offset.y = y;
 		y += menu->buttons[i]->bg.ai.size.h + 30;
@@ -157,7 +160,8 @@ Menu* new_archives_menu()
 	menu->buttons[0] = new_button("Retour",  0.5, ACTION_NONE,   MENU_MAIN);
 
 	int y = 100;
-	for (int i = 0; i < menu->buttonCount; i++) {
+	for (int i = 0; i < menu->buttonCount; i++)
+	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
 		menu->buttons[i]->bg.ai.offset.y = y;
 		y += menu->buttons[i]->bg.ai.size.h + 30;
@@ -177,7 +181,8 @@ Menu* new_settings_menu()
 	menu->buttons[0] = new_button("Retour",  0.5, ACTION_NONE,   MENU_MAIN);
 
 	int y = 100;
-	for (int i = 0; i < menu->buttonCount; i++) {
+	for (int i = 0; i < menu->buttonCount; i++)
+	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
 		menu->buttons[i]->bg.ai.offset.y = y;
 		y += menu->buttons[i]->bg.ai.size.h + 30;
@@ -189,22 +194,26 @@ Menu* new_settings_menu()
 void draw_menu(Menu* menu)
 {
 	// bg or decorative sprites
-	for (int i = 0; i < menu->spriteCount; i++) {
+	for (int i = 0; i < menu->spriteCount; i++)
+	{
 		draw_sprite(menu->sprites[i]);
 	}
 
 	// texts
-	for (int i = 0; i < menu->textCount; i++) {
+	for (int i = 0; i < menu->textCount; i++)
+	{
 		draw_sprite(menu->texts[i]->sprite);
 	}
 
 	// input fields
-	for (int i = 0; i < menu->textboxCount; i++) {
+	for (int i = 0; i < menu->textboxCount; i++)
+	{
 		draw_textbox(menu->textboxes[i]);
 	}
 
 	// buttons to interact with
-	for (int i = 0; i < menu->buttonCount; i++) {
+	for (int i = 0; i < menu->buttonCount; i++)
+	{
 		draw_button(menu->buttons[i]);
 	}
 	// printf("\n\n");
@@ -258,7 +267,8 @@ void button_action(Button* button, MenuId* menuId)
 {
 	printf("\e[33m [INFO] : Le bouton %s a été cliqué ! ✨\e[37m\n", button->text->content);
 
-	switch (button->action) {
+	switch (button->action)
+	{
 		case ACTION_NONE:
 			break;
 		case ACTION_QUIT:
@@ -401,7 +411,8 @@ void textbox_event(Textbox *textbox, SDL_Event* event)
 	if (textbox->isPassword)
 	{
 		strcpy(passwordBuffer, textbox->text->content);
-		for (int i = 0; i < textbox->textLen; i++) {
+		for (int i = 0; i < textbox->textLen; i++)
+		{
 			textbox->text->content[i] = '*';
 		}
 		textbox->text->content[textbox->textLen] = '\0';

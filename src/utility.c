@@ -56,7 +56,7 @@ void init(void)
 		exit_with_error("Création du Renderer échouée");
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	SDL_setenv("SDL_VIDEODRIVER", "directx", 1);
+	// SDL_setenv("SDL_VIDEODRIVER", "directx", 1);
 
 	// Initialisation SDL_TTF
 	TTF_Init();
@@ -114,6 +114,14 @@ void update_fps_counter()
     }
 }
 
+void show_splash_screen()
+{
+	SDL_Texture* splashScreenTex = load_texture("resources/gfx/bg/splash.png");
+	SDL_RenderCopy(renderer, splashScreenTex, NULL, NULL);
+	SDL_RenderPresent(renderer);
+	SDL_DestroyTexture(splashScreenTex);
+}
+
 // TEXTURES
 SDL_Texture* load_texture(const char *path)
 {
@@ -134,40 +142,54 @@ void load_textures()
 	textureMgr = (TextureMgr*)malloc(sizeof(TextureMgr));
 	// TEXTURES
 
-	textureMgr->bg[0]        = load_texture("resources/gfx/bg/menu_main.png");
+	textureMgr->bgTex[0]        = load_texture("resources/gfx/bg/menu_main.png");
+	textureMgr->bgTex[1]        = load_texture("resources/gfx/bg/pan_rice.png");
+	textureMgr->bgTex[2]        = load_texture("resources/gfx/bg/pan_mount.png");
+	textureMgr->bgTex[3]        = load_texture("resources/gfx/bg/pan_sea.png");
+	textureMgr->bgTex[4]        = load_texture("resources/gfx/bg/shop_inn.png");
 
-	textureMgr->squareTex    = load_texture("resources/gfx/square_spritesheet.png");
-	textureMgr->foodTex      = load_texture("resources/gfx/food_spritesheet.png");
-	textureMgr->travelerTex  = load_texture("resources/gfx/traveler_spritesheet.png");
-	textureMgr->itemTex      = load_texture("resources/gfx/item_spritesheet.png");
-	// textureMgr->encounterTex = load_texture("resources/gfx/encounter_spritesheet.png");
-	textureMgr->iconTex      = load_texture("resources/gfx/gui/icon_spritesheet.png");
-	textureMgr->guiTex       = load_texture("resources/gfx/gui/gui_spritesheet.png");
+	textureMgr->squareTex       = load_texture("resources/gfx/square_spritesheet.png");
+	textureMgr->foodTex         = load_texture("resources/gfx/food_spritesheet.png");
+	textureMgr->travelerTex     = load_texture("resources/gfx/traveler_spritesheet.png");
+	textureMgr->itemTex         = load_texture("resources/gfx/item_spritesheet.png");
+	// textureMgr->encounterTex   = load_texture("resources/gfx/encounter_spritesheet.png");
+	textureMgr->iconTex         = load_texture("resources/gfx/gui/icon_spritesheet.png");
+	textureMgr->guiTex          = load_texture("resources/gfx/gui/gui_spritesheet.png");
 
-	textureMgr->title  = *new_sprite(textureMgr->guiTex, new_rect(0, 308, 888, 335));
-	textureMgr->button = *new_sprite(textureMgr->guiTex, new_rect(0, 0, 1319, 307));
-	textureMgr->textbox = *new_sprite(textureMgr->guiTex, new_rect(0, 647, 1319, 307));
+	textureMgr->title   = *new_sprite(textureMgr->guiTex, new_rect(0, 308, 888, 335));
+
+	textureMgr->button  = *new_sprite(textureMgr->guiTex, new_rect(0, 0, 1319, 307));
 	textureMgr->button.ai.size.w *= 0.3;
 	textureMgr->button.ai.size.h *= 0.3;
+
+	textureMgr->textbox = *new_sprite(textureMgr->guiTex, new_rect(0, 647, 1319, 307));
 	textureMgr->textbox.ai.size.w *= 0.5;
 	textureMgr->textbox.ai.size.h *= 0.3;
 
-	textureMgr->bgSprite[0] = *new_sprite(textureMgr->bg[0], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[0]        = *new_sprite(textureMgr->bgTex[0], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[1]        = *new_sprite(textureMgr->bgTex[1], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[2]        = *new_sprite(textureMgr->bgTex[2], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[3]        = *new_sprite(textureMgr->bgTex[3], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[4]        = *new_sprite(textureMgr->bgTex[4], new_rect(0, 0, 1920, 1080));
 
 	textureMgr->bundleTkIcon = *new_sprite(textureMgr->iconTex, new_rect(256, 0, 256, 256));
 	textureMgr->bundleTkIcon.ai.size.w = 40;
 	textureMgr->bundleTkIcon.ai.size.h = 40;
+
 	textureMgr->coinIcon = *new_sprite(textureMgr->iconTex, new_rect(0, 0, 256, 256));
 	textureMgr->coinIcon.ai.size.w = 40;
 	textureMgr->coinIcon.ai.size.h = 40;
+
 	for (int i = 0; i < 4 /*ITEM_CATS*/; i++) {
 		textureMgr->itemCatIcons[i] = *new_sprite(textureMgr->iconTex, new_rect(128 * i, 384, 128, 128));
 		textureMgr->itemCatIcons[i].ai.size.w = 40;
 		textureMgr->itemCatIcons[i].ai.size.h = 40;
 	}
+
 	textureMgr->templeCoinIcon = *new_sprite(textureMgr->iconTex, new_rect(0, 256, 128, 128));
 	textureMgr->templeCoinIcon.ai.size.w = 40;
 	textureMgr->templeCoinIcon.ai.size.h = 40;
+
 	textureMgr->frame = *new_sprite(textureMgr->guiTex, new_rect(1320, 0, 643, 882));
 	textureMgr->frame.ai.size.w = 200;
 	textureMgr->frame.ai.size.h = 300;
@@ -184,6 +206,11 @@ void destroy_textures()
 	// SDL_DestroyTexture(textureMgr->encounterTex);
 	SDL_DestroyTexture(textureMgr->iconTex);
 	SDL_DestroyTexture(textureMgr->guiTex);
+	SDL_DestroyTexture(textureMgr->bgTex[0]);
+	SDL_DestroyTexture(textureMgr->bgTex[1]);
+	SDL_DestroyTexture(textureMgr->bgTex[2]);
+	SDL_DestroyTexture(textureMgr->bgTex[3]);
+	SDL_DestroyTexture(textureMgr->bgTex[4]);
 }
 
 Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* crop)

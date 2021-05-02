@@ -55,7 +55,7 @@ typedef struct
 typedef struct
 {
 	// All the textures in the game
-	SDL_Texture* bg[10];
+	SDL_Texture* bgTex[10];
 	SDL_Texture* squareTex;
 	SDL_Texture* foodTex;
 	SDL_Texture* travelerTex;
@@ -64,7 +64,7 @@ typedef struct
 	SDL_Texture* iconTex;
 	SDL_Texture* guiTex;
 
-	Sprite bgSprite[10];
+	Sprite bg[10];
 	Sprite title;
 	Sprite button;
 	Sprite textbox;
@@ -95,6 +95,8 @@ float min(float f1, float f2);
 void limit_fps(unsigned int limit);
 void init_fps_counter();
 void update_fps_counter();
+
+void show_splash_screen();
 
 SDL_Texture* load_texture(const char *path);
 void load_textures();

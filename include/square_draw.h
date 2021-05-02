@@ -89,7 +89,7 @@ typedef struct
 // SquareGui
 
 SquareGui* new_inn_gui(Food** foods, int foodCount);
-SquareGui* new_shop_gui(Item* items[]);
+SquareGui* new_shop_gui(Item* items[], Player* player);
 SquareGui* new_hot_spring_gui();
 SquareGui* new_temple_gui();
 SquareGui* new_encounter_gui();
