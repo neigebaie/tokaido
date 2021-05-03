@@ -38,6 +38,6 @@ make
 Une grande partie des assets utilisés pour ce projet proviennent du jeu Steam Tokaido.
 Si vous aimez le jeu, achetez la version Steam pour soutenir les développeurs ainsi que les créateurs du jeu.
 
-Lien vers le magasin Steam : https://store.steampowered.com/app/648750/Tokaido/
-\n
-Jeu de plateau  : https://www.philibertnet.com/fr/funforge/20177-tokaido-3770001556604.html
+[Lien vers le magasin Steam](https://store.steampowered.com/app/648750/Tokaido/)
+
+[Jeu de plateau](https://www.philibertnet.com/fr/funforge/20177-tokaido-3770001556604.html)
