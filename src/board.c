@@ -111,7 +111,8 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].traveler = *resources.travelers[travId[i]];
 		if (i == 0)
 		{
-			board.players[i].traveler = *resources.travelers[8];
+			// pour tester un voyageur spécifique
+			// board.players[i].traveler = *resources.travelers[8];
 			sprintf(board.players[i].nickname, "%s", loggedAccount->nick);
 			board.players[i].isHuman = SDL_TRUE;
 		}
@@ -346,6 +347,8 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 
 		for (int btnId = 0; btnId < board.sgui->menu->buttonCount; btnId++)
 		{
+			if (board.sgui->menu->buttons[btnId]->state == STATE_DISABLED)
+				continue;
 			SDL_Rect rect = anchored_rect(board.sgui->menu->buttons[btnId]->bg.ai, board.sgui->menu->buttons[btnId]->bg.parent);
 			if (SDL_PointInRect(mousePos, &rect))
 			{
@@ -353,8 +356,20 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 				{
 					board.sgui->menu->buttons[btnId]->state = STATE_CLICKED;
 					// button_action(board.sgui->menu->buttons[btnId], &mid);
-					board.mode = BM_BOARD;
-					end_turn();
+					if (board.sgui->menu->buttons[btnId]->action == ACTION_END_TURN)
+					{
+						board.mode = BM_BOARD;
+						end_turn();
+					}
+					else if (board.sgui->menu->buttons[btnId]->action == ACTION_TEMPLE)
+					{
+						action_temple(board.playing, &board.recap);
+						update_hud(board.hud, *board.playing);
+						if (board.recap.templeCoins == 3 || board.playing->coins == 0)
+						{
+							board.sgui->menu->buttons[btnId]->state = STATE_DISABLED;
+						}
+					}
 				}
 				else
 				{
@@ -646,6 +661,7 @@ void move_player(Square* square)
 
 void begin_turn()
 {
+	reset_recap(&board.recap);
 	board.playing = &board.players[whos_turn_is_it()];
 	board.hud = new_hud(*board.playing);
 	highlight_possible_moves(*board.playing);

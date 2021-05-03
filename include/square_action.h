@@ -10,17 +10,13 @@
 #include <utility.h>
 #include <square_draw.h>
 
+// used for inn & shop
 SDL_bool buy_from_frame(Player* player, Frame* frame);
 
-//
-// void action_inn(Player *player);
-//
-// void action_shop(Player *player, int item);
-//
 void action_hot_spring(Player *player, int hotSpringTk);
-//
-// void action_temple(Player *player);
-//
+
+int action_temple(Player* player, Recap* recap);
+
 void action_farm(Player *player);
 
 void action_encounter(Player *player, int id, char* obtained);

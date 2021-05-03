@@ -5,7 +5,7 @@
 
 void init_inn(Food** foods);
 void init_shop(Item** items);
-
+int init_encounter(Player* player);
 int init_hot_spring();
 
 #endif

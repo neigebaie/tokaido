@@ -145,7 +145,7 @@ SquareGui* new_temple_gui()
 {
 	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
 
-	sgui->menu = base_menu(1, 1, 0, 1);
+	sgui->menu = base_menu(1, 1, 0, 2);
 
 	sgui->menu->sprites[0] = &textureMgr->bg[0];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
@@ -157,9 +157,12 @@ SquareGui* new_temple_gui()
 	sgui->frameCount = 0;
 	sgui->frames = NULL;
 
-	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
-	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
-	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+	sgui->menu->buttons[0] = new_button("Donner une pièce", 0.5, ACTION_TEMPLE, MENU_NONE);
+	sgui->menu->buttons[0]->bg.ai.at = AT_CENTER;
+
+	sgui->menu->buttons[1] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
+	sgui->menu->buttons[1]->bg.ai.at = AT_BOTTOM_RIGHT;
+	sgui->menu->buttons[1]->bg.ai.offset = (Offset){-10, -10};
 
 	return sgui;
 }

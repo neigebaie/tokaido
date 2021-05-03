@@ -43,9 +43,19 @@ void action_hot_spring(Player* player, int hotSpringTk)
 	player->bundleToken += hotSpringTk;
 }
 
-void action_temple(Player* player)
+int action_temple(Player* player, Recap* recap)
 {
-	player->templeCoins += 1;
+	if (recap->templeCoins < 3 && player->coins > 0)
+	{
+		recap->templeCoins += 1;
+		player->templeCoins += 1;
+		player->coins--;
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 void action_farm(Player* player)
