@@ -56,11 +56,6 @@ typedef struct
 {
 	char name[100];					// nom de la categorie de souvenir
 	Sprite* sprite;
-	int giveItem;           // Artisan       →  x:quantity
-	int givePanCard;        // Guide         →  0:nothing  1:rice  2:mount  3:sea
-	int giveBundleTk;       // Samouraï      →  x:quantity
-	int giveCoin;           // Noble         →  x:quantity
-	int giveTemple;         // Prêtre Shinto →  x:quantity
 } Encounter;
 
 typedef struct
@@ -72,6 +67,7 @@ typedef struct
 
 typedef struct
 {
+	int id;
 	char name[100]; // nom du souvenir
 	Sprite* sprite;
 	int price;
@@ -130,13 +126,13 @@ typedef struct
 	int hotSpring;					// nombre de passages à une source chaude
 
 	Food foods[50];
-	int   foodCount;
+	int  foodCount;
 
 	Item items[50];
-	int   itemCount;
+	int  itemCount;
 
 	Encounter encounters[50];
-	int        encounterCount;
+	int       encounterCount;
 
 	int panRice;						// cartes panorama Rizière
 	int panMount;						// cartes panorama Montagne

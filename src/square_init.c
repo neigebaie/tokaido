@@ -46,8 +46,7 @@ int init_encounter(Player* player)
   choices[3] = 6;
   for (int i = choiceNb; i < ENCOUNTERS; i++)
   {
-    // if (!pano_complete)
-		if (1)
+		if ((i == 1 && player->panRice < 3) || (i == 2 && player->panMount < 4) || (i == 3 && player->panSea < 5))
     {
       choices[choiceNb] = i;
       choiceNb++;

@@ -24,7 +24,6 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 	int j = 0;
 	for (int i = 0; i < foodCount; i++)
 	{
-		printf("DEBUG FRAME : i=%d j=%d \n", i, j);
 		ai.offset.x = ((i % 3) - 1) * 320;
 		ai.offset.y = 400 * (int)(i/3) - 180;
 
@@ -35,15 +34,15 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 			sgui->frames[j] = new_frame(&ai, contentType, content);
 			sgui->frames[j]->sold = SDL_TRUE;
 			sgui->frames[j]->state = STATE_DISABLED;
-			printf("continue\n");
+			printf("\e[36m[Inn] Empty Frame\e[37m\n");
 		}
 		else
 		{
-			printf("new_frame\n");
 			content.food = *foods[i];
 
 			sgui->frames[j] = new_frame(&ai, contentType, content);
 			sgui->frames[j]->sold = SDL_FALSE;
+			printf("\e[35m[Inn] New Frame : %s\e[37m\n", foods[i]->name);
 
 			sprintf(sgui->frames[j]->title->content, "%s", foods[i]->name);
 			update_text(sgui->frames[j]->title);
@@ -165,11 +164,11 @@ SquareGui* new_temple_gui()
 	return sgui;
 }
 
-SquareGui* new_encounter_gui()
+SquareGui* new_encounter_gui(int encounterId, char* obtained)
 {
 	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
 
-	sgui->menu = base_menu(1, 1, 0, 1);
+	sgui->menu = base_menu(1, 3, 0, 1);
 
 	sgui->menu->sprites[0] = &textureMgr->bg[0];
 	sgui->menu->sprites[0]->ai.at = AT_CENTER;
@@ -177,6 +176,13 @@ SquareGui* new_encounter_gui()
 	sgui->menu->texts[0] = new_text("Rencontre", 0, 0, 0, 1);
 	sgui->menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 	sgui->menu->texts[0]->sprite->ai.offset.y = 80;
+
+	sgui->menu->texts[1] = new_text("Vous avez obtenu :", 0, 0, 0, 0.8);
+	sgui->menu->texts[1]->sprite->ai.at = AT_CENTER;
+	sgui->menu->texts[1]->sprite->ai.offset.y = -80;
+	sgui->menu->texts[2] = new_text(obtained, 0, 0, 0, 0.8);
+	sgui->menu->texts[2]->sprite->ai.at = AT_CENTER;
+	sgui->menu->texts[2]->sprite->ai.offset.y = 80;
 
 	sgui->frameCount = 0;
 	sgui->frames = NULL;

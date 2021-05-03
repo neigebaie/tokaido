@@ -92,7 +92,7 @@ SquareGui* new_inn_gui(Food** foods, int foodCount);
 SquareGui* new_shop_gui(Item* items[], Player* player);
 SquareGui* new_hot_spring_gui();
 SquareGui* new_temple_gui();
-SquareGui* new_encounter_gui();
+SquareGui* new_encounter_gui(int encounterId, char* obtained);
 SquareGui* new_farm_gui();
 SquareGui* new_pan_rice_gui(int nb);
 SquareGui* new_pan_mount_gui(int nb);

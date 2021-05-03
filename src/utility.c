@@ -57,6 +57,8 @@ void init(void)
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	// SDL_setenv("SDL_VIDEODRIVER", "directx", 1);
+	// SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2"); // Add option in settings
 
 	// Initialisation SDL_TTF
 	TTF_Init();

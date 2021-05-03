@@ -97,6 +97,7 @@ void load_resources()
 	int priceItem[] =  {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3};
 	for (int i = 0; i < ITEMS; i++)
 	{
+		resources.items[i]->id = i;
 		resources.items[i]->category = *resources.itemCats[itemCatsId[i]];
 		resources.items[i]->price = priceItem[i];
 		resources.items[i]->sprite = new_sprite(textureMgr->itemTex, new_rect(i * 128, 0, 128, 128));
@@ -146,14 +147,13 @@ void load_resources()
 		resources.encounters[i] = (Encounter*)malloc(sizeof(Encounter));
 	}
 
-	strcpy(resources.encounters[0]->name,  "Annaibito"); // Rizière
-	strcpy(resources.encounters[1]->name,  "Annaibito"); // Montagne
-	strcpy(resources.encounters[2]->name,  "Annaibito"); // Mer
-	strcpy(resources.encounters[3]->name,  "Shokunin");
+	strcpy(resources.encounters[0]->name,  "Shokunin");
+	strcpy(resources.encounters[1]->name,  "Annaibito"); // Rizière
+	strcpy(resources.encounters[2]->name,  "Annaibito"); // Montagne
+	strcpy(resources.encounters[3]->name,  "Annaibito"); // Mer
 	strcpy(resources.encounters[4]->name,  "Miko");
 	strcpy(resources.encounters[5]->name,  "Kuge");
 	strcpy(resources.encounters[6]->name,  "Samourai");
-
 
 	// TRAVELERS
 
