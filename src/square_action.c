@@ -76,15 +76,15 @@ void action_encounter(Player* player, int id, char* obtained)
 			sprintf(obtained, "Objet - %s", item.name);
 			break;
 		case 1 :
-			player->panRice += 1;
+			action_pan_rice(player);
 			strcpy(obtained, "Carte - Rizière");
 			break;
 		case 2 :
-			player->panMount += 1;
+			action_pan_mount(player);
 			strcpy(obtained, "Carte - Montagne");
 			break;
 		case 3 :
-			player->panSea += 1;
+			action_pan_sea(player);
 			strcpy(obtained, "Carte - Mer");
 			break;
 		case 4 :

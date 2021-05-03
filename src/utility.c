@@ -339,6 +339,19 @@ void print_ai(AnchorInfo* ai)
 		printf("[DEBUG] %d : %d %d %d %d\n", ai->at, ai->offset.x, ai->offset.y, ai->size.w, ai->size.h);
 }
 
+void log_player(int value, int newline)
+{
+	FILE* file = fopen("user_data/logs.csv", "a");
+
+	if (file == NULL)
+		return;
+	if (newline)
+		fprintf(file, "%d\n", value);
+	else
+		fprintf(file, "%d, ", value);
+	fclose(file);
+}
+
 void state_color_mod(SDL_Texture* tex, State* state)
 {
 	switch (*state) {

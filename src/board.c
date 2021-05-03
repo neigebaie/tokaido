@@ -109,7 +109,7 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	for (int i = 0; i < BOARD_PLAYERS; i++)
 	{
 		board.players[i].traveler = *resources.travelers[travId[i]];
-		if (i == 0)
+		if (i == -1) // debug 0
 		{
 			// pour tester un voyageur spécifique
 			// board.players[i].traveler = *resources.travelers[8];
@@ -607,7 +607,7 @@ SDL_bool is_move_allowed(int position, Player player)
 void random_move()
 {
 	int playerId = whos_turn_is_it();
-	int possibleSquares[5];
+	int possibleSquares[4];
 	int possibilities = 0;
 	for (int position = board.players[playerId].position + 1; position < BOARD_SQUARES; position++)
 	{
@@ -616,7 +616,7 @@ void random_move()
 			possibleSquares[possibilities] = position;
 			possibilities++;
 		}
-		if (possibilities == 5)
+		if (possibilities == 4)
 			break;
 	}
 	if (possibilities == 0)
@@ -632,7 +632,30 @@ void random_move()
 		return;
 	}
 	shuffle(possibleSquares, possibilities);
-	int position = possibleSquares[0];
+	int position = -1;
+	if (board.playing->coins < 2)
+	{
+		for (int i = 0; i < possibilities; i++)
+		{
+			if (board.squares[possibleSquares[i]].type.id == SQUARE_FARM)
+				position = possibleSquares[i];
+			else if (board.squares[possibleSquares[i]].type.id == SQUARE_ENCOUNTER  && position < 0)
+				position = possibleSquares[i];
+		}
+	}
+	else if (board.playing->coins > 5)
+	{
+		for (int i = 0; i < possibilities; i++)
+		{
+			if (board.squares[possibleSquares[i]].type.id == SQUARE_SHOP)
+				position = possibleSquares[i];
+		}
+	}
+	if (position < 0)
+	{
+		position = possibleSquares[0];
+	}
+
 	int space = board.squares[position].capacity;
 	for (int i = 0; i < board.playerCount; i++)
 	{
@@ -663,6 +686,10 @@ void begin_turn()
 {
 	reset_recap(&board.recap);
 	board.playing = &board.players[whos_turn_is_it()];
+	// for (int i = 0; i < board.playerCount; i++)
+	// {
+	// 	log_player(board.players[i].coins, i == board.playerCount - 1);
+	// }
 	board.hud = new_hud(*board.playing);
 	highlight_possible_moves(*board.playing);
 	if (!board.started)
@@ -686,7 +713,7 @@ void end_turn()
 	highlight_possible_moves(*board.playing);
 	destroy_hud(board.hud);
 	board.hud = new_hud(*board.playing);
-	board.waitUntil = SDL_GetTicks() + 500;
+	board.waitUntil = SDL_GetTicks(); // + 200; // + 5000;
 	printf("\e[32m [RECAP] %d %d %d\e[37m\n", board.recap.coins, board.recap.bundleToken, board.recap.templeCoins);
 }
 
@@ -699,9 +726,9 @@ void end_turn()
 void square_action(Square* square)
 {
 	Item* items[3];
-	int tk, encounterId;
+	int tk, encounterId, minPrice = 999, minPriceId;
 	char obtained[256];
-	printf("SQUARE ACTION = %s\n", board.playing->nickname);
+	printf("SQUARE ACTION = %s %d\n", board.playing->nickname, square->type.id);
 
 	board.squareId = square->type.id;
 	board.mode = BM_SQUARE;
@@ -729,7 +756,7 @@ void square_action(Square* square)
 
 			if (board.playing->traveler.id == TRAVELER_KINKO) 	// Prix réduit
 			{
-				for(int i = 0; i < board.sgui->frameCount; i++)
+				for (int i = 0; i < board.sgui->frameCount; i++)
 				{
 					board.sgui->frames[i]->content.food.price--;
 					sprintf(board.sgui->frames[i]->coinText->content, "%d", board.sgui->frames[i]->content.food.price);
@@ -741,18 +768,31 @@ void square_action(Square* square)
 			{
 				for (int i = 0; i < board.sgui->frameCount; i++)
 				{
-					// printf("%d\n", i);
-					if (board.sgui->frames[i]->sold == SDL_TRUE || board.innFoods[i] == NULL)
+					if (board.sgui->frames[i]->content.food.price < minPrice)
 					{
-						continue;
-						// printf(".");
-					}
-					else if (buy_from_frame(board.playing, board.sgui->frames[i]))
-					{
-						board.innFoods[i] = NULL;
-						break;
+						minPrice = board.sgui->frames[i]->content.food.price;
+						minPriceId = i;
 					}
 				}
+				if (buy_from_frame(board.playing, board.sgui->frames[minPriceId]))
+				{
+					board.innFoods[minPriceId] = NULL;
+				}
+
+				// for (int i = 0; i < board.sgui->frameCount; i++)
+				// {
+				// 	// printf("%d\n", i);
+				// 	if (board.sgui->frames[i]->sold == SDL_TRUE || board.innFoods[i] == NULL)
+				// 	{
+				// 		continue;
+				// 		// printf(".");
+				// 	}
+				// 	else if (buy_from_frame(board.playing, board.sgui->frames[i]))
+				// 	{
+				// 		board.innFoods[i] = NULL;
+				// 		break;
+				// 	}
+				// }
 			}
 			break;
 		case SQUARE_SHOP:
@@ -760,7 +800,7 @@ void square_action(Square* square)
 			board.sgui = new_shop_gui(items, board.playing);
 			if (board.playing->traveler.id == TRAVELER_ZEN_EMON) 	// Prix 1 pièce
 			{
-				for(int i = 0; i < board.sgui->frameCount; i++)
+				for (int i = 0; i < board.sgui->frameCount; i++)
 				{
 					board.sgui->frames[i]->content.item.price = 1;
 					sprintf(board.sgui->frames[i]->coinText->content, "%d", board.sgui->frames[i]->content.food.price);
@@ -771,9 +811,23 @@ void square_action(Square* square)
 			{
 				for (int i = 0; i < 3; i++)
 				{
-					if (buy_from_frame(board.playing, board.sgui->frames[i]))
+					minPriceId = -1;
+					for (int j = 0; j < 3; j++)
 					{
-						if (rand() % 3 == 0)
+						if (board.sgui->frames[j]->sold)
+							continue;
+						if (board.sgui->frames[j]->content.item.price < minPrice)
+						{
+							minPrice = board.sgui->frames[j]->content.item.price;
+							minPriceId = j;
+						}
+					}
+					if (minPriceId == -1)
+						break;
+					printf("here\n");
+					if (buy_from_frame(board.playing, board.sgui->frames[minPriceId]))
+					{
+						if (board.playing->coins < 5 && (rand() % 3 == 0 || board.playing->coins < 3))
 							break;
 					}
 				}
@@ -792,6 +846,20 @@ void square_action(Square* square)
 				board.playing->templeCoins += 1 ;
 			}
 			board.sgui = new_temple_gui();
+			if (!board.playing->isHuman)
+			{
+				for (int i = 0; i < 3; i++) {
+					if (action_temple(board.playing, &board.recap))
+					{
+						if (board.playing->coins < 5 && (rand() % 3 == 0 || board.playing->coins < 3))
+							break;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
 			break;
 		case SQUARE_ENCOUNTER:
 			if (board.playing->traveler.id == TRAVELER_UMEGAE)		// +1 Coins et +1 Point de victoire pour les recontres

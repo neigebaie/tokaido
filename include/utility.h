@@ -104,6 +104,7 @@ void destroy_textures();
 
 SDL_Rect anchored_rect(AnchorInfo ai, AnchorInfo* parentAi);
 SDL_bool is_ai_on_screen(AnchorInfo* ai);
+void log_player(int value, int newline);
 
 Sprite* new_sprite(SDL_Texture* tex, SDL_Rect* crop);
 
