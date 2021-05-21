@@ -47,6 +47,7 @@ typedef struct
 	Recap recap;
 
 	Hud* hud;
+	Lboard* lboard;
 } Board;
 
 extern Board board;

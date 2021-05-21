@@ -41,6 +41,7 @@ SDL_bool buy_from_frame(Player* player, Frame* frame)
 void action_hot_spring(Player* player, int hotSpringTk)
 {
 	player->bundleToken += hotSpringTk;
+	player->hotSpringCount += 1;
 }
 
 int action_temple(Player* player, Recap* recap)
@@ -66,6 +67,7 @@ void action_farm(Player* player)
 void action_encounter(Player* player, int id, char* obtained)
 {
 	Item item;
+	player->encounterCount += 1;
 	switch (id)
 	{
 		case 0 :

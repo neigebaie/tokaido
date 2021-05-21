@@ -123,7 +123,7 @@ typedef struct
 	int bundleToken;				// points de victoire accumulés (jeton balûchon)
 	int coins;							// pièces possédées
 	int templeCoins;				// pièces données au temple
-	int hotSpring;					// nombre de passages à une source chaude
+	int hotSpringCount;					// nombre de passages à une source chaude
 
 	Food foods[50];
 	int  foodCount;

@@ -57,7 +57,7 @@ Menu* new_main_menu(Gui* gui)
 	menu->buttons[0] = new_button("Solo",        0.5, ACTION_START_SOLO, MENU_BOARD);
 	menu->buttons[1] = new_button("Multijoueur", 0.5, ACTION_START_LAN,  MENU_NONE);
 	menu->buttons[2] = new_button("Archives",    0.5, ACTION_NONE,       MENU_ARCHIVES);
-	menu->buttons[3] = new_button("Options",     0.5, ACTION_NONE,       MENU_SETTINGS);
+	menu->buttons[3] = new_button("Connexion",   0.5, ACTION_NONE,       MENU_LOGIN);
 	menu->buttons[4] = new_button("Quitter",     0.5, ACTION_QUIT,       MENU_NONE);
 
 	for (int i = 0; i < menu->buttonCount; i++)

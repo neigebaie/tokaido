@@ -13,6 +13,7 @@
 #define PAN_MOUNT_CARDS 4
 #define PAN_SEA_CARDS 5
 
+typedef int (*compfn)(const void*, const void*);
 
 typedef enum
 {
@@ -86,6 +87,24 @@ typedef struct
 	Text* templeCoinText;
 } Hud;
 
+typedef struct
+{
+	Sprite bg;
+	Sprite colIcons[8];
+	Text texts[8][5];
+
+	Player** riceList;      // rizière
+	Player** mountList;     // montagne
+	Player** seaList;       // mer
+	Player** templeList;    // temple
+	Player** encounterList; // rencontre
+	Player** shopList;      // échoppe
+	Player** hotSpringList; // source chaude
+	Player** innList;       // pièces au relai
+	Player** bundleTkList;  // pts de victoire
+
+} Lboard;
+
 // SquareGui
 
 SquareGui* new_inn_gui(Food** foods, int foodCount);
@@ -103,6 +122,18 @@ Hud* new_hud(Player player);
 void update_hud(Hud* hud, Player player);
 void draw_hud(Hud* hud);
 void destroy_hud(Hud* hud);
+
+// LEADERBOARD
+Lboard* new_lboard(Player*  players, int playerCount);
+void update_lboard(Lboard* lboard, Player* players, int playerCount);
+void draw_lboard(Lboard* lboard);
+void destroy_lboard(Lboard* lboard);
+
+// // INVENTORY
+// Inventory* new_inv();
+// void update_inv(Inventory* inv, Player player);
+// void draw_inv(Inventory* inv);
+// void destroy_inv(Inventory* inv);
 
 // FRAME
 Frame* new_frame(AnchorInfo* ai, ContentType contentType, Content content);

@@ -79,10 +79,6 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	char nameTagText[110];
 	srand(time(NULL));
 
-	board.camera.origin.x = 0;
-	board.camera.origin.y = 0;
-	board.camera.scale    = 1.f;
-
 	board.squareId = SQUARE_INN;
 	board.mode     = BM_BOARD;
 	reset_recap(&board.recap);
@@ -109,7 +105,7 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	for (int i = 0; i < BOARD_PLAYERS; i++)
 	{
 		board.players[i].traveler = *resources.travelers[travId[i]];
-		if (i == -1) // debug 0
+		if (i == 0) // debug 0
 		{
 			// pour tester un voyageur spécifique
 			// board.players[i].traveler = *resources.travelers[8];
@@ -129,7 +125,7 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].bundleToken = 0;
 		board.players[i].coins = board.players[i].traveler.startCoins;
 		board.players[i].templeCoins = 0;
-		board.players[i].hotSpring = 0;
+		board.players[i].hotSpringCount = 0;
 		board.players[i].foodCount = 0;
 		board.players[i].itemCount = 0;
 		board.players[i].encounterCount = 0;
@@ -159,6 +155,14 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].traveler.sprite.ai.size.h = 100;
 		update_player_ai(&board.players[i]);
 	}
+
+	board.lboard = new_lboard(board.players, board.playerCount);
+	update_lboard(board.lboard, board.players, board.playerCount);
+
+	board.camera.origin.x = -500;
+	board.camera.origin.y = 300;
+	board.camera.scale    = 1.f;
+
 	board.started = SDL_FALSE;
 }
 
@@ -686,10 +690,10 @@ void begin_turn()
 {
 	reset_recap(&board.recap);
 	board.playing = &board.players[whos_turn_is_it()];
-	// for (int i = 0; i < board.playerCount; i++)
-	// {
-	// 	log_player(board.players[i].coins, i == board.playerCount - 1);
-	// }
+	for (int i = 0; i < board.playerCount; i++)
+	{
+		log_player(board.players[i].bundleToken, i == board.playerCount - 1);
+	}
 	board.hud = new_hud(*board.playing);
 	highlight_possible_moves(*board.playing);
 	if (!board.started)
@@ -709,11 +713,13 @@ void end_turn()
 {
 	printf(" END TURN\n");
 	board.mode = BM_BOARD;
+	update_lboard(board.lboard, board.players, board.playerCount);
+
 	// board.playing = &board.players[whos_turn_is_it()];
 	highlight_possible_moves(*board.playing);
 	destroy_hud(board.hud);
 	board.hud = new_hud(*board.playing);
-	board.waitUntil = SDL_GetTicks(); // + 200; // + 5000;
+	board.waitUntil = SDL_GetTicks() + 500; // + 200; // + 5000;
 	printf("\e[32m [RECAP] %d %d %d\e[37m\n", board.recap.coins, board.recap.bundleToken, board.recap.templeCoins);
 }
 

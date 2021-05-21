@@ -396,6 +396,124 @@ void destroy_hud(Hud* hud)
 	free(hud);
 }
 
+// LEADERBOARD
+Lboard* new_lboard(Player* players, int playerCount)
+{
+	Lboard* lboard = (Lboard*)malloc(sizeof(Lboard));
+	lboard->riceList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->mountList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->seaList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->templeList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->encounterList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->shopList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->hotSpringList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->innList = (Player**)malloc(sizeof(Player*) * playerCount);
+	lboard->bundleTkList = (Player**)malloc(sizeof(Player*) * playerCount);
+
+	for (int i = 0; i < playerCount; i++) {
+		lboard->riceList[i] = &players[i];
+		printf("%s\n", lboard->riceList[i]->nickname);
+		lboard->mountList[i] = &players[i];
+		lboard->seaList[i] = &players[i];
+		lboard->templeList[i] = &players[i];
+		lboard->encounterList[i] = &players[i];
+		lboard->shopList[i] = &players[i];
+		lboard->hotSpringList[i] = &players[i];
+		lboard->innList[i] = &players[i];
+		lboard->bundleTkList[i] = &players[i];
+	}
+	return lboard;
+}
+
+int cmpfunc_rice(const void* a, const void* b)
+{
+	return (*(Player**)b)->panRice - (*(Player**)a)->panRice;
+}
+
+int cmpfunc_mount(const void* a, const void* b)
+{
+	return (*(Player**)b)->panMount - (*(Player**)a)->panMount;
+}
+
+int cmpfunc_sea(const void* a, const void* b)
+{
+	return (*(Player**)b)->panSea - (*(Player**)a)->panSea;
+}
+
+int cmpfunc_temple(const void* a, const void* b)
+{
+	return (*(Player**)b)->templeCoins - (*(Player**)a)->templeCoins;
+}
+
+int cmpfunc_encounter(const void* a, const void* b)
+{
+	return (*(Player**)b)->encounterCount - (*(Player**)a)->encounterCount;
+}
+
+int cmpfunc_shop(const void* a, const void* b)
+{
+	return 0;
+	// return (*(Player**)b)->bundleToken - (*(Player**)a)->bundleToken;
+}
+
+int cmpfunc_hot_spring(const void* a, const void* b)
+{
+	return (*(Player**)b)->hotSpringCount - (*(Player**)a)->hotSpringCount;
+}
+
+int cmpfunc_inn(const void* a, const void* b)
+{
+	return 0;
+	// return (*(Player**)b)->bundleToken - (*(Player**)a)->bundleToken;
+}
+
+int cmpfunc_bundle_tk(const void* a, const void* b)
+{
+	return (*(Player**)b)->bundleToken - (*(Player**)a)->bundleToken;
+}
+
+void update_lboard(Lboard* lboard, Player* players, int playerCount)
+{
+	// sort every list
+	for (int i = 0; i < playerCount; i++) {
+		printf("beta = %s\n", lboard->bundleTkList[i]->nickname);
+	}
+	qsort(lboard->riceList, playerCount, sizeof(Player*), (compfn)cmpfunc_rice);
+	qsort(lboard->mountList, playerCount, sizeof(Player*), (compfn)cmpfunc_mount);
+	qsort(lboard->seaList, playerCount, sizeof(Player*), (compfn)cmpfunc_sea);
+	qsort(lboard->templeList, playerCount, sizeof(Player*), (compfn)cmpfunc_temple);
+	qsort(lboard->encounterList, playerCount, sizeof(Player*), (compfn)cmpfunc_encounter);
+	qsort(lboard->shopList, playerCount, sizeof(Player*), (compfn)cmpfunc_shop);
+	qsort(lboard->hotSpringList, playerCount, sizeof(Player*), (compfn)cmpfunc_hot_spring);
+	qsort(lboard->innList, playerCount, sizeof(Player*), (compfn)cmpfunc_inn);
+	qsort(lboard->bundleTkList, playerCount, sizeof(Player*), cmpfunc_bundle_tk);
+
+	printf("Bundle list :\n");
+	for (int i = 0; i < playerCount; i++) {
+		printf(" - %s : %d\n", lboard->bundleTkList[i]->nickname, lboard->bundleTkList[i]->bundleToken);
+	}
+
+	printf("Rice list :\n");
+	for (int i = 0; i < playerCount; i++) {
+		printf(" - %s : %d\n", lboard->riceList[i]->nickname, lboard->riceList[i]->panRice);
+	}
+}
+
+void draw_lboard(Lboard* lboard)
+{
+	draw_sprite(&lboard->bg);
+	for (int col = 0; col < 8; col++) {
+		for (int row = 0; row < 5; row++) {
+			draw_sprite(lboard->texts[col][row].sprite);
+		}
+	}
+}
+
+void destroy_lboard(Lboard* lboard)
+{
+	free(lboard);
+}
+
 // FRAME
 Frame* new_frame(AnchorInfo* ai, ContentType contentType, Content content)
 {

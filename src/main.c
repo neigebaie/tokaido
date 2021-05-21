@@ -154,26 +154,6 @@ int main(int argc, const char *argv[])
 					SDL_GetWindowSize(window, &windowAnchor.size.w, &windowAnchor.size.h);
 					break;
 
-				// case SDL_MOUSEBUTTONDOWN:
-				// 	if (event.button.button == SDL_BUTTON_LEFT)
-				// 	{
-				// 		for (int btnId = 0; btnId < BTN_NB; btnId++)
-				// 		{
-				// 			if (SDL_PointInRect(&mousePos, gui->btnList[btnId]->bg->rect))
-				// 			{
-				// 				; // gui->btnList[btnId]->clicked = 1;
-				// 			}
-				// 		}
-				// 		switch (menu)
-				// 		{
-				// 			case MENU_LOGIN:
-				// 			focusedTextbox = NULL;
-				// 				if (SDL_PointInRect(&mousePos, gui->btnSignUp->bg->rect))
-				// 				{
-				// 					printf("\e[31m [INFO] : Le bouton SignUp a été cliqué ! ✨\e[37m\n");
-				// 					menu = MENU_SIGNUP;
-				// 					text_info_clear(gui->textInfo);
-				// 				}
 				// 				else if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
 				// 				{
 				// 					printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
@@ -194,25 +174,7 @@ int main(int argc, const char *argv[])
 				// 					gui->textboxPassword->textLen = 0;
 				// 					textbox_update(gui->textboxPassword);
 				// 					text_info_update(gui->textInfo);
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
-				// 				{
-				// 					printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
-				// 					menu = MENU_MAIN;
-				// 					text_info_clear(gui->textInfo);
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->textboxUsername->box->bg->rect))
-				// 				{
-				// 					focusedTextbox = gui->textboxUsername;
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->textboxPassword->box->bg->rect))
-				// 				{
-				// 					focusedTextbox = gui->textboxPassword;
-				// 				}
-				// 				break;
-				// 			case MENU_SIGNUP:
-				// 				if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
-				// 				{
+
 				// 					printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
 				// 					if (account_create(gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfo->text))
 				// 					{
@@ -237,18 +199,6 @@ int main(int argc, const char *argv[])
 				// 					menu = MENU_LOGIN;
 				// 					text_info_clear(gui->textInfo);
 				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->textboxUsername->box->bg->rect))
-				// 				{
-				// 					focusedTextbox = gui->textboxUsername;
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->textboxPassword->box->bg->rect))
-				// 				{
-				// 					focusedTextbox = gui->textboxPassword;
-				// 				}
-				// 				break;
-				// 		}
-				// 	}
-				// 	break;
 				case SDL_QUIT:
 					program_launched = SDL_FALSE;
 					break;
