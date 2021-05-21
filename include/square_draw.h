@@ -117,6 +117,11 @@ SquareGui* new_pan_rice_gui(int nb);
 SquareGui* new_pan_mount_gui(int nb);
 SquareGui* new_pan_sea_gui(int nb);
 
+//Custom Menu
+	Menu* new_yoshiyasu_menu(int encounterId1, int encounterId2);
+	Menu* new_Hiroshige_menu();
+	Menu* new_Satsuki_menu(int foodId);
+
 // HUD
 Hud* new_hud(Player player);
 void update_hud(Hud* hud, Player player);

@@ -621,3 +621,66 @@ void draw_square_gui(SquareGui* sgui)
 		}
 	}
 }
+
+Menu* new_yoshiyasu_menu(int encounterId1, int encounterId2)
+{
+		Menu* menu = base_menu(2, 2, 0, 2)
+
+		menu->texts[0] = new_text("Rencontre 1", 0, 0, 0, 0.5);
+		menu->texts[0]->sprite->ai.at = AT_CENTER;
+		menu->texts[0]->sprite->ai.offset = (Offset){-150, 50};
+		menu->texts[1] = new_text("Rencontre 2", 0, 0, 0, 0.5);
+		menu->texts[1]->sprite->ai.at = AT_CENTER;
+		menu->texts[1]->sprite->ai.offset = (Offset){150, 50};
+
+		menu->buttons[0] = new_button("Rencontre 1",0.5, ACTION_NONE, MENU_NONE);
+		menu->buttons[0]->sprite->ai.offset = (Offset){-200, 0};
+		menu->buttons[0]->sprite->ai.at = AT_CENTER;
+		menu->buttons[1] = new_button("Rencontre 2",0.5, ACTION_NONE, MENU_NONE);
+		menu->buttons[1]->sprite->ai.offset = (Offset){200, 0};
+		menu->buttons[1]->sprite->ai.at = AT_CENTER;
+
+}
+
+Menu* new_Hiroshige_menu()
+{
+		Menu* menu = base_menu(3, 3, 0, 3)
+
+		menu->texts[0] = new_text("Panorama Montagne", 0, 0, 0, 0.5);
+		menu->texts[0]->sprite->ai.at = AT_CENTER;
+		menu->texts[0]->sprite->ai.offset = (Offset){-200,50};
+		menu->texts[1] = new_text("Panorama Rizière", 0, 0, 0, 0.5);
+		menu->texts[1]->sprite->ai.at = AT_CENTER;
+		menu->texts[1]->sprite->ai.offset = (Offset){0,50};
+		menu->texts[2] = new_text("Panorama Mer", 0, 0, 0, 0.5);
+		menu->texts[2]->sprite->ai.at = AT_CENTER;
+		menu->texts[2]->sprite->ai.offset = (Offset){200,50};
+
+		menu->buttons[0] = new_button("Choix Panorama Montagne",0.5, ACTION_NONE, MENU_NONE);
+		menu->buttons[0]->sprite->ai.offset = (Offset){-200, 0};
+		menu->buttons[0]->sprite->ai.at = AT_CENTER;
+		menu->buttons[1] = new_button("Choix Panorama Rizière",0.5, ACTION_NONE, MENU_NONE);
+		menu->buttons[1]->sprite->ai.offset = (Offset){0, 0};
+		menu->buttons[1]->sprite->ai.at = AT_CENTER;
+		menu->buttons[2] = new_button("Choix Panorama Mer",0.5, ACTION_NONE, MENU_NONE);
+		menu->buttons[2]->sprite->ai.offset = (Offset){200, 0};
+		menu->buttons[2]->sprite->ai.at = AT_CENTER;
+
+}
+
+Menu* new_Satsuki_menu(int foodId))
+{
+		Menu* menu = base_menu(1, 1, 0, 2)
+
+		menu->texts[0] = new_text("Repas Gratuit", 0, 0, 0, 1);
+		menu->texts[0]->sprite->ai.at = AT_CENTER;
+		menu->texts[0]->sprite->ai.offset = (Offset){0,100};
+
+		menu->buttons[0] = new_button("Accepter",0.5, ACTION_NONE, MENU_NONE);
+		menu->buttons[0]->sprite->ai.offset = (Offset){0, -50};
+		menu->buttons[0]->sprite->ai.at = AT_CENTER;
+		menu->buttons[1] = new_button("Refuser",0.5, ACTION_END_TURN, MENU_NONE);
+		menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+		menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+}
