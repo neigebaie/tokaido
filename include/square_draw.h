@@ -90,8 +90,9 @@ typedef struct
 typedef struct
 {
 	Sprite bg;
-	Sprite colIcons[8];
-	Text texts[8][5];
+	Sprite colIcons[9];
+	Text* texts[9][5];
+	Sprite playerIcons[9][5];
 
 	Player** riceList;      // rizière
 	Player** mountList;     // montagne

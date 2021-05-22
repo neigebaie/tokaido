@@ -163,6 +163,7 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	board.camera.origin.y = 300;
 	board.camera.scale    = 1.f;
 
+	board.drawLboard = SDL_FALSE;
 	board.started = SDL_FALSE;
 }
 
@@ -177,9 +178,14 @@ void board_update()
 	int scrollY = 0;
 	int zoom = 0;
 
+	const Uint8 *state = SDL_GetKeyboardState(NULL);
+	if (state[SDL_SCANCODE_TAB])
+		board.drawLboard = SDL_TRUE;
+	else
+		board.drawLboard = SDL_FALSE;
+
 	if (board.mode == BM_BOARD)
 	{
-		const Uint8 *state = SDL_GetKeyboardState(NULL);
 		if (state[SDL_SCANCODE_LEFT])
 			scrollX += 1;
 		if (state[SDL_SCANCODE_RIGHT])
@@ -509,14 +515,18 @@ void draw_board()
 			break;
 		case BM_BOARD:
 			// draw_bg(); // Affiche l'arrière plan du plateau
+			draw_sprite(&textureMgr->bg[6]);
 			draw_lines(board.squareCount);
 			draw_squares(&board);
 			draw_players();
 			break;
-		case BM_LEADER_BOARD:
-			break;
 		case BM_INVENTORY:
 			break;
+	}
+
+	if (board.drawLboard)
+	{
+		draw_lboard(board.lboard);
 	}
 
 	draw_hud(board.hud);
@@ -690,10 +700,10 @@ void begin_turn()
 {
 	reset_recap(&board.recap);
 	board.playing = &board.players[whos_turn_is_it()];
-	for (int i = 0; i < board.playerCount; i++)
-	{
-		log_player(board.players[i].bundleToken, i == board.playerCount - 1);
-	}
+	// for (int i = 0; i < board.playerCount; i++)
+	// {
+	// 	log_player(board.players[i].bundleToken, i == board.playerCount - 1);
+	// }
 	board.hud = new_hud(*board.playing);
 	highlight_possible_moves(*board.playing);
 	if (!board.started)

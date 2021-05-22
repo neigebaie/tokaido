@@ -61,6 +61,7 @@ typedef struct
 	SDL_Texture* travelerTex;
 	SDL_Texture* itemTex;
 	SDL_Texture* encounterTex;
+	SDL_Texture* lbIcontex;
 	SDL_Texture* iconTex;
 	SDL_Texture* guiTex;
 
@@ -71,6 +72,7 @@ typedef struct
 	Sprite bundleTkIcon;
 	Sprite coinIcon;
 	Sprite itemCatIcons[4];
+	Sprite lbIcons[9];
 	Sprite templeCoinIcon;
 	Sprite frame;
 

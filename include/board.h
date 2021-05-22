@@ -16,7 +16,6 @@
 typedef enum
 {
 	BM_BOARD,
-	BM_LEADER_BOARD,
 	BM_INVENTORY,
 	BM_SQUARE
 } BoardMode;
@@ -47,6 +46,7 @@ typedef struct
 	Recap recap;
 
 	Hud* hud;
+	SDL_bool drawLboard;
 	Lboard* lboard;
 } Board;
 

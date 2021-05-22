@@ -400,6 +400,7 @@ void destroy_hud(Hud* hud)
 Lboard* new_lboard(Player* players, int playerCount)
 {
 	Lboard* lboard = (Lboard*)malloc(sizeof(Lboard));
+	const int delta = 140;
 	lboard->riceList = (Player**)malloc(sizeof(Player*) * playerCount);
 	lboard->mountList = (Player**)malloc(sizeof(Player*) * playerCount);
 	lboard->seaList = (Player**)malloc(sizeof(Player*) * playerCount);
@@ -410,17 +411,37 @@ Lboard* new_lboard(Player* players, int playerCount)
 	lboard->innList = (Player**)malloc(sizeof(Player*) * playerCount);
 	lboard->bundleTkList = (Player**)malloc(sizeof(Player*) * playerCount);
 
-	for (int i = 0; i < playerCount; i++) {
-		lboard->riceList[i] = &players[i];
-		printf("%s\n", lboard->riceList[i]->nickname);
-		lboard->mountList[i] = &players[i];
-		lboard->seaList[i] = &players[i];
-		lboard->templeList[i] = &players[i];
-		lboard->encounterList[i] = &players[i];
-		lboard->shopList[i] = &players[i];
-		lboard->hotSpringList[i] = &players[i];
-		lboard->innList[i] = &players[i];
-		lboard->bundleTkList[i] = &players[i];
+	for (int row = 0; row < playerCount; row++) {
+		lboard->riceList[row] = &players[row];
+		printf("%s\n", lboard->riceList[row]->nickname);
+		lboard->mountList[row] = &players[row];
+		lboard->seaList[row] = &players[row];
+		lboard->templeList[row] = &players[row];
+		lboard->encounterList[row] = &players[row];
+		lboard->shopList[row] = &players[row];
+		lboard->hotSpringList[row] = &players[row];
+		lboard->innList[row] = &players[row];
+		lboard->bundleTkList[row] = &players[row];
+		for (int col = 0; col < 9; col++) {
+			lboard->playerIcons[col][row] = players[row].traveler.sprite;
+			lboard->playerIcons[col][row].ai.at = AT_CENTER;
+			lboard->playerIcons[col][row].ai.offset.x = 0.5 * delta + (-0.5) * delta * 8 + col * delta;
+			lboard->playerIcons[col][row].ai.offset.y = 60 + (-0.5) * delta * 5 + row * delta;
+		}
+	}
+
+	lboard->bg = textureMgr->bg[5];
+	for (int col = 0; col < 9; col++) {
+		lboard->colIcons[col] = textureMgr->lbIcons[col];
+		lboard->colIcons[col].ai.at = AT_CENTER;
+		lboard->colIcons[col].ai.offset.x = 0.5 * delta + (-0.5) * delta * 8 + col * delta;
+		lboard->colIcons[col].ai.offset.y = 20 + (-0.5) * delta * 6;
+		for (int row = 0; row < playerCount; row++) {
+			lboard->texts[col][row] = new_text("0", 20, 20, 20, 0.5);
+			lboard->texts[col][row]->sprite->ai.at = AT_CENTER;
+			lboard->texts[col][row]->sprite->ai.offset.x = 60 + 0.5 * delta + (-0.5) * delta * 8 + col * delta;
+			lboard->texts[col][row]->sprite->ai.offset.y = 128 + (-0.5) * delta * 5 + row * delta;
+		}
 	}
 	return lboard;
 }
@@ -452,8 +473,7 @@ int cmpfunc_encounter(const void* a, const void* b)
 
 int cmpfunc_shop(const void* a, const void* b)
 {
-	return 0;
-	// return (*(Player**)b)->bundleToken - (*(Player**)a)->bundleToken;
+	return (*(Player**)b)->itemCount - (*(Player**)a)->itemCount;
 }
 
 int cmpfunc_hot_spring(const void* a, const void* b)
@@ -475,9 +495,6 @@ int cmpfunc_bundle_tk(const void* a, const void* b)
 void update_lboard(Lboard* lboard, Player* players, int playerCount)
 {
 	// sort every list
-	for (int i = 0; i < playerCount; i++) {
-		printf("beta = %s\n", lboard->bundleTkList[i]->nickname);
-	}
 	qsort(lboard->riceList, playerCount, sizeof(Player*), (compfn)cmpfunc_rice);
 	qsort(lboard->mountList, playerCount, sizeof(Player*), (compfn)cmpfunc_mount);
 	qsort(lboard->seaList, playerCount, sizeof(Player*), (compfn)cmpfunc_sea);
@@ -488,14 +505,37 @@ void update_lboard(Lboard* lboard, Player* players, int playerCount)
 	qsort(lboard->innList, playerCount, sizeof(Player*), (compfn)cmpfunc_inn);
 	qsort(lboard->bundleTkList, playerCount, sizeof(Player*), cmpfunc_bundle_tk);
 
-	printf("Bundle list :\n");
 	for (int i = 0; i < playerCount; i++) {
-		printf(" - %s : %d\n", lboard->bundleTkList[i]->nickname, lboard->bundleTkList[i]->bundleToken);
-	}
+		lboard->playerIcons[0][i].crop = lboard->riceList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[0][i]->content, "%d", lboard->riceList[i]->panRice);
+		lboard->playerIcons[1][i].crop = lboard->mountList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[1][i]->content, "%d", lboard->mountList[i]->panMount);
 
-	printf("Rice list :\n");
-	for (int i = 0; i < playerCount; i++) {
-		printf(" - %s : %d\n", lboard->riceList[i]->nickname, lboard->riceList[i]->panRice);
+		lboard->playerIcons[2][i].crop = lboard->seaList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[2][i]->content, "%d", lboard->seaList[i]->panSea);
+
+		lboard->playerIcons[3][i].crop = lboard->templeList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[3][i]->content, "%d", lboard->templeList[i]->templeCoins);
+
+		lboard->playerIcons[4][i].crop = lboard->encounterList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[4][i]->content, "%d", lboard->encounterList[i]->encounterCount);
+
+		lboard->playerIcons[5][i].crop = lboard->shopList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[5][i]->content, "%d", lboard->shopList[i]->itemCount);
+		printf("[shop] %s : %d\n", lboard->shopList[i]->nickname, lboard->shopList[i]->itemCount);
+		
+		lboard->playerIcons[6][i].crop = lboard->hotSpringList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[6][i]->content, "%d", lboard->hotSpringList[i]->hotSpringCount);
+
+		lboard->playerIcons[7][i].crop = lboard->innList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[7][i]->content, "%d", lboard->innList[i]->innCoins);
+
+		lboard->playerIcons[8][i].crop = lboard->bundleTkList[i]->traveler.sprite.crop;
+		sprintf(lboard->texts[8][i]->content, "%d", lboard->bundleTkList[i]->bundleToken);
+
+		for (int col = 0; col < 9; col++) {
+			update_text(lboard->texts[col][i]);
+		}
 	}
 }
 
@@ -503,8 +543,13 @@ void draw_lboard(Lboard* lboard)
 {
 	draw_sprite(&lboard->bg);
 	for (int col = 0; col < 8; col++) {
+		draw_sprite(&lboard->colIcons[col]);
 		for (int row = 0; row < 5; row++) {
-			draw_sprite(lboard->texts[col][row].sprite);
+			if (lboard->texts[col][row]->content[0] != '0')
+			{
+				draw_sprite(lboard->texts[col][row]->sprite);
+				draw_sprite(&lboard->playerIcons[col][row]);
+			}
 		}
 	}
 }
@@ -622,65 +667,65 @@ void draw_square_gui(SquareGui* sgui)
 	}
 }
 
-Menu* new_yoshiyasu_menu(int encounterId1, int encounterId2)
-{
-		Menu* menu = base_menu(2, 2, 0, 2)
-
-		menu->texts[0] = new_text("Rencontre 1", 0, 0, 0, 0.5);
-		menu->texts[0]->sprite->ai.at = AT_CENTER;
-		menu->texts[0]->sprite->ai.offset = (Offset){-150, 50};
-		menu->texts[1] = new_text("Rencontre 2", 0, 0, 0, 0.5);
-		menu->texts[1]->sprite->ai.at = AT_CENTER;
-		menu->texts[1]->sprite->ai.offset = (Offset){150, 50};
-
-		menu->buttons[0] = new_button("Rencontre 1",0.5, ACTION_NONE, MENU_NONE);
-		menu->buttons[0]->sprite->ai.offset = (Offset){-200, 0};
-		menu->buttons[0]->sprite->ai.at = AT_CENTER;
-		menu->buttons[1] = new_button("Rencontre 2",0.5, ACTION_NONE, MENU_NONE);
-		menu->buttons[1]->sprite->ai.offset = (Offset){200, 0};
-		menu->buttons[1]->sprite->ai.at = AT_CENTER;
-
-}
-
-Menu* new_Hiroshige_menu()
-{
-		Menu* menu = base_menu(3, 3, 0, 3)
-
-		menu->texts[0] = new_text("Panorama Montagne", 0, 0, 0, 0.5);
-		menu->texts[0]->sprite->ai.at = AT_CENTER;
-		menu->texts[0]->sprite->ai.offset = (Offset){-200,50};
-		menu->texts[1] = new_text("Panorama Rizière", 0, 0, 0, 0.5);
-		menu->texts[1]->sprite->ai.at = AT_CENTER;
-		menu->texts[1]->sprite->ai.offset = (Offset){0,50};
-		menu->texts[2] = new_text("Panorama Mer", 0, 0, 0, 0.5);
-		menu->texts[2]->sprite->ai.at = AT_CENTER;
-		menu->texts[2]->sprite->ai.offset = (Offset){200,50};
-
-		menu->buttons[0] = new_button("Choix Panorama Montagne",0.5, ACTION_NONE, MENU_NONE);
-		menu->buttons[0]->sprite->ai.offset = (Offset){-200, 0};
-		menu->buttons[0]->sprite->ai.at = AT_CENTER;
-		menu->buttons[1] = new_button("Choix Panorama Rizière",0.5, ACTION_NONE, MENU_NONE);
-		menu->buttons[1]->sprite->ai.offset = (Offset){0, 0};
-		menu->buttons[1]->sprite->ai.at = AT_CENTER;
-		menu->buttons[2] = new_button("Choix Panorama Mer",0.5, ACTION_NONE, MENU_NONE);
-		menu->buttons[2]->sprite->ai.offset = (Offset){200, 0};
-		menu->buttons[2]->sprite->ai.at = AT_CENTER;
-
-}
-
-Menu* new_Satsuki_menu(int foodId))
-{
-		Menu* menu = base_menu(1, 1, 0, 2)
-
-		menu->texts[0] = new_text("Repas Gratuit", 0, 0, 0, 1);
-		menu->texts[0]->sprite->ai.at = AT_CENTER;
-		menu->texts[0]->sprite->ai.offset = (Offset){0,100};
-
-		menu->buttons[0] = new_button("Accepter",0.5, ACTION_NONE, MENU_NONE);
-		menu->buttons[0]->sprite->ai.offset = (Offset){0, -50};
-		menu->buttons[0]->sprite->ai.at = AT_CENTER;
-		menu->buttons[1] = new_button("Refuser",0.5, ACTION_END_TURN, MENU_NONE);
-		menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
-		menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
-
-}
+// Menu* new_yoshiyasu_menu(int encounterId1, int encounterId2)
+// {
+// 		Menu* menu = base_menu(2, 2, 0, 2)
+//
+// 		menu->texts[0] = new_text("Rencontre 1", 0, 0, 0, 0.5);
+// 		menu->texts[0]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[0]->sprite->ai.offset = (Offset){-150, 50};
+// 		menu->texts[1] = new_text("Rencontre 2", 0, 0, 0, 0.5);
+// 		menu->texts[1]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[1]->sprite->ai.offset = (Offset){150, 50};
+//
+// 		menu->buttons[0] = new_button("Rencontre 1",0.5, ACTION_NONE, MENU_NONE);
+// 		menu->buttons[0]->sprite->ai.offset = (Offset){-200, 0};
+// 		menu->buttons[0]->sprite->ai.at = AT_CENTER;
+// 		menu->buttons[1] = new_button("Rencontre 2",0.5, ACTION_NONE, MENU_NONE);
+// 		menu->buttons[1]->sprite->ai.offset = (Offset){200, 0};
+// 		menu->buttons[1]->sprite->ai.at = AT_CENTER;
+//
+// }
+//
+// Menu* new_Hiroshige_menu()
+// {
+// 		Menu* menu = base_menu(3, 3, 0, 3)
+//
+// 		menu->texts[0] = new_text("Panorama Montagne", 0, 0, 0, 0.5);
+// 		menu->texts[0]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[0]->sprite->ai.offset = (Offset){-200,50};
+// 		menu->texts[1] = new_text("Panorama Rizière", 0, 0, 0, 0.5);
+// 		menu->texts[1]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[1]->sprite->ai.offset = (Offset){0,50};
+// 		menu->texts[2] = new_text("Panorama Mer", 0, 0, 0, 0.5);
+// 		menu->texts[2]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[2]->sprite->ai.offset = (Offset){200,50};
+//
+// 		menu->buttons[0] = new_button("Choix Panorama Montagne",0.5, ACTION_NONE, MENU_NONE);
+// 		menu->buttons[0]->sprite->ai.offset = (Offset){-200, 0};
+// 		menu->buttons[0]->sprite->ai.at = AT_CENTER;
+// 		menu->buttons[1] = new_button("Choix Panorama Rizière",0.5, ACTION_NONE, MENU_NONE);
+// 		menu->buttons[1]->sprite->ai.offset = (Offset){0, 0};
+// 		menu->buttons[1]->sprite->ai.at = AT_CENTER;
+// 		menu->buttons[2] = new_button("Choix Panorama Mer",0.5, ACTION_NONE, MENU_NONE);
+// 		menu->buttons[2]->sprite->ai.offset = (Offset){200, 0};
+// 		menu->buttons[2]->sprite->ai.at = AT_CENTER;
+//
+// }
+//
+// Menu* new_Satsuki_menu(int foodId))
+// {
+// 		Menu* menu = base_menu(1, 1, 0, 2)
+//
+// 		menu->texts[0] = new_text("Repas Gratuit", 0, 0, 0, 1);
+// 		menu->texts[0]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[0]->sprite->ai.offset = (Offset){0,100};
+//
+// 		menu->buttons[0] = new_button("Accepter",0.5, ACTION_NONE, MENU_NONE);
+// 		menu->buttons[0]->sprite->ai.offset = (Offset){0, -50};
+// 		menu->buttons[0]->sprite->ai.at = AT_CENTER;
+// 		menu->buttons[1] = new_button("Refuser",0.5, ACTION_END_TURN, MENU_NONE);
+// 		menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+// 		menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+//
+// }

@@ -120,10 +120,11 @@ typedef struct
 	int position;						// position du joueur sur le plateau
 	int roadDist;						// éloignement de la route
 
-	int bundleToken;				// points de victoire accumulés (jeton balûchon)
-	int coins;							// pièces possédées
-	int templeCoins;				// pièces données au temple
-	int hotSpringCount;					// nombre de passages à une source chaude
+	int bundleToken;        // points de victoire accumulés (jeton balûchon)
+	int coins;              // pièces possédées
+	int templeCoins;        // pièces données au temple
+	int hotSpringCount;     // nombre de passages à une source chaude
+	int innCoins;           // nombre de pièces dépensées pour les repas
 
 	Food foods[50];
 	int  foodCount;
