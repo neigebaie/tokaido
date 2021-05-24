@@ -76,6 +76,8 @@ void load_squares(Square *squares, int playerCount)
 
 void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 {
+	if (board.initialized)
+		return;
 	char nameTagText[110];
 	srand(time(NULL));
 
@@ -105,7 +107,7 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	for (int i = 0; i < BOARD_PLAYERS; i++)
 	{
 		board.players[i].traveler = *resources.travelers[travId[i]];
-		if (i == 0) // debug 0
+		if (i == 0 || 0) // debug 0
 		{
 			// pour tester un voyageur spécifique
 			// board.players[i].traveler = *resources.travelers[8];
@@ -165,6 +167,10 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 
 	board.drawLboard = SDL_FALSE;
 	board.started = SDL_FALSE;
+	board.initialized = SDL_TRUE;
+
+	board.gameOverMenu = NULL;
+	board.achievementsGui = NULL;
 }
 
 SDL_bool is_game_started()
@@ -215,18 +221,18 @@ void board_update()
 	}
 }
 
-void board_event(SDL_Event* event, SDL_Point* mousePos)
+void board_event(SDL_Event* event, SDL_Point* mousePos, MenuId* menuId)
 {
 	switch (event->type)
 	{
 		case SDL_MOUSEMOTION:
-			board_mouse(mousePos, SDL_FALSE);
+			board_mouse(mousePos, SDL_FALSE, menuId);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			if (board.playing != NULL && !board.waitUntil)
 			{
-				if (board.playing->isHuman)
-					board_mouse(mousePos, SDL_TRUE);
+				if (board.playing->isHuman || (board.mode == BM_ACHIEVEMENTS || board.mode == BM_GAMEOVER))
+					board_mouse(mousePos, SDL_TRUE, menuId);
 			}
 			break;
 		case SDL_KEYDOWN:
@@ -244,7 +250,7 @@ void board_event(SDL_Event* event, SDL_Point* mousePos)
 	}
 }
 
-void board_mouse(SDL_Point* mousePos, SDL_bool click)
+void board_mouse(SDL_Point* mousePos, SDL_bool click, MenuId* menuId)
 {
 	SDL_Rect rect;
 
@@ -292,6 +298,31 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click)
 			else
 			{
 				board.squares[position].state = STATE_IDLE;
+			}
+		}
+	}
+	else if (board.mode == BM_GAMEOVER)
+	{
+		for (int btnId = 0; btnId < board.gameOverMenu->buttonCount; btnId++)
+		{
+			if (board.gameOverMenu->buttons[btnId]->state == STATE_DISABLED)
+				continue;
+			SDL_Rect rect = anchored_rect(board.gameOverMenu->buttons[btnId]->bg.ai, board.gameOverMenu->buttons[btnId]->bg.parent);
+			if (SDL_PointInRect(mousePos, &rect))
+			{
+				if (click)
+				{
+					board.gameOverMenu->buttons[btnId]->state = STATE_CLICKED;
+					button_action(board.gameOverMenu->buttons[btnId], menuId);
+				}
+				else
+				{
+					board.gameOverMenu->buttons[btnId]->state = STATE_HOVERED;
+				}
+			}
+			else
+			{
+				board.gameOverMenu->buttons[btnId]->state = STATE_IDLE;
 			}
 		}
 	}
@@ -522,14 +553,23 @@ void draw_board()
 			break;
 		case BM_INVENTORY:
 			break;
+		case BM_ACHIEVEMENTS:
+			draw_achievements_gui(board.achievementsGui);
+			break;
+		case BM_GAMEOVER:
+			draw_menu(board.gameOverMenu);
+			break;
 	}
 
-	if (board.drawLboard)
+	if (board.mode != BM_GAMEOVER && board.mode != BM_ACHIEVEMENTS)
 	{
-		draw_lboard(board.lboard);
-	}
+		if (board.drawLboard)
+		{
+			draw_lboard(board.lboard);
+		}
 
-	draw_hud(board.hud);
+		draw_hud(board.hud);
+	}
 }
 
 int whos_turn_is_it()
@@ -635,6 +675,9 @@ void random_move()
 	}
 	if (possibilities == 0)
 	{
+		// board.gameOverMenu = new_game_over_gui(board.players, board.playerCount);
+		board.achievementsGui = new_achievements_gui(board.lboard, board.players, board.playerCount);
+		board.mode = BM_ACHIEVEMENTS;
 		printf("\e[34m [DEBUG] Game over !\e[37m\n");
 		for (int i = 0; i < board.playerCount; i++)
 		{
@@ -768,7 +811,7 @@ void square_action(Square* square)
 
 			}
 
-			board.sgui = new_inn_gui(board.innFoods, board.playerCount + 1);
+			board.sgui = new_inn_gui(board.innFoods, board.playerCount + 1, board.playing);
 
 			if (board.playing->traveler.id == TRAVELER_KINKO) 	// Prix réduit
 			{
@@ -819,6 +862,7 @@ void square_action(Square* square)
 				for (int i = 0; i < board.sgui->frameCount; i++)
 				{
 					board.sgui->frames[i]->content.item.price = 1;
+					board.sgui->frames[i]->state = STATE_IDLE;
 					sprintf(board.sgui->frames[i]->coinText->content, "%d", board.sgui->frames[i]->content.food.price);
 					update_text(board.sgui->frames[i]->coinText);
 				}

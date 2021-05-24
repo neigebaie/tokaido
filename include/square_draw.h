@@ -106,9 +106,15 @@ typedef struct
 
 } Lboard;
 
+typedef struct
+{
+	Menu* menu;
+	Sprite playerIcons[8];
+} AchievementsGui;
+
 // SquareGui
 
-SquareGui* new_inn_gui(Food** foods, int foodCount);
+SquareGui* new_inn_gui(Food** foods, int foodCount, Player* player);
 SquareGui* new_shop_gui(Item* items[], Player* player);
 SquareGui* new_hot_spring_gui();
 SquareGui* new_temple_gui();
@@ -118,16 +124,23 @@ SquareGui* new_pan_rice_gui(int nb);
 SquareGui* new_pan_mount_gui(int nb);
 SquareGui* new_pan_sea_gui(int nb);
 
-//Custom Menu
-	Menu* new_yoshiyasu_menu(int encounterId1, int encounterId2);
-	Menu* new_Hiroshige_menu();
-	Menu* new_Satsuki_menu(int foodId);
+// Game over
+AchievementsGui* new_achievements_gui(Lboard* lboard, Player* players, int playerCount);
+Menu* new_game_over_gui(Player* players, int playerCount);
+
+// Custom Menu
+Menu* new_yoshiyasu_menu(int encounterId1, int encounterId2);
+Menu* new_Hiroshige_menu();
+Menu* new_Satsuki_menu(int foodId);
 
 // HUD
 Hud* new_hud(Player player);
 void update_hud(Hud* hud, Player player);
 void draw_hud(Hud* hud);
 void destroy_hud(Hud* hud);
+
+// COMPARE
+int cmpfunc_bundle_tk(const void* a, const void* b);
 
 // LEADERBOARD
 Lboard* new_lboard(Player*  players, int playerCount);

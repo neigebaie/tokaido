@@ -27,8 +27,7 @@ int main(int argc, const char *argv[])
 	Gui* gui = init_gui();
 	MenuId menuId = MENU_MAIN;
 	Menu* menu = gui->menus[menuId];
-	if (logged) // à décaler évidemment
-		init_board(loggedAccount, textureMgr);
+	// init_board(loggedAccount, textureMgr);
 
 	SDL_Point mousePos;
 
@@ -153,65 +152,55 @@ int main(int argc, const char *argv[])
 				case SDL_WINDOWEVENT:
 					SDL_GetWindowSize(window, &windowAnchor.size.w, &windowAnchor.size.h);
 					break;
-
-				// 				else if (SDL_PointInRect(&mousePos, gui->btnNext->bg->rect))
-				// 				{
-				// 					printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
-				// 					if (account_login(loggedAccount, gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfo->text))
-				// 					{
-				// 						printf("Connexion échouée !\n");
-				// 					}
-				// 					else
-				// 					{
-				// 						logged = SDL_TRUE;
-				// 						printf("Connexion réussie ! %s\n", loggedAccount->nick);
-				// 						gui->textboxUsername->text[0] = 0;
-				// 						gui->textboxUsername->textLen = 0;
-				// 						textbox_update(gui->textboxUsername);
-				// 					}
-				// 					focusedTextbox = NULL;
-				// 					gui->textboxPassword->text[0] = 0;
-				// 					gui->textboxPassword->textLen = 0;
-				// 					textbox_update(gui->textboxPassword);
-				// 					text_info_update(gui->textInfo);
-
-				// 					printf("\e[32m [INFO] : Le bouton Next a été cliqué ! ✨\e[37m\n");
-				// 					if (account_create(gui->textboxUsername->text, gui->textboxPassword->text, gui->textInfo->text))
-				// 					{
-				// 						printf("Création échouée !\n");
-				// 					}
-				// 					else
-				// 					{
-				// 						printf("Compte créé !\n");
-				// 						gui->textboxUsername->text[0] = 0;
-				// 						gui->textboxUsername->textLen = 0;
-				// 						textbox_update(gui->textboxUsername);
-				// 					}
-				// 					focusedTextbox = NULL;
-				// 					gui->textboxPassword->text[0] = 0;
-				// 					gui->textboxPassword->textLen = 0;
-				// 					textbox_update(gui->textboxPassword);
-				// 					text_info_update(gui->textInfo);
-				// 				}
-				// 				else if (SDL_PointInRect(&mousePos, gui->btnBack->bg->rect))
-				// 				{
-				// 					printf("\e[33m [INFO] : Le bouton Back a été cliqué ! ✨\e[37m\n");
-				// 					menu = MENU_LOGIN;
-				// 					text_info_clear(gui->textInfo);
-				// 				}
 				case SDL_QUIT:
 					program_launched = SDL_FALSE;
 					break;
 			}
 			if (menuId == MENU_BOARD)
 			{
-				board_event(&event, &mousePos);
+				board_event(&event, &mousePos, &menuId);
 			}
 		}
 
 		if (SDL_GetTicks() > clickedUntil && clickedUntil && clickedButton != NULL)
 		{
-			button_action(clickedButton, &menuId);
+			if (clickedButton->action == ACTION_LOGIN)
+			{
+				if (account_login(loggedAccount, gui->loginMenu->textboxes[0]->text->content, gui->loginMenu->textboxes[1]->text->content, gui->loginMenu->texts[3]->content))
+				{
+					printf("Connexion échouée ! [%s]\n", gui->loginMenu->textboxes[1]->text->content);
+				}
+				else
+				{
+					logged = SDL_TRUE;
+					printf("Connexion réussie ! %s\n", loggedAccount->nick);
+				}
+				gui->loginMenu->textboxes[1]->text->content[0] = 0;
+				update_text(gui->loginMenu->textboxes[1]->text);
+				update_text(gui->loginMenu->texts[3]);
+			}
+			else if (clickedButton->action == ACTION_SIGNUP)
+			{
+				if (account_create(gui->signupMenu->textboxes[0]->text->content, gui->signupMenu->textboxes[1]->text->content, gui->signupMenu->texts[3]->content))
+				{
+					printf("Création de compte échouée !\n");
+				}
+				else
+				{
+					printf("Création de compte réussie !\n");
+				}
+				gui->signupMenu->textboxes[1]->text->content[0] = 0;
+				update_text(gui->signupMenu->textboxes[1]->text);
+				update_text(gui->signupMenu->texts[3]);
+			}
+			else
+			{
+				if (clickedButton->action == ACTION_START_SOLO)
+				{
+					init_board(loggedAccount, textureMgr);
+				}
+				button_action(clickedButton, &menuId);
+			}
 			clickedButton->state = STATE_IDLE;
 			clickedButton = NULL;
 			clickedUntil = 0;

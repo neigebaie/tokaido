@@ -5,6 +5,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include <utility.h>
+#include <account.h>
 
 #define TEXT_LEN 512
 

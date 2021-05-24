@@ -151,6 +151,9 @@ void load_textures()
 	textureMgr->bgTex[4]         = load_texture("resources/gfx/bg/shop_inn.png");
 	textureMgr->bgTex[5]         = load_texture("resources/gfx/bg/leaderboard.png");
 	textureMgr->bgTex[6]         = load_texture("resources/gfx/bg/board.png");
+	textureMgr->bgTex[7]         = load_texture("resources/gfx/bg/game_over.png");
+	textureMgr->bgTex[8]         = load_texture("resources/gfx/bg/achievements.png");
+	textureMgr->bgTex[9]         = load_texture("resources/gfx/bg/char_selection.png");
 
 	textureMgr->squareTex        = load_texture("resources/gfx/square_spritesheet.png");
 	textureMgr->foodTex          = load_texture("resources/gfx/food_spritesheet.png");
@@ -178,6 +181,9 @@ void load_textures()
 	textureMgr->bg[4]        = *new_sprite(textureMgr->bgTex[4], new_rect(0, 0, 1920, 1080));
 	textureMgr->bg[5]        = *new_sprite(textureMgr->bgTex[5], new_rect(0, 0, 1920, 1080));
 	textureMgr->bg[6]        = *new_sprite(textureMgr->bgTex[6], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[7]        = *new_sprite(textureMgr->bgTex[7], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[8]        = *new_sprite(textureMgr->bgTex[8], new_rect(0, 0, 1920, 1080));
+	textureMgr->bg[9]        = *new_sprite(textureMgr->bgTex[9], new_rect(0, 0, 1920, 1080));
 
 	textureMgr->bundleTkIcon = *new_sprite(textureMgr->iconTex, new_rect(256, 0, 256, 256));
 	textureMgr->bundleTkIcon.ai.size.w = 40;

@@ -17,7 +17,9 @@ typedef enum
 {
 	BM_BOARD,
 	BM_INVENTORY,
-	BM_SQUARE
+	BM_SQUARE,
+	BM_ACHIEVEMENTS,
+	BM_GAMEOVER
 } BoardMode;
 
 typedef struct
@@ -25,6 +27,7 @@ typedef struct
 	Camera camera;
 
 	SDL_bool started;
+	SDL_bool initialized;
 
 	Player players[BOARD_PLAYERS];
 	int playerCount;
@@ -48,6 +51,8 @@ typedef struct
 	Hud* hud;
 	SDL_bool drawLboard;
 	Lboard* lboard;
+	AchievementsGui* achievementsGui;
+	Menu* gameOverMenu;
 } Board;
 
 extern Board board;
@@ -61,8 +66,8 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr);
 SDL_bool is_game_started();
 
 void board_update();
-void board_event(SDL_Event* event, SDL_Point* mousePos);
-void board_mouse(SDL_Point* mousePos, SDL_bool click);
+void board_event(SDL_Event* event, SDL_Point* mousePos, MenuId* menuId);
+void board_mouse(SDL_Point* mousePos, SDL_bool click, MenuId* menuId);
 
 int whos_turn_is_it();
 int highlight_possible_moves(Player player);

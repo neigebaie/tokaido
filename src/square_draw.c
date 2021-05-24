@@ -1,6 +1,6 @@
 #include <square_draw.h>
 
-SquareGui* new_inn_gui(Food** foods, int foodCount)
+SquareGui* new_inn_gui(Food** foods, int foodCount, Player* player)
 {
 	SquareGui* sgui = (SquareGui*)malloc(sizeof(SquareGui));
 	sgui->menu = base_menu(1, 1, 0, 1);
@@ -22,6 +22,7 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 	ai.size = (Size){220, 330};
 
 	int j = 0;
+	int alreadyTasted = 0;
 	for (int i = 0; i < foodCount; i++)
 	{
 		ai.offset.x = ((i % 3) - 1) * 320;
@@ -38,6 +39,15 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 		}
 		else
 		{
+			alreadyTasted = 0;
+			for (int f = 0; f < player->foodCount; f++) {
+				if (strcmp(player->foods[f].name, foods[i]->name) == 0)
+				{
+					alreadyTasted = 1;
+					break;
+				}
+			}
+
 			content.food = *foods[i];
 
 			sgui->frames[j] = new_frame(&ai, contentType, content);
@@ -52,6 +62,11 @@ SquareGui* new_inn_gui(Food** foods, int foodCount)
 
 			strcpy(sgui->frames[j]->bundleTkText->content, "+6");
 			update_text(sgui->frames[j]->bundleTkText);
+
+			if (alreadyTasted || foods[i]->price > player->coins)
+			{
+				sgui->frames[j]->state = STATE_DISABLED;
+			}
 
 			j++;
 		}
@@ -103,8 +118,12 @@ SquareGui* new_shop_gui(Item* items[], Player* player)
 
 		sprintf(sgui->frames[i]->bundleTkText->content, "%d", tk_from_collection(*items[i], player->items, player->itemCount));
 		update_text(sgui->frames[i]->bundleTkText);
+
+		if (items[i]->price > player->coins)
+		{
+			sgui->frames[i]->state = STATE_DISABLED;
+		}
 	}
-	//
 	sgui->menu->buttons[0] = new_button("Retour", 0.5, ACTION_END_TURN, MENU_NONE);
 	sgui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
 	sgui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
@@ -313,6 +332,92 @@ SquareGui* new_pan_sea_gui(int nb)
 	return sgui;
 }
 
+// Game over
+AchievementsGui* new_achievements_gui(Lboard* lboard, Player* players, int playerCount)
+{
+	AchievementsGui* achievementsGui = (AchievementsGui*)malloc(sizeof(AchievementsGui));
+	achievementsGui->menu = base_menu(1, 0, 0, 1);
+	int offsetX[] = {-468, -468, -468, -468, 312, 312, 312, 312};
+	int offsetY[] = {-166, -24, 119, 261, -166, -24, 119, 261};
+	achievementsGui->menu->sprites[0] = &textureMgr->bg[8];
+
+	achievementsGui->playerIcons[0] = lboard->riceList[0]->traveler.sprite;
+	printf("%s\n", lboard->riceList[0]->nickname);
+	achievementsGui->playerIcons[1] = lboard->mountList[0]->traveler.sprite;
+	printf("%s\n", lboard->mountList[0]->nickname);
+	achievementsGui->playerIcons[2] = lboard->seaList[0]->traveler.sprite;
+	printf("%s\n", lboard->seaList[0]->nickname);
+	achievementsGui->playerIcons[3] = lboard->templeList[0]->traveler.sprite;
+	printf("%s\n", lboard->templeList[0]->nickname);
+	achievementsGui->playerIcons[4] = lboard->encounterList[0]->traveler.sprite;
+	printf("%s\n", lboard->encounterList[0]->nickname);
+	achievementsGui->playerIcons[5] = lboard->shopList[0]->traveler.sprite;
+	printf("%s\n", lboard->shopList[0]->nickname);
+	achievementsGui->playerIcons[6] = lboard->hotSpringList[0]->traveler.sprite;
+	printf("%s\n", lboard->hotSpringList[0]->nickname);
+	achievementsGui->playerIcons[7] = lboard->innList[0]->traveler.sprite;
+	printf("%s\n", lboard->innList[0]->nickname);
+	for (int i = 0; i < 8; i++) {
+		achievementsGui->playerIcons[i].ai.offset.x = offsetX[i];
+		achievementsGui->playerIcons[i].ai.offset.y = offsetY[i];
+		achievementsGui->playerIcons[i].ai.at = AT_CENTER;
+		achievementsGui->playerIcons[i].ai.size.w = 90;
+		achievementsGui->playerIcons[i].ai.size.h = 90;
+		printf("offset = %d %d\n", achievementsGui->playerIcons[i].ai.offset.x, achievementsGui->playerIcons[i].ai.offset.y);
+	}
+
+	achievementsGui->menu->buttons[0] = new_button("Suivant", 0.5, ACTION_NONE, MENU_NONE);
+	achievementsGui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	achievementsGui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	return achievementsGui;
+}
+
+void draw_achievements_gui(AchievementsGui* achievementsGui)
+{
+	draw_menu(achievementsGui->menu);
+	for (int i = 0; i < 8; i++) {
+		draw_sprite(&achievementsGui->playerIcons[i]);
+	}
+}
+
+Menu* new_game_over_gui(Player* players, int playerCount)
+{
+	Player** sortedPlayers = (Player**)malloc(sizeof(Player*) * playerCount);
+	for (int row = 0; row < playerCount; row++) {
+		sortedPlayers[row] = &players[row];
+	}
+	qsort(sortedPlayers, playerCount, sizeof(Player*), cmpfunc_bundle_tk);
+	Menu* menu = base_menu(1 + playerCount, playerCount, 0, 1);
+	int offsetX[] = {-600, -300, 0, 300, 600};
+	int offsetY[] = {-30, 20, 70, 130, 130};
+	menu->sprites[0] = &textureMgr->bg[7];
+	menu->sprites[0]->ai.at = AT_CENTER;
+
+	for (int i = 1; i < 1 + playerCount; i++) {
+		menu->sprites[i] = &sortedPlayers[i - 1]->traveler.sprite;
+		menu->sprites[i]->ai.at = AT_CENTER;
+		menu->sprites[i]->ai.offset.x = offsetX[i - 1];
+		menu->sprites[i]->ai.offset.y = offsetY[i - 1];
+		menu->sprites[i]->ai.size.w = 150;
+		menu->sprites[i]->ai.size.h = 150;
+
+		menu->texts[i - 1] = new_text("0", 255, 255, 255, 0.8);
+		menu->texts[i - 1]->sprite->ai.at = AT_CENTER;
+		menu->texts[i - 1]->sprite->ai.offset.x = offsetX[i - 1] + 10;
+		menu->texts[i - 1]->sprite->ai.offset.y = offsetY[i - 1] + 170 - 30 * (i>=4);
+		sprintf(menu->texts[i - 1]->content, "%d", sortedPlayers[i - 1]->bundleToken);
+		update_text(menu->texts[i - 1]);
+	}
+
+	menu->buttons[0] = new_button("Menu", 0.5, ACTION_NONE, MENU_MAIN);
+	menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+	menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+
+	// printf("it worked\n");
+	return menu;
+}
+
 // HUD
 Hud* new_hud(Player player)
 {
@@ -400,7 +505,8 @@ void destroy_hud(Hud* hud)
 Lboard* new_lboard(Player* players, int playerCount)
 {
 	Lboard* lboard = (Lboard*)malloc(sizeof(Lboard));
-	const int delta = 140;
+	const int deltaX = 150;
+	const int deltaY = 120;
 	lboard->riceList = (Player**)malloc(sizeof(Player*) * playerCount);
 	lboard->mountList = (Player**)malloc(sizeof(Player*) * playerCount);
 	lboard->seaList = (Player**)malloc(sizeof(Player*) * playerCount);
@@ -422,26 +528,41 @@ Lboard* new_lboard(Player* players, int playerCount)
 		lboard->hotSpringList[row] = &players[row];
 		lboard->innList[row] = &players[row];
 		lboard->bundleTkList[row] = &players[row];
-		for (int col = 0; col < 9; col++) {
+		for (int col = 0; col < 8; col++) {
 			lboard->playerIcons[col][row] = players[row].traveler.sprite;
 			lboard->playerIcons[col][row].ai.at = AT_CENTER;
-			lboard->playerIcons[col][row].ai.offset.x = 0.5 * delta + (-0.5) * delta * 8 + col * delta;
-			lboard->playerIcons[col][row].ai.offset.y = 60 + (-0.5) * delta * 5 + row * delta;
+			lboard->playerIcons[col][row].ai.offset.x = 0.5 * deltaX + (-0.5) * deltaX * 8 + col * deltaX;
+			lboard->playerIcons[col][row].ai.offset.y = 180 + 60 + (-0.5) * deltaY * 5 + row * deltaY;
+			lboard->playerIcons[col][row].ai.size.w *= .7 + .2 * (row == 0);
+			lboard->playerIcons[col][row].ai.size.h *= .7 + .2 * (row == 0);
 		}
+		lboard->playerIcons[8][row] = players[row].traveler.sprite;
+		lboard->playerIcons[8][row].ai.at = AT_CENTER;
+		lboard->playerIcons[8][row].ai.offset.x = 0.5 * deltaX * 8/6 + (-0.5) * deltaX * 8 + (row + 1) * deltaX * 8/6;
+		lboard->playerIcons[8][row].ai.offset.y = -50 + (-0.5) * deltaY * 5;
+		lboard->playerIcons[8][row].ai.size.w *= .7 + .4 * (row == 0);
+		lboard->playerIcons[8][row].ai.size.h *= .7 + .4 * (row == 0);
 	}
 
 	lboard->bg = textureMgr->bg[5];
-	for (int col = 0; col < 9; col++) {
+	for (int col = 0; col < 8; col++) {
 		lboard->colIcons[col] = textureMgr->lbIcons[col];
 		lboard->colIcons[col].ai.at = AT_CENTER;
-		lboard->colIcons[col].ai.offset.x = 0.5 * delta + (-0.5) * delta * 8 + col * delta;
-		lboard->colIcons[col].ai.offset.y = 20 + (-0.5) * delta * 6;
+		lboard->colIcons[col].ai.offset.x = 0.5 * deltaX + (-0.5) * deltaX * 8 + col * deltaX;
+		lboard->colIcons[col].ai.offset.y = 170 + (-0.5) * deltaY * 6;
 		for (int row = 0; row < playerCount; row++) {
-			lboard->texts[col][row] = new_text("0", 20, 20, 20, 0.5);
+			lboard->texts[col][row] = new_text("0", 255, 255, 255, 0.5);
 			lboard->texts[col][row]->sprite->ai.at = AT_CENTER;
-			lboard->texts[col][row]->sprite->ai.offset.x = 60 + 0.5 * delta + (-0.5) * delta * 8 + col * delta;
-			lboard->texts[col][row]->sprite->ai.offset.y = 128 + (-0.5) * delta * 5 + row * delta;
+			lboard->texts[col][row]->sprite->ai.offset.x = 50 + 5 * (row == 0) + 0.5 * deltaX + (-0.5) * deltaX * 8 + col * deltaX;
+			lboard->texts[col][row]->sprite->ai.offset.y = 270 + 20 * (row == 0) + (-0.5) * deltaY * 5 + row * deltaY;
 		}
+	}
+
+	for (int row = 0; row < playerCount; row++) {
+		lboard->texts[8][row] = new_text("0", 255, 255, 255, 0.5);
+		lboard->texts[8][row]->sprite->ai.at = AT_CENTER;
+		lboard->texts[8][row]->sprite->ai.offset.x = 70 + 20 * (row == 0) + 0.5 * deltaX + (-0.5) * deltaX * 8 + (row + 1) * deltaX * 8/6;
+		lboard->texts[8][row]->sprite->ai.offset.y = 10 * (row == 0) + (-0.5) * deltaY * 5;
 	}
 	return lboard;
 }
@@ -483,8 +604,7 @@ int cmpfunc_hot_spring(const void* a, const void* b)
 
 int cmpfunc_inn(const void* a, const void* b)
 {
-	return 0;
-	// return (*(Player**)b)->bundleToken - (*(Player**)a)->bundleToken;
+	return (*(Player**)b)->innCoins - (*(Player**)a)->innCoins;
 }
 
 int cmpfunc_bundle_tk(const void* a, const void* b)
@@ -523,7 +643,7 @@ void update_lboard(Lboard* lboard, Player* players, int playerCount)
 		lboard->playerIcons[5][i].crop = lboard->shopList[i]->traveler.sprite.crop;
 		sprintf(lboard->texts[5][i]->content, "%d", lboard->shopList[i]->itemCount);
 		printf("[shop] %s : %d\n", lboard->shopList[i]->nickname, lboard->shopList[i]->itemCount);
-		
+
 		lboard->playerIcons[6][i].crop = lboard->hotSpringList[i]->traveler.sprite.crop;
 		sprintf(lboard->texts[6][i]->content, "%d", lboard->hotSpringList[i]->hotSpringCount);
 
@@ -551,6 +671,10 @@ void draw_lboard(Lboard* lboard)
 				draw_sprite(&lboard->playerIcons[col][row]);
 			}
 		}
+	}
+	for (int row = 0; row < 5; row++) {
+		draw_sprite(lboard->texts[8][row]->sprite);
+		draw_sprite(&lboard->playerIcons[8][row]);
 	}
 }
 

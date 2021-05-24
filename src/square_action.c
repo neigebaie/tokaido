@@ -23,6 +23,7 @@ SDL_bool buy_from_frame(Player* player, Frame* frame)
 			player->foods[player->foodCount] = frame->content.food;
 			player->bundleToken += 6;
 			player->foodCount++;
+			player->innCoins += frame->content.food.price;
 			// printf("FOODCOUNT = %d\n", player->foodCount);
 			bought = SDL_TRUE;
 		}

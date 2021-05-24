@@ -72,7 +72,7 @@ Menu* new_main_menu(Gui* gui)
 
 Menu* new_login_menu()
 {
-	Menu* menu = base_menu(0, 3, 2, 3);
+	Menu* menu = base_menu(0, 4, 2, 3);
 
 	menu->texts[0] = new_text("Connexion", 0, 0, 0, 1);
 	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
@@ -85,6 +85,10 @@ Menu* new_login_menu()
 	menu->texts[2] = new_text("Mot de passe", 0, 0, 0, 0.5);
 	menu->texts[2]->sprite->ai.offset = (Offset){-300, -100};
 	menu->texts[2]->sprite->ai.at = AT_CENTER;
+
+	menu->texts[3] = new_text("", 120, 0, 0, 0.7);
+	menu->texts[3]->sprite->ai.offset = (Offset){0, 0};
+	menu->texts[3]->sprite->ai.at = AT_CENTER;
 
 	menu->textboxes[0] = new_textbox(SDL_FALSE, 1);
 	menu->textboxes[0]->bg.ai.offset = (Offset){150, -200};
@@ -99,7 +103,7 @@ Menu* new_login_menu()
 	menu->buttons[1] = new_button("Créer un compte", 0.5, ACTION_NONE,   MENU_SIGNUP);
 	menu->buttons[2] = new_button("Retour",          0.5, ACTION_NONE,   MENU_MAIN);
 
-	int y = 100;
+	int y = 150;
 	for (int i = 0; i < menu->buttonCount; i++)
 	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
@@ -112,7 +116,7 @@ Menu* new_login_menu()
 
 Menu* new_signup_menu()
 {
-	Menu* menu = base_menu(0, 3, 2, 2);
+	Menu* menu = base_menu(0, 4, 2, 2);
 
 	menu->texts[0] = new_text("Création d'un compte", 0, 0, 0, 1);
 	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
@@ -126,6 +130,10 @@ Menu* new_signup_menu()
 	menu->texts[2]->sprite->ai.offset = (Offset){-300, -100};
 	menu->texts[2]->sprite->ai.at = AT_CENTER;
 
+	menu->texts[3] = new_text("", 120, 0, 0, 0.7);
+	menu->texts[3]->sprite->ai.offset = (Offset){0, 0};
+	menu->texts[3]->sprite->ai.at = AT_CENTER;
+
 	menu->textboxes[0] = new_textbox(SDL_FALSE, 1);
 	menu->textboxes[0]->bg.ai.offset = (Offset){150, -200};
 	menu->textboxes[0]->bg.ai.at = AT_CENTER;
@@ -138,7 +146,7 @@ Menu* new_signup_menu()
 	menu->buttons[0] = new_button("Suivant", 0.5, ACTION_SIGNUP, MENU_NONE);
 	menu->buttons[1] = new_button("Retour",  0.5, ACTION_NONE,   MENU_LOGIN);
 
-	int y = 100;
+	int y = 150;
 	for (int i = 0; i < menu->buttonCount; i++)
 	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
@@ -273,20 +281,6 @@ void button_action(Button* button, MenuId* menuId)
 			break;
 		case ACTION_QUIT:
 			program_launched = SDL_FALSE;
-			break;
-		case ACTION_START_SOLO:
-			break;
-		case ACTION_START_LAN:
-			break;
-		case ACTION_LOGIN:
-			break;
-		case ACTION_SIGNUP:
-			break;
-		case ACTION_JOIN_LAN:
-			break;
-		case ACTION_TEMPLE:
-			break;
-		case ACTION_BUY:
 			break;
 		case ACTION_END_TURN:
 			end_turn();
