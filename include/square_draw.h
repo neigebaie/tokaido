@@ -132,6 +132,8 @@ Menu* new_game_over_gui(Player* players, int playerCount);
 Menu* new_yoshiyasu_menu(int encounterId1, int encounterId2);
 Menu* new_Hiroshige_menu();
 Menu* new_Satsuki_menu(int foodId);
+Menu* new_Chuubei_menu();
+Menu* new_Sasayakko_menu();
 
 // HUD
 Hud* new_hud(Player player);
