@@ -5,6 +5,7 @@ void sha256_string(const char* string, char* outputBuffer)
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256_CTX sha256;
 
+		// hashage du mdp
     SHA256_Init(&sha256);
     SHA256_Update(&sha256, string, strlen(string));
     SHA256_Final(hash, &sha256);
@@ -17,7 +18,7 @@ void sha256_string(const char* string, char* outputBuffer)
     outputBuffer[ACCOUNT_PSWD_SIZE - 1] = 0;
 }
 
-void print_account(Account account)
+void print_account(Account account) // debug
 {
 	printf("NICK = %s\n", account.nick);
 	printf("PSWD = %s\n", account.pswd);

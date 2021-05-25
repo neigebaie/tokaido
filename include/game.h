@@ -54,7 +54,7 @@ typedef enum
 
 typedef struct
 {
-	char name[100];					// nom de la categorie de souvenir
+	char name[100]; // nom de la rencontre
 	Sprite* sprite;
 } Encounter;
 
@@ -91,7 +91,7 @@ typedef struct
 
 typedef struct
 {
-	char name[100]; // nom de la categorie de souvenir
+	char name[100]; // nom du voyageur
 	Sprite sprite;
 	int startCoins;
 	TravelerId id;
@@ -167,9 +167,9 @@ typedef struct
 
 typedef struct
 {
-	SquareType type;    // pointeur vers le type de case
+	SquareType type;    // type de case
 	int position;
-	int capacity;        // Nb de joueurs pouvant être sur la case
+	int capacity;       // Nb de joueurs pouvant être sur la case
 
 	State state;
 } Square;
@@ -189,7 +189,7 @@ void load_resources();
 #endif
 
 /*
-Types de case :
+Types de case : (+traduction)
  0 : Relai / Inn
  1 : Echoppe / Shop
  2 : Source chaude / Hot water spring

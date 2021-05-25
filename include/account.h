@@ -21,9 +21,16 @@ typedef struct
 		int score;
 } Account;
 
+// compte par défaut quand personne n'est connecté
 Account* guest_account();
+
+// création d'un compte
 int account_create(const char* nick, const char* pswd, char* outputMessage);
+
+// supression d'un compte
 int account_delete(int id);
+
+// connexion à un compte
 int account_login(Account* loggedAccount, const char* nick, const char* pswd, char* outputMessage);
 
 #endif

@@ -7,20 +7,22 @@
 #include <board.h>
 #include <account.h>
 
+// Menu accessible avec <F12>
 void debug_aff(int debugMode, Text* debugText, double time_spent);
 
 int frameCount = 0;
 
 int main(int argc, const char *argv[])
 {
-	double startedAt = SDL_GetTicks();
-	init();
+	double startedAt = SDL_GetTicks(); // pour le délai du splash screen
+	init(); // initialisation du renderer/window
 	init_fps_counter();
-	show_splash_screen();
+	show_splash_screen(); // affiche le splash screen le temps du chargement
 	// SDL_SetCursor(init_system_cursor(arrow));
 	Account* loggedAccount = guest_account();
 	SDL_bool logged = SDL_TRUE; // SDL_FALSE debug
 
+	// chargement de toutes les images utilisées dans le jeu
 	load_textures();
 	load_resources();
 
@@ -35,25 +37,25 @@ int main(int argc, const char *argv[])
 	Button* clickedButton = NULL;
 
 	// debug
-	k = 0; // debug
 	Text* debugText = new_text("Loading debug info...", 255, 255, 255, 0.45);
 	debugText->sprite->ai.at = AT_BOTTOM_LEFT;
 	debugText->sprite->ai.offset.x = 10;
 	debugText->sprite->ai.offset.y = 10;
 
-	while (SDL_GetTicks() - startedAt < 500)
+	while (SDL_GetTicks() - startedAt < 500) // pour que le splash screen reste au moins 500ms
 	{
 		SDL_Delay(100);
 	}
 
-	while (program_launched)
+	while (program_launched) // boucle principale
 	{
 		update_fps_counter();
-		clock_t begin = clock();
+		clock_t begin = clock(); // pour connaitre le temps de calcul de chaque frame
 
 		SDL_Event event;
 		SDL_GetMouseState(&mousePos.x, &mousePos.y);
 
+		// change la couleur des boutons au survol
 		if (menuId != MENU_BOARD)
 		{
 			for (int btnId = 0; btnId < menu->buttonCount; btnId++)
@@ -88,6 +90,7 @@ int main(int argc, const char *argv[])
 			}
 		}
 
+		// récupération de tous les event
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
@@ -101,16 +104,10 @@ int main(int argc, const char *argv[])
 					}
 					switch (event.key.keysym.sym)
 					{
-						case SDLK_F1:
-							k -= 1;
-							break;
-						case SDLK_F2:
-							k += 1;
-							break;
 						case SDLK_F12:
 							debugMode = (debugMode + 1) % 4;
 							break;
-						case SDLK_ESCAPE:
+						case SDLK_ESCAPE: // retourne au menu principal
 							if (menuId == MENU_MAIN)
 								program_launched = SDL_FALSE;
 							else
@@ -122,6 +119,7 @@ int main(int argc, const char *argv[])
 					}
 					break;
 				case SDL_MOUSEBUTTONDOWN:
+					// clic des boutons
 					if (event.button.button == SDL_BUTTON_LEFT)
 					{
 						if (menuId != MENU_BOARD)
@@ -150,6 +148,7 @@ int main(int argc, const char *argv[])
 					}
 					break;
 				case SDL_WINDOWEVENT:
+					// s'adapte à la fenêtre quand elle est redimensionée
 					SDL_GetWindowSize(window, &windowAnchor.size.w, &windowAnchor.size.h);
 					break;
 				case SDL_QUIT:
@@ -158,10 +157,12 @@ int main(int argc, const char *argv[])
 			}
 			if (menuId == MENU_BOARD)
 			{
+				// s'occupe des event du plateau
 				board_event(&event, &mousePos, &menuId);
 			}
 		}
 
+		// actions des boutons après le petit délai
 		if (SDL_GetTicks() > clickedUntil && clickedUntil && clickedButton != NULL)
 		{
 			if (clickedButton->action == ACTION_LOGIN)
@@ -213,6 +214,7 @@ int main(int argc, const char *argv[])
 
 		if (menuId == MENU_BOARD)
 		{
+			// déroulement de la partie
 			if (!is_game_started())
 			{
 				begin_turn();
@@ -222,6 +224,7 @@ int main(int argc, const char *argv[])
 		}
 		else
 		{
+			// affiche les menus conventionnels
 			draw_menu(menu);
 			menu = gui->menus[menuId];
 		}
@@ -229,6 +232,7 @@ int main(int argc, const char *argv[])
 		clock_t end = clock();
 		double time_spent = (1000 * (double)(end - begin) / CLOCKS_PER_SEC);
 		frameCount++;
+		// calcul du temps de rendu pour l'affichage de debug
 
 		debug_aff(debugMode, debugText, time_spent);
 
@@ -239,6 +243,7 @@ int main(int argc, const char *argv[])
 	return EXIT_SUCCESS;
 }
 
+// affichage du menu de debugging
 void debug_aff(int debugMode, Text* debugText, double time_spent)
 {
 	SDL_Rect rect;
