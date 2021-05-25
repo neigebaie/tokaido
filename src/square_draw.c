@@ -837,7 +837,7 @@ void draw_square_gui(SquareGui* sgui)
 //
 // }
 //
-// Menu* new_Satsuki_menu(int foodId))
+// Menu* new_Satsuki_menu(int foodId)
 // {
 // 		Menu* menu = base_menu(1, 1, 0, 2)
 //
@@ -849,6 +849,34 @@ void draw_square_gui(SquareGui* sgui)
 // 		menu->buttons[0]->sprite->ai.offset = (Offset){0, -50};
 // 		menu->buttons[0]->sprite->ai.at = AT_CENTER;
 // 		menu->buttons[1] = new_button("Refuser",0.5, ACTION_END_TURN, MENU_NONE);
+// 		menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+// 		menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+//
+// }
+//
+// Menu* new_Chuubei_menu()
+// {
+// 		Menu* menu = base_menu(1, 1, 0, 1)
+//
+// 		menu->texts[0] = new_text("Rencontre", 0, 0, 0, 1);
+// 		menu->texts[0]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[0]->sprite->ai.offset = (Offset){0,100};
+//
+// 		menu->buttons[1] = new_button("Suivant",0.5, ACTION_END_TURN, MENU_NONE);
+// 		menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
+// 		menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
+//
+// }
+//
+// Menu* new_Sasayakko_menu()
+// {
+// 		Menu* menu = base_menu(1, 1, 0, 1)
+//
+// 		menu->texts[0] = new_text("Objets offert", 0, 0, 0, 1);
+// 		menu->texts[0]->sprite->ai.at = AT_CENTER;
+// 		menu->texts[0]->sprite->ai.offset = (Offset){0,100};
+//
+// 		menu->buttons[1] = new_button("Suivant",0.5, ACTION_END_TURN, MENU_NONE);
 // 		menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
 // 		menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
 //
