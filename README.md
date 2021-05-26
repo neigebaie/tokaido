@@ -3,9 +3,9 @@ Adaptation du jeu de société Tokaido en langage C avec l'aide de la SDL (versi
 
 ## Liste des fonctionnalités à ajouter :
 - jeu de base
-- jeu en réseau
+- ~~jeu en réseau~~
 - IA pour pouvoir jouer contre l'ordi
-- peut-être les DLC
+- ~~peut-être les DLC~~
 
 ## Compilation
 
