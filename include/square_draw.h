@@ -15,18 +15,20 @@
 
 typedef int (*compfn)(const void*, const void*);
 
+// définie si un cadre contient un repas ou un souvenir
 typedef enum
 {
 	CONTENT_FOOD,
 	CONTENT_ITEM
 } ContentType;
 
+// contenu du cadre
 typedef union {
 	Food food;
 	Item item;
 } Content;
 
-
+// cadre utilisé dans l'échoppe et le relai
 typedef struct
 {
 	AnchorInfo ai;
@@ -49,11 +51,11 @@ typedef struct
 
 } Frame;
 
-typedef struct
-{
-	Sprite* itemCatIcons[ITEM_CATS];
-	Text* itemCatTexts[ITEM_CATS];
-} CollectionFrame;
+// typedef struct
+// {
+// 	Sprite* itemCatIcons[ITEM_CATS];
+// 	Text* itemCatTexts[ITEM_CATS];
+// } CollectionFrame;
 
 
 typedef struct
@@ -64,14 +66,15 @@ typedef struct
 	Frame** frames;
 	int frameCount;
 
-	union {
-		CollectionFrame colFrame;
-		Sprite* panorama;
-	} special;
+	// union {
+	// 	CollectionFrame colFrame;
+	// 	Sprite* panorama;
+	// } special;
 
 } SquareGui;
 
 
+// barre d'état
 typedef struct
 {
 	Text* nick;
@@ -87,6 +90,7 @@ typedef struct
 	Text* templeCoinText;
 } Hud;
 
+// leaderboard
 typedef struct
 {
 	Sprite bg;
@@ -109,10 +113,14 @@ typedef struct
 typedef struct
 {
 	Menu* menu;
-	Sprite playerIcons[8];
+	Sprite panAchievements[3];
+	Sprite templeAchievements[8];
+	Sprite otherAchievements[4][5];
+	SDL_bool panWinner[3];
+	int nbExAequo[4];
 } AchievementsGui;
 
-// SquareGui
+// SquareGui : initialise les menus de cases
 
 SquareGui* new_inn_gui(Food** foods, int foodCount, Player* player);
 SquareGui* new_shop_gui(Item* items[], Player* player);
@@ -126,6 +134,7 @@ SquareGui* new_pan_sea_gui(int nb);
 
 // Game over
 AchievementsGui* new_achievements_gui(Lboard* lboard, Player* players, int playerCount);
+void draw_achievements_gui(AchievementsGui* achievementsGui); // affichage du tableau des accomplissements
 Menu* new_game_over_gui(Player* players, int playerCount);
 
 // Custom Menu
@@ -141,7 +150,15 @@ void update_hud(Hud* hud, Player player);
 void draw_hud(Hud* hud);
 void destroy_hud(Hud* hud);
 
-// COMPARE
+// COMPARE : utilisé par les qsort du leaderboard
+int cmpfunc_rice(const void* a, const void* b);
+int cmpfunc_mount(const void* a, const void* b);
+int cmpfunc_sea(const void* a, const void* b);
+int cmpfunc_temple(const void* a, const void* b);
+int cmpfunc_encounter(const void* a, const void* b);
+int cmpfunc_shop(const void* a, const void* b);
+int cmpfunc_hot_spring(const void* a, const void* b);
+int cmpfunc_inn(const void* a, const void* b);
 int cmpfunc_bundle_tk(const void* a, const void* b);
 
 // LEADERBOARD

@@ -16,20 +16,24 @@ int main(int argc, const char *argv[])
 {
 	double startedAt = SDL_GetTicks(); // pour le délai du splash screen
 	init(); // initialisation du renderer/window
-	init_fps_counter();
+	init_fps_counter(); // pour le nombre de FPS dans le menu debug
 	show_splash_screen(); // affiche le splash screen le temps du chargement
 	// SDL_SetCursor(init_system_cursor(arrow));
 	Account* loggedAccount = guest_account();
-	SDL_bool logged = SDL_TRUE; // SDL_FALSE debug
+	SDL_bool logged = SDL_FALSE; // SDL_FALSE debug
 
 	// chargement de toutes les images utilisées dans le jeu
 	load_textures();
 	load_resources();
 
+
 	Gui* gui = init_gui();
 	MenuId menuId = MENU_MAIN;
 	Menu* menu = gui->menus[menuId];
-	// init_board(loggedAccount, textureMgr);
+
+	init_char_sel(gui->charSelMenu->sprites[1], gui->charSelMenu->sprites[2], gui->charSelMenu->buttons[0]->text->content, gui->charSelMenu->buttons[1]->text->content);
+	update_text(gui->charSelMenu->buttons[0]->text);
+	update_text(gui->charSelMenu->buttons[1]->text);
 
 	SDL_Point mousePos;
 
@@ -110,11 +114,11 @@ int main(int argc, const char *argv[])
 						case SDLK_ESCAPE: // retourne au menu principal
 							if (menuId == MENU_MAIN)
 								program_launched = SDL_FALSE;
-							else
-							{
-								menu = gui->mainMenu;
-								menuId = MENU_MAIN;
-							}
+							// else
+							// {
+							// 	menu = gui->mainMenu;
+							// 	menuId = MENU_MAIN;
+							// }
 							break;
 					}
 					break;
@@ -176,9 +180,17 @@ int main(int argc, const char *argv[])
 					logged = SDL_TRUE;
 					printf("Connexion réussie ! %s\n", loggedAccount->nick);
 				}
+				sprintf(gui->archivesMenu->texts[2]->content, "Nombre de victoires : %d", loggedAccount->wonGames);
+				sprintf(gui->archivesMenu->texts[3]->content, "Nombre de défaites  : %d", loggedAccount->lostGames);
+				sprintf(gui->archivesMenu->texts[4]->content, "Connecté en tant que : %s", loggedAccount->nick);
+				update_text(gui->archivesMenu->texts[2]);
+				update_text(gui->archivesMenu->texts[3]);
+				update_text(gui->archivesMenu->texts[4]);
 				gui->loginMenu->textboxes[1]->text->content[0] = 0;
+				gui->loginMenu->textboxes[1]->textLen = 0;
 				update_text(gui->loginMenu->textboxes[1]->text);
 				update_text(gui->loginMenu->texts[3]);
+
 			}
 			else if (clickedButton->action == ACTION_SIGNUP)
 			{
@@ -191,16 +203,67 @@ int main(int argc, const char *argv[])
 					printf("Création de compte réussie !\n");
 				}
 				gui->signupMenu->textboxes[1]->text->content[0] = 0;
+				gui->signupMenu->textboxes[1]->textLen = 0;
 				update_text(gui->signupMenu->textboxes[1]->text);
 				update_text(gui->signupMenu->texts[3]);
 			}
+			else if (clickedButton->action == ACTION_DEL_ACC)
+			{
+				if (logged)
+					account_delete(loggedAccount->id, menu->texts[1]->content);
+				else
+					sprintf(menu->texts[1]->content, "Vous n'êtes pas connecté !");
+				update_text(menu->texts[1]);
+				logged = SDL_FALSE;
+				loggedAccount = guest_account();
+			}
+			else if (clickedButton->action == ACTION_LOGOUT)
+			{
+				if (logged)
+				{
+					strcpy(menu->texts[1]->content, "Déconnexion réussie !");
+					logged = SDL_FALSE;
+					loggedAccount = guest_account();
+					strcpy(gui->archivesMenu->texts[2]->content, "Nombre de victoires : _");
+					strcpy(gui->archivesMenu->texts[3]->content, "Nombre de défaites  : _");
+					strcpy(gui->archivesMenu->texts[4]->content, "Connecté en tant que : Invité");
+					update_text(gui->archivesMenu->texts[2]);
+					update_text(gui->archivesMenu->texts[3]);
+					update_text(gui->archivesMenu->texts[4]);
+				}
+				else
+				{
+					strcpy(menu->texts[1]->content, "Vous n'êtes pas connecté !");
+				}
+				update_text(menu->texts[1]);
+			}
 			else
 			{
-				if (clickedButton->action == ACTION_START_SOLO)
-				{
-					init_board(loggedAccount, textureMgr);
-				}
+				if (clickedButton->action == ACTION_START_SOLO_1)
+					init_board(loggedAccount, textureMgr, 0);
+				else if (clickedButton->action == ACTION_START_SOLO_2)
+					init_board(loggedAccount, textureMgr, 1);
+
 				button_action(clickedButton, &menuId);
+				if (clickedButton->nextMenuId == MENU_ARCHIVES)
+				{
+					strcpy(gui->archivesMenu->texts[1]->content, "");
+					if (logged)
+					{
+						sprintf(gui->archivesMenu->texts[2]->content, "Nombre de victoires : %d", loggedAccount->wonGames);
+						sprintf(gui->archivesMenu->texts[3]->content, "Nombre de défaites  : %d", loggedAccount->lostGames);
+					}
+					update_text(gui->archivesMenu->texts[1]);
+					update_text(gui->archivesMenu->texts[2]);
+					update_text(gui->archivesMenu->texts[3]);
+				}
+				else if (clickedButton->nextMenuId == MENU_SIGNUP || clickedButton->nextMenuId == MENU_LOGIN)
+				{
+					strcpy(gui->loginMenu->texts[3]->content, "");
+					update_text(gui->loginMenu->texts[3]);
+					strcpy(gui->signupMenu->texts[3]->content, "");
+					update_text(gui->signupMenu->texts[3]);
+				}
 			}
 			clickedButton->state = STATE_IDLE;
 			clickedButton = NULL;

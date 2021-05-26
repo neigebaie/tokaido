@@ -69,6 +69,7 @@ void init(void)
 
 void shuffle(int *array, size_t n)
 {
+		srand(time(NULL));
     if (n > 1)
     {
         size_t i;

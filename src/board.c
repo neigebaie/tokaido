@@ -3,44 +3,47 @@
 Board board;
 Resources resources;
 
-void save_board(Board board, const char* path)
-{
-	FILE *file = fopen(path, "w");
-
-	if (file == NULL)
-	{
-		char errorMsg[100];
-		sprintf(errorMsg, "%s n'a pas pu être ouvert", path);
-		exit_with_error(errorMsg);
-	}
-
-	fwrite(&board, sizeof(Board), 1, file);
-
-	fclose(file);
-}
-
-Board load_board(const char* path)
-{
-	FILE *file = fopen(path, "r");
-	Board board;
-
-	if (file == NULL)
-	{
-		char errorMsg[100];
-		sprintf(errorMsg, "%s n'a pas pu être ouvert", path);
-		exit_with_error(errorMsg);
-	}
-
-	if(!feof(file))
-		fread(&board, sizeof(Board), 1, file);
-	fclose(file);
-	return board;
-}
+// NEVER USED
+//
+// void save_board(Board board, const char* path)
+// {
+// 	FILE *file = fopen(path, "w");
+//
+// 	if (file == NULL)
+// 	{
+// 		char errorMsg[100];
+// 		sprintf(errorMsg, "%s n'a pas pu être ouvert", path);
+// 		exit_with_error(errorMsg);
+// 	}
+//
+// 	fwrite(&board, sizeof(Board), 1, file);
+//
+// 	fclose(file);
+// }
+//
+// Board load_board(const char* path)
+// {
+// 	FILE *file = fopen(path, "r");
+// 	Board board;
+//
+// 	if (file == NULL)
+// 	{
+// 		char errorMsg[100];
+// 		sprintf(errorMsg, "%s n'a pas pu être ouvert", path);
+// 		exit_with_error(errorMsg);
+// 	}
+//
+// 	if(!feof(file))
+// 		fread(&board, sizeof(Board), 1, file);
+// 	fclose(file);
+// 	return board;
+// }
 
 // charge les tuiles dans l'ordre du plateau de jeu
 void load_squares(Square *squares, int playerCount)
 {
 	int n = 2;
+	// réduit la capa des cases si le nb de joueur est inférieur à 5
 	if (playerCount < 5)
 	{
 		n = 1;
@@ -53,6 +56,7 @@ void load_squares(Square *squares, int playerCount)
 		SQUARE_INN, SQUARE_HOTSPRING, SQUARE_TEMPLE, SQUARE_ENCOUNTER, SQUARE_SHOP, SQUARE_PAN_SEA, SQUARE_FARM, SQUARE_HOTSPRING, SQUARE_ENCOUNTER, SQUARE_PAN_MOUNT, SQUARE_PAN_RICE, SQUARE_PAN_SEA, SQUARE_SHOP,
 		SQUARE_INN
 	};
+
 	const int boardCapacities[] = {
 		playerCount, n, 1, 1, 1, n, n, n, 1, n, 1, n, 1, 1,
 		playerCount, 1, 1, n, n, n, n, 1, n, 1, n, 1, 1,
@@ -74,27 +78,40 @@ void load_squares(Square *squares, int playerCount)
 	}
 }
 
-void init_board(Account* loggedAccount, TextureMgr* textureMgr)
+void init_char_sel(Sprite* sprite1, Sprite* sprite2, char* text1, char* text2)
 {
-	if (board.initialized)
+	// Initialisation des joueurs
+	for (int i = 0; i < TRAVELERS; i++)
+	{
+		board.travId[i] = i;
+	}
+	shuffle(board.travId, TRAVELERS);
+
+	// affiche les sprites des voyageurs pour le menu de choix
+	sprite1->tex = resources.travelers[board.travId[0]]->sprite.tex;
+	sprite1->crop = resources.travelers[board.travId[0]]->sprite.crop;
+
+	sprite2->tex = resources.travelers[board.travId[1]]->sprite.tex;
+	sprite2->crop = resources.travelers[board.travId[1]]->sprite.crop;
+
+	sprintf(text1, "%s", resources.travelers[board.travId[0]]->name);
+	sprintf(text2, "%s", resources.travelers[board.travId[1]]->name);
+}
+
+void init_board(Account* loggedAccount, TextureMgr* textureMgr, int pickedTraveler)
+{
+	if (board.initialized) // si le plateau est déjà init -> return
 		return;
 	char nameTagText[110];
 	srand(time(NULL));
 
+	board.loggedAccount = loggedAccount;
 	board.squareId = SQUARE_INN;
 	board.mode     = BM_BOARD;
 	reset_recap(&board.recap);
 
 	board.sgui = NULL;
 	board.lastInnPos = -1;
-
-	// Initialisation des joueurs
-	int travId[TRAVELERS];
-	for (int i = 0; i < TRAVELERS; i++)
-	{
-		travId[i] = i;
-	}
-	shuffle(travId, TRAVELERS);
 
 	int roadDist[BOARD_PLAYERS];
 	for (int i = 0; i < BOARD_PLAYERS; i++)
@@ -106,11 +123,12 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 	printf(" \e[34m◁ Liste des Joueurs ▷\e[37m\n");
 	for (int i = 0; i < BOARD_PLAYERS; i++)
 	{
-		board.players[i].traveler = *resources.travelers[travId[i]];
+		board.players[i].id = i;
+		board.players[i].traveler = *resources.travelers[board.travId[i + 2]];
 		if (i == 0 || 0) // debug 0
 		{
 			// pour tester un voyageur spécifique
-			// board.players[i].traveler = *resources.travelers[8];
+			board.players[i].traveler = *resources.travelers[board.travId[pickedTraveler]];
 			sprintf(board.players[i].nickname, "%s", loggedAccount->nick);
 			board.players[i].isHuman = SDL_TRUE;
 		}
@@ -134,6 +152,9 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].panRice = 0;
 		board.players[i].panMount = 0;
 		board.players[i].panSea = 0;
+		board.players[i].panRiceAchievement = SDL_FALSE;
+		board.players[i].panMountAchievement = SDL_FALSE;
+		board.players[i].panSeaAchievement = SDL_FALSE;
 		board.players[i].state = STATE_IDLE;
 		// printf("[%d] %d %d %d %d\n", i, board.players[i].traveler.sprite.ai.offset.x, board.players[i].traveler.sprite.ai.offset.y, board.players[i].traveler.sprite.ai.size.w, board.players[i].traveler.sprite.ai.size.h);
 
@@ -156,6 +177,11 @@ void init_board(Account* loggedAccount, TextureMgr* textureMgr)
 		board.players[i].traveler.sprite.ai.size.w = 100;
 		board.players[i].traveler.sprite.ai.size.h = 100;
 		update_player_ai(&board.players[i]);
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		board.panAchievements[i] = NULL;
 	}
 
 	board.lboard = new_lboard(board.players, board.playerCount);
@@ -298,6 +324,31 @@ void board_mouse(SDL_Point* mousePos, SDL_bool click, MenuId* menuId)
 			else
 			{
 				board.squares[position].state = STATE_IDLE;
+			}
+		}
+	}
+	else if (board.mode == BM_ACHIEVEMENTS)
+	{
+		for (int btnId = 0; btnId < board.achievementsGui->menu->buttonCount; btnId++)
+		{
+			if (board.achievementsGui->menu->buttons[btnId]->state == STATE_DISABLED)
+				continue;
+			SDL_Rect rect = anchored_rect(board.achievementsGui->menu->buttons[btnId]->bg.ai, board.achievementsGui->menu->buttons[btnId]->bg.parent);
+			if (SDL_PointInRect(mousePos, &rect))
+			{
+				if (click)
+				{
+					board.achievementsGui->menu->buttons[btnId]->state = STATE_CLICKED;
+					board.mode = BM_GAMEOVER;
+				}
+				else
+				{
+					board.achievementsGui->menu->buttons[btnId]->state = STATE_HOVERED;
+				}
+			}
+			else
+			{
+				board.achievementsGui->menu->buttons[btnId]->state = STATE_IDLE;
 			}
 		}
 	}
@@ -453,15 +504,6 @@ void camera_draw_sprite(Sprite* sprite, Camera camera)
 	}
 }
 
-// todo
-void draw_char_sel_gui()
-{
-	for (int i = 0; i < TRAVELERS; i++)
-	{
-		draw_sprite(&resources.travelers[i]->sprite);
-	}
-}
-
 void draw_lines(int squareCount)
 {
 	if (!squareCount)
@@ -538,7 +580,6 @@ void draw_players()
 
 void draw_board()
 {
-	// draw_char_sel_gui();
 	switch (board.mode)
 	{
 		case BM_SQUARE:
@@ -645,9 +686,11 @@ SDL_bool is_move_allowed(int position, Player player)
 	if (space <= 0)
 		return SDL_FALSE;
 
+	// interdiction d'aller sur une échoppe/temple si le joueur n'a pas d'argent
 	if ((board.squares[position].type.id == SQUARE_SHOP || board.squares[position].type.id == SQUARE_TEMPLE) && player.coins == 0)
 		return SDL_FALSE;
 
+	// interdiction d'aller sur un panorama si il est complété
 	if (board.squares[position].type.id == SQUARE_PAN_RICE && player.panRice == 3)
 		return SDL_FALSE;
 	if (board.squares[position].type.id == SQUARE_PAN_MOUNT && player.panMount == 4)
@@ -675,17 +718,23 @@ void random_move()
 	}
 	if (possibilities == 0)
 	{
-		// board.gameOverMenu = new_game_over_gui(board.players, board.playerCount);
-		board.achievementsGui = new_achievements_gui(board.lboard, board.players, board.playerCount);
-		board.mode = BM_ACHIEVEMENTS;
-		printf("\e[34m [DEBUG] Game over !\e[37m\n");
-		for (int i = 0; i < board.playerCount; i++)
-		{
-			printf("\e[34m   - %s :\n", board.players[i].nickname);
-			printf("     Pièces = %d\n", board.players[i].coins);
-			printf("     Points de Victoire = %d\n", board.players[i].bundleToken);
-			printf("     Pièce au temple = %d\e[37m\n\n", board.players[i].templeCoins);
-		}
+		// printf("\e[35m [BEFORE ACHIEVEMENTS]\e[37m\n");
+		// for (int i = 0; i < board.playerCount; i++)
+		// {
+		// 	printf("\e[35m   - %s :\n", board.players[i].nickname);
+		// 	printf("     Pièces = %d\n", board.players[i].coins);
+		// 	printf("     Points de Victoire = %d\n", board.players[i].bundleToken);
+		// 	printf("     Pièce au temple = %d\e[37m\n\n", board.players[i].templeCoins);
+		// }
+
+		// printf("\e[34m [DEBUG] Game over !\e[37m\n");
+		// for (int i = 0; i < board.playerCount; i++)
+		// {
+		// 	printf("\e[34m   - %s :\n", board.players[i].nickname);
+		// 	printf("     Pièces = %d\n", board.players[i].coins);
+		// 	printf("     Points de Victoire = %d\n", board.players[i].bundleToken);
+		// 	printf("     Pièce au temple = %d\e[37m\n\n", board.players[i].templeCoins);
+		// }
 		return;
 	}
 	shuffle(possibleSquares, possibilities);
@@ -760,6 +809,22 @@ void begin_turn()
 		random_move();
 	}
 	printf(" BEGIN TURN\n");
+
+	// regarde si des mouvements sont encore possibles
+	for (int position = board.playing->position + 1; position < BOARD_SQUARES; position++)
+	{
+		if (is_move_allowed(position, board.players[board.playing->id]))
+		{
+			return;
+		}
+	}
+	// atteint uniquement si aucune mouvement n'est possible
+	// -> déclenchement du game_over
+	board.achievementsGui = new_achievements_gui(board.lboard, board.players, board.playerCount);
+	board.gameOverMenu = new_game_over_gui(board.players, board.playerCount);
+	board.mode = BM_ACHIEVEMENTS;
+	update_lboard(board.lboard, board.players, board.playerCount);
+	add_won_lost(board.loggedAccount, (board.lboard->bundleTkList[0]->id == 0));
 }
 
 void end_turn()
@@ -772,8 +837,9 @@ void end_turn()
 	highlight_possible_moves(*board.playing);
 	destroy_hud(board.hud);
 	board.hud = new_hud(*board.playing);
-	board.waitUntil = SDL_GetTicks() + 500; // + 200; // + 5000;
-	printf("\e[32m [RECAP] %d %d %d\e[37m\n", board.recap.coins, board.recap.bundleToken, board.recap.templeCoins);
+	board.waitUntil = SDL_GetTicks() + 1500; // + 200; // + 5000;
+	printf("\e[32m [RECAP] c=%d btk=%d tc%d\e[37m\n", board.recap.coins, board.recap.bundleToken, board.recap.templeCoins);
+
 }
 
 // Bonus à faire :
@@ -937,16 +1003,32 @@ void square_action(Square* square)
 			break;
 		case SQUARE_PAN_RICE:
 			action_pan_rice(board.playing);
+			if (board.playing->panRice == 3 && board.panAchievements[0] == NULL)
+			{
+				board.panAchievements[0] = board.playing;
+				board.playing->panRiceAchievement = SDL_TRUE;
+			}
 			board.sgui = new_pan_rice_gui(board.playing->panRice);
 			break;
 		case SQUARE_PAN_MOUNT:
 			action_pan_mount(board.playing);
+			if (board.playing->panMount == 4 && board.panAchievements[1] == NULL)
+			{
+				board.panAchievements[1] = board.playing;
+				board.playing->panMountAchievement = SDL_TRUE;
+			}
 			board.sgui = new_pan_mount_gui(board.playing->panMount);
 			break;
 		case SQUARE_PAN_SEA:
 			action_pan_sea(board.playing);
+			if (board.playing->panRice == 5 && board.panAchievements[2] == NULL)
+			{
+				board.panAchievements[2] = board.playing;
+				board.playing->panSeaAchievement = SDL_TRUE;
+			}
 			board.sgui = new_pan_sea_gui(board.playing->panSea);
 			break;
 	}
+	update_lboard(board.lboard, board.players, board.playerCount);
 	update_hud(board.hud, *board.playing);
 }

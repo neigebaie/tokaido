@@ -336,36 +336,128 @@ SquareGui* new_pan_sea_gui(int nb)
 AchievementsGui* new_achievements_gui(Lboard* lboard, Player* players, int playerCount)
 {
 	AchievementsGui* achievementsGui = (AchievementsGui*)malloc(sizeof(AchievementsGui));
-	achievementsGui->menu = base_menu(1, 0, 0, 1);
-	int offsetX[] = {-468, -468, -468, -468, 312, 312, 312, 312};
-	int offsetY[] = {-166, -24, 119, 261, -166, -24, 119, 261};
+	int templeBonus[] = {10, 7, 4, 2, 2};
+	char templeBonusText[16];
+
+	achievementsGui->menu = base_menu(1, 5, 0, 1);
+
 	achievementsGui->menu->sprites[0] = &textureMgr->bg[8];
 
-	achievementsGui->playerIcons[0] = lboard->riceList[0]->traveler.sprite;
-	printf("%s\n", lboard->riceList[0]->nickname);
-	achievementsGui->playerIcons[1] = lboard->mountList[0]->traveler.sprite;
-	printf("%s\n", lboard->mountList[0]->nickname);
-	achievementsGui->playerIcons[2] = lboard->seaList[0]->traveler.sprite;
-	printf("%s\n", lboard->seaList[0]->nickname);
-	achievementsGui->playerIcons[3] = lboard->templeList[0]->traveler.sprite;
-	printf("%s\n", lboard->templeList[0]->nickname);
-	achievementsGui->playerIcons[4] = lboard->encounterList[0]->traveler.sprite;
-	printf("%s\n", lboard->encounterList[0]->nickname);
-	achievementsGui->playerIcons[5] = lboard->shopList[0]->traveler.sprite;
-	printf("%s\n", lboard->shopList[0]->nickname);
-	achievementsGui->playerIcons[6] = lboard->hotSpringList[0]->traveler.sprite;
-	printf("%s\n", lboard->hotSpringList[0]->nickname);
-	achievementsGui->playerIcons[7] = lboard->innList[0]->traveler.sprite;
-	printf("%s\n", lboard->innList[0]->nickname);
-	for (int i = 0; i < 8; i++) {
-		achievementsGui->playerIcons[i].ai.offset.x = offsetX[i];
-		achievementsGui->playerIcons[i].ai.offset.y = offsetY[i];
-		achievementsGui->playerIcons[i].ai.at = AT_CENTER;
-		achievementsGui->playerIcons[i].ai.size.w = 90;
-		achievementsGui->playerIcons[i].ai.size.h = 90;
-		printf("offset = %d %d\n", achievementsGui->playerIcons[i].ai.offset.x, achievementsGui->playerIcons[i].ai.offset.y);
+	achievementsGui->panWinner[0] = SDL_FALSE;
+	achievementsGui->panWinner[1] = SDL_FALSE;
+	achievementsGui->panWinner[2] = SDL_FALSE;
+
+	if (lboard->riceList[0]->panRiceAchievement)
+	{
+		achievementsGui->panAchievements[0] = lboard->riceList[0]->traveler.sprite;
+		achievementsGui->panWinner[0] = SDL_TRUE;
+		lboard->riceList[0]->bundleToken += 3;
+	}
+	if (lboard->mountList[0]->panMountAchievement)
+	{
+		achievementsGui->panAchievements[1] = lboard->mountList[0]->traveler.sprite;
+		achievementsGui->panWinner[1] = SDL_TRUE;
+		lboard->mountList[0]->bundleToken += 3;
+	}
+	if (lboard->seaList[0]->panSeaAchievement)
+	{
+		achievementsGui->panAchievements[2] = lboard->seaList[0]->traveler.sprite;
+		achievementsGui->panWinner[2] = SDL_TRUE;
+		lboard->seaList[0]->bundleToken += 3;
 	}
 
+	for (int i = 0; i < 3; i++)
+	{
+		achievementsGui->panAchievements[i].ai.offset.x = -635 + 150 * i;
+		achievementsGui->panAchievements[i].ai.offset.y = -110;
+		achievementsGui->panAchievements[i].ai.at = AT_CENTER;
+		achievementsGui->panAchievements[i].ai.size.w = 95;
+		achievementsGui->panAchievements[i].ai.size.h = 95;
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		achievementsGui->templeAchievements[i] = lboard->templeList[i]->traveler.sprite;
+		achievementsGui->templeAchievements[i].ai.offset.x = -110;
+		achievementsGui->templeAchievements[i].ai.offset.y = -110 + 125 * i;
+		achievementsGui->templeAchievements[i].ai.at = AT_CENTER;
+		achievementsGui->templeAchievements[i].ai.size.w = 95;
+		achievementsGui->templeAchievements[i].ai.size.h = 95;
+		if (lboard->templeList[i]->templeCoins > 0)
+		{
+			sprintf(templeBonusText, "%d", templeBonus[i]);
+			lboard->templeList[i]->bundleToken += templeBonus[i];
+		}
+		else
+			strcpy(templeBonusText, "0");
+		achievementsGui->menu->texts[i] = new_text(templeBonusText, 255, 255, 255, 0.8);
+		achievementsGui->menu->texts[i]->sprite->ai.at = AT_CENTER;
+		achievementsGui->menu->texts[i]->sprite->ai.offset = (Offset){25, -100 + 125 * i};
+	}
+
+	achievementsGui->otherAchievements[0][0] = lboard->encounterList[0]->traveler.sprite;
+	lboard->encounterList[0]->bundleToken += 3;
+	achievementsGui->nbExAequo[0] = 1;
+	for (int i = 1; i < 5; i++) {
+		if (lboard->encounterList[i-1]->encounterCount == lboard->encounterList[i]->encounterCount)
+		{
+			achievementsGui->nbExAequo[0]++;
+			achievementsGui->otherAchievements[0][i] = lboard->encounterList[i]->traveler.sprite;
+			lboard->encounterList[i]->bundleToken += 3;
+		}
+		else
+			break;
+	}
+	achievementsGui->otherAchievements[1][0] = lboard->shopList[0]->traveler.sprite;
+	lboard->shopList[0]->bundleToken += 3;
+	achievementsGui->nbExAequo[1] = 1;
+	for (int i = 1; i < 5; i++) {
+		if (lboard->shopList[i-1]->itemCount == lboard->shopList[i]->itemCount)
+		{
+			achievementsGui->nbExAequo[1]++;
+			achievementsGui->otherAchievements[1][i] = lboard->shopList[i]->traveler.sprite;
+			lboard->shopList[i]->bundleToken += 3;
+		}
+		else
+			break;
+	}
+	achievementsGui->otherAchievements[2][0] = lboard->hotSpringList[0]->traveler.sprite;
+	lboard->hotSpringList[0]->bundleToken += 3;
+	achievementsGui->nbExAequo[2] = 1;
+	for (int i = 1; i < 5; i++) {
+		if (lboard->hotSpringList[i-1]->hotSpringCount == lboard->hotSpringList[i]->hotSpringCount)
+		{
+			achievementsGui->nbExAequo[2]++;
+			achievementsGui->otherAchievements[2][i] = lboard->hotSpringList[i]->traveler.sprite;
+			lboard->hotSpringList[i]->bundleToken += 3;
+		}
+		else
+			break;
+	}
+	achievementsGui->otherAchievements[3][0] = lboard->innList[0]->traveler.sprite;
+	lboard->innList[0]->bundleToken += 3;
+	achievementsGui->nbExAequo[3] = 1;
+	for (int i = 1; i < 5; i++) {
+		if (lboard->innList[i-1]->innCoins == lboard->innList[i]->innCoins)
+		{
+			achievementsGui->nbExAequo[3]++;
+			achievementsGui->otherAchievements[3][i] = lboard->innList[i]->traveler.sprite;
+			lboard->innList[i]->bundleToken += 3;
+		}
+		else
+			break;
+	}
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < achievementsGui->nbExAequo[i]; j++) {
+			achievementsGui->otherAchievements[i][j].ai.offset.x = 190 + 150 * i;
+			achievementsGui->otherAchievements[i][j].ai.offset.y = -110 + 125 * j;
+			achievementsGui->otherAchievements[i][j].ai.at = AT_CENTER;
+			achievementsGui->otherAchievements[i][j].ai.size.w = 95;
+			achievementsGui->otherAchievements[i][j].ai.size.h = 95;
+		}
+
+	}
 	achievementsGui->menu->buttons[0] = new_button("Suivant", 0.5, ACTION_NONE, MENU_NONE);
 	achievementsGui->menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
 	achievementsGui->menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
@@ -376,8 +468,17 @@ AchievementsGui* new_achievements_gui(Lboard* lboard, Player* players, int playe
 void draw_achievements_gui(AchievementsGui* achievementsGui)
 {
 	draw_menu(achievementsGui->menu);
-	for (int i = 0; i < 8; i++) {
-		draw_sprite(&achievementsGui->playerIcons[i]);
+	for (int i = 0; i < 3; i++) {
+		if (achievementsGui->panWinner[i])
+			draw_sprite(&achievementsGui->panAchievements[i]);
+	}
+	for (int i = 0; i < 5; i++) {
+		draw_sprite(&achievementsGui->templeAchievements[i]);
+	}
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < achievementsGui->nbExAequo[i]; j++) {
+			draw_sprite(&achievementsGui->otherAchievements[i][j]);
+		}
 	}
 }
 
@@ -569,17 +670,17 @@ Lboard* new_lboard(Player* players, int playerCount)
 
 int cmpfunc_rice(const void* a, const void* b)
 {
-	return (*(Player**)b)->panRice - (*(Player**)a)->panRice;
+	return (*(Player**)b)->panRice - (*(Player**)a)->panRice - 1 * ((*(Player**)a)->panRiceAchievement == 1);
 }
 
 int cmpfunc_mount(const void* a, const void* b)
 {
-	return (*(Player**)b)->panMount - (*(Player**)a)->panMount;
+	return (*(Player**)b)->panMount - (*(Player**)a)->panMount - 1 * ((*(Player**)a)->panMountAchievement == 1);
 }
 
 int cmpfunc_sea(const void* a, const void* b)
 {
-	return (*(Player**)b)->panSea - (*(Player**)a)->panSea;
+	return (*(Player**)b)->panSea - (*(Player**)a)->panSea - 1 * ((*(Player**)a)->panSeaAchievement == 1);
 }
 
 int cmpfunc_temple(const void* a, const void* b)
@@ -769,7 +870,7 @@ void draw_frame(Frame* frame)
 	if (frame->contentType == CONTENT_FOOD)
 	{
 		draw_sprite(frame->content.food.sprite);
-		// print_ai(&frame->content.food.sprite->ai);
+		// print_ai(&frame->content.food.sprite->ai); // debug
 	}
 	else if (frame->contentType == CONTENT_ITEM)
 	{
@@ -879,5 +980,4 @@ void draw_square_gui(SquareGui* sgui)
 // 		menu->buttons[1] = new_button("Suivant",0.5, ACTION_END_TURN, MENU_NONE);
 // 		menu->buttons[0]->bg.ai.at = AT_BOTTOM_RIGHT;
 // 		menu->buttons[0]->bg.ai.offset = (Offset){-10, -10};
-//
 // }

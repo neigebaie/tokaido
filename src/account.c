@@ -27,11 +27,13 @@ void print_account(Account account) // debug
 
 Account* guest_account()
 {
+	// compte utilisé quand l'utilisateur ne se connecte pas
 	Account* account = (Account*)malloc(sizeof(Account));
 	strcpy(account->nick, "Invité");
 	strcpy(account->pswd, "");
 	account->id = -1;
-	account->score = 0;
+	account->wonGames = 0;
+	account->lostGames = 0;
 	return account;
 }
 
@@ -125,10 +127,11 @@ int account_create(const char* nick, const char* pswd, char* outputMessage)
 
 	strcpy(newAccount.nick, nick);
 	strcpy(newAccount.pswd, outputBuffer);
-	newAccount.id = accountCount;
-	newAccount.score = 0;
+	newAccount.id = accounts[accountCount - 1].id + 1;
+	newAccount.wonGames = 0;
+	newAccount.lostGames = 0;
 
-	// print_account(newAccount);
+	// print_account(newAccount); // debug
 
 	accounts[accountCount] = newAccount;
 	accountCount++;
@@ -144,7 +147,7 @@ int account_create(const char* nick, const char* pswd, char* outputMessage)
 	return 0;
 }
 
-int account_delete(int id)
+int account_delete(int id, char* outputMessage)
 {
 	Account accounts[ACCOUNT_MAX_COUNT];
 	int accountCount = 0;
@@ -160,11 +163,14 @@ int account_delete(int id)
 				accounts[i] = accounts[accountCount - 1];
 				accountCount--;
 				account_save_file(accounts, accountCount);
-				return 0;
+				strcpy(outputMessage, "Le compte a été supprimé !");
+				return 0; // succès
 			}
 		}
+		strcpy(outputMessage, "Le compte n'a pas été trouvé !");
 		return 1; // Compte non trouvé
 	}
+	strcpy(outputMessage, "Le compte n'a pas été trouvé !");
 	return 1; // Pas de comptes
 }
 
@@ -202,4 +208,38 @@ int account_login(Account* loggedAccount, const char* nick, const char* pswd, ch
 	}
 	strcpy(outputMessage, "Ce compte n'existe pas !");
 	return 1;
+}
+
+void add_won_lost(Account* loggedAccount, int won)
+{
+	Account accounts[ACCOUNT_MAX_COUNT];
+	int accountCount = 0;
+
+	account_load_file(accounts, &accountCount);
+
+	if (accountCount)
+	{
+		for (int i = 0; i < accountCount; i++)
+		{
+			if (accounts[i].id == loggedAccount->id)
+			{
+				if (won)
+				{
+					loggedAccount->wonGames++;
+					accounts[i].wonGames++;
+					printf("Victoire ajoutée ! (%d)\n", accounts[i].wonGames);
+				}
+				else
+				{
+					loggedAccount->lostGames++;
+					accounts[i].lostGames++;
+					printf("Défaite ajoutée ! (%d)\n", accounts[i].lostGames);
+				}
+				account_save_file(accounts, accountCount);
+				return; // succès
+			}
+		}
+		return; // Compte non trouvé
+	}
+	return; // Pas de comptes
 }

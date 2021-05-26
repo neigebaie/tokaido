@@ -51,6 +51,7 @@ int action_temple(Player* player, Recap* recap)
 	{
 		recap->templeCoins += 1;
 		player->templeCoins += 1;
+		player->bundleToken += 1;
 		player->coins--;
 		return 1;
 	}

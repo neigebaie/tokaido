@@ -110,6 +110,7 @@ typedef struct
 
 typedef struct
 {
+	int id;
 	Traveler traveler;     // personnage choisi
 	Text* nameTag;
 
@@ -138,6 +139,10 @@ typedef struct
 	int panRice;						// cartes panorama Rizière
 	int panMount;						// cartes panorama Montagne
 	int panSea;							// cartes panorama Mer
+
+	SDL_bool panRiceAchievement;
+	SDL_bool panMountAchievement;
+	SDL_bool panSeaAchievement;
 
 	State state;
 } Player;
@@ -182,8 +187,13 @@ typedef struct
 
 extern Resources resources;
 
+// calcule le nb de pts de victoire que rapporte un souvenir
 int tk_from_collection(Item newItem, Item* items, int itemCount);
+
+// réinitialise le recap
 void reset_recap(Recap* recap);
+
+// charge toutes les ressources du jeu (sprites) et attribution des noms
 void load_resources();
 
 #endif

@@ -18,7 +18,9 @@ typedef struct
 		int  id;
     char nick[ACCOUNT_NICK_SIZE];
     char pswd[ACCOUNT_PSWD_SIZE];
-		int score;
+		int wonGames; // nb de parties gagnées
+		int lostGames; // nb de parties perdues
+
 } Account;
 
 // compte par défaut quand personne n'est connecté
@@ -28,9 +30,12 @@ Account* guest_account();
 int account_create(const char* nick, const char* pswd, char* outputMessage);
 
 // supression d'un compte
-int account_delete(int id);
+int account_delete(int id, char* outputMessage);
 
 // connexion à un compte
 int account_login(Account* loggedAccount, const char* nick, const char* pswd, char* outputMessage);
+
+// ajoute une victoire/défaite à un compte (won==1 pour une victoire)
+void add_won_lost(Account* loggedAccount, int won);
 
 #endif

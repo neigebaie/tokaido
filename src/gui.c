@@ -8,13 +8,13 @@ Gui* init_gui()
 	gui->loginMenu    = new_login_menu();
 	gui->signupMenu   = new_signup_menu();
 	gui->archivesMenu = new_archives_menu();
-	gui->settingsMenu = new_settings_menu();
+	gui->charSelMenu  = new_char_sel_menu();
 
 	gui->menus[MENU_MAIN] = gui->mainMenu;
 	gui->menus[MENU_LOGIN] = gui->loginMenu;
 	gui->menus[MENU_SIGNUP] = gui->signupMenu;
 	gui->menus[MENU_ARCHIVES] = gui->archivesMenu;
-	gui->menus[MENU_SETTINGS] = gui->settingsMenu;
+	gui->menus[MENU_CHAR_SEL] = gui->charSelMenu;
 
 	printf("\e[32m [DEBUG] Gui initialized !\e[37m\n");
 	return gui;
@@ -39,7 +39,7 @@ Menu* base_menu(int s, int t, int tb, int b)
 
 Menu* new_main_menu(Gui* gui)
 {
-	Menu* menu = base_menu(2, 1, 0, 5);
+	Menu* menu = base_menu(2, 1, 0, 4);
 	int y = -350;
 
 	menu->sprites[0] = &textureMgr->bg[0];
@@ -50,15 +50,14 @@ Menu* new_main_menu(Gui* gui)
 	menu->sprites[1]->ai.offset.y = y;
 	y += menu->sprites[1]->ai.size.h;
 
-	menu->texts[0] = new_text("Tokaido v0.2.0", 100, 100, 100, 0.35);
+	menu->texts[0] = new_text("Tokaido v1.0.0", 100, 100, 100, 0.35);
 	menu->texts[0]->sprite->ai.offset = (Offset){10, 10};
 	menu->texts[0]->sprite->ai.at = AT_BOTTOM_LEFT;
 
-	menu->buttons[0] = new_button("Solo",        0.5, ACTION_START_SOLO, MENU_BOARD);
-	menu->buttons[1] = new_button("Multijoueur", 0.5, ACTION_START_LAN,  MENU_NONE);
-	menu->buttons[2] = new_button("Archives",    0.5, ACTION_NONE,       MENU_ARCHIVES);
-	menu->buttons[3] = new_button("Connexion",   0.5, ACTION_NONE,       MENU_LOGIN);
-	menu->buttons[4] = new_button("Quitter",     0.5, ACTION_QUIT,       MENU_NONE);
+	menu->buttons[0] = new_button("Solo",        0.5, ACTION_NONE, MENU_CHAR_SEL);
+	menu->buttons[1] = new_button("Archives",    0.5, ACTION_NONE,       MENU_ARCHIVES);
+	menu->buttons[2] = new_button("Connexion",   0.5, ACTION_NONE,       MENU_LOGIN);
+	menu->buttons[3] = new_button("Quitter",     0.5, ACTION_QUIT,       MENU_NONE);
 
 	for (int i = 0; i < menu->buttonCount; i++)
 	{
@@ -75,23 +74,23 @@ Menu* new_login_menu()
 	Menu* menu = base_menu(0, 4, 2, 3);
 
 	menu->texts[0] = new_text("Connexion", 0, 0, 0, 1);
-	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 50};
 	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 
 	menu->texts[1] = new_text("Nom d'utilisateur", 0, 0, 0, 0.5);
-	menu->texts[1]->sprite->ai.offset = (Offset){-300, -200};
+	menu->texts[1]->sprite->ai.offset = (Offset){-300, -220};
 	menu->texts[1]->sprite->ai.at = AT_CENTER;
 
 	menu->texts[2] = new_text("Mot de passe", 0, 0, 0, 0.5);
 	menu->texts[2]->sprite->ai.offset = (Offset){-300, -100};
 	menu->texts[2]->sprite->ai.at = AT_CENTER;
 
-	menu->texts[3] = new_text("", 120, 0, 0, 0.7);
-	menu->texts[3]->sprite->ai.offset = (Offset){0, 0};
+	menu->texts[3] = new_text("", 120, 0, 50, 0.7);
+	menu->texts[3]->sprite->ai.offset = (Offset){0, 20};
 	menu->texts[3]->sprite->ai.at = AT_CENTER;
 
 	menu->textboxes[0] = new_textbox(SDL_FALSE, 1);
-	menu->textboxes[0]->bg.ai.offset = (Offset){150, -200};
+	menu->textboxes[0]->bg.ai.offset = (Offset){150, -220};
 	menu->textboxes[0]->bg.ai.at = AT_CENTER;
 
 	menu->textboxes[1] = new_textbox(SDL_TRUE, 0);
@@ -119,23 +118,23 @@ Menu* new_signup_menu()
 	Menu* menu = base_menu(0, 4, 2, 2);
 
 	menu->texts[0] = new_text("Création d'un compte", 0, 0, 0, 1);
-	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 50};
 	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 
 	menu->texts[1] = new_text("Nom d'utilisateur", 0, 0, 0, 0.5);
-	menu->texts[1]->sprite->ai.offset = (Offset){-300, -200};
+	menu->texts[1]->sprite->ai.offset = (Offset){-300, -220};
 	menu->texts[1]->sprite->ai.at = AT_CENTER;
 
 	menu->texts[2] = new_text("Mot de passe", 0, 0, 0, 0.5);
 	menu->texts[2]->sprite->ai.offset = (Offset){-300, -100};
 	menu->texts[2]->sprite->ai.at = AT_CENTER;
 
-	menu->texts[3] = new_text("", 120, 0, 0, 0.7);
-	menu->texts[3]->sprite->ai.offset = (Offset){0, 0};
+	menu->texts[3] = new_text("", 120, 0, 50, 0.7);
+	menu->texts[3]->sprite->ai.offset = (Offset){0, 20};
 	menu->texts[3]->sprite->ai.at = AT_CENTER;
 
 	menu->textboxes[0] = new_textbox(SDL_FALSE, 1);
-	menu->textboxes[0]->bg.ai.offset = (Offset){150, -200};
+	menu->textboxes[0]->bg.ai.offset = (Offset){150, -220};
 	menu->textboxes[0]->bg.ai.at = AT_CENTER;
 
 	menu->textboxes[1] = new_textbox(SDL_TRUE, 0);
@@ -159,15 +158,33 @@ Menu* new_signup_menu()
 
 Menu* new_archives_menu()
 {
-	Menu* menu = base_menu(0, 1, 0, 1);
+	Menu* menu = base_menu(0, 5, 0, 3);
 
 	menu->texts[0] = new_text("Archives", 0, 0, 0, 1);
-	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 50};
 	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 
-	menu->buttons[0] = new_button("Retour",  0.5, ACTION_NONE,   MENU_MAIN);
+	menu->texts[1] = new_text("", 120, 0, 50, 0.7);
+	menu->texts[1]->sprite->ai.offset = (Offset){0, 0};
+	menu->texts[1]->sprite->ai.at = AT_CENTER;
 
-	int y = 100;
+	menu->texts[2] = new_text("Nombre de victoires : _", 20, 50, 20, 0.7);
+	menu->texts[2]->sprite->ai.offset = (Offset){0, -250};
+	menu->texts[2]->sprite->ai.at = AT_CENTER;
+
+	menu->texts[3] = new_text("Nombre de défaites  : _", 50, 20, 20, 0.7);
+	menu->texts[3]->sprite->ai.offset = (Offset){0, -150};
+	menu->texts[3]->sprite->ai.at = AT_CENTER;
+
+	menu->texts[4] = new_text("Connecté en tant que : Invité", 50, 20, 20, 0.5);
+	menu->texts[4]->sprite->ai.offset = (Offset){20, -10};
+	menu->texts[4]->sprite->ai.at = AT_BOTTOM_LEFT;
+
+	menu->buttons[0] = new_button("Déconnexion",         0.5, ACTION_LOGOUT,  MENU_NONE);
+	menu->buttons[1] = new_button("Supprimer le compte", 0.5, ACTION_DEL_ACC, MENU_NONE);
+	menu->buttons[2] = new_button("Retour",              0.5, ACTION_NONE,    MENU_MAIN);
+
+	int y = 150;
 	for (int i = 0; i < menu->buttonCount; i++)
 	{
 		menu->buttons[i]->bg.ai.at = AT_CENTER;
@@ -178,23 +195,36 @@ Menu* new_archives_menu()
 	return menu;
 }
 
-Menu* new_settings_menu()
+Menu* new_char_sel_menu()
 {
-	Menu* menu = base_menu(0, 1, 0, 1);
+	Menu* menu = base_menu(3, 1, 0, 2);
 
-	menu->texts[0] = new_text("Options", 0, 0, 0, 1);
-	menu->texts[0]->sprite->ai.offset = (Offset){0, 10};
+	menu->sprites[0] = &textureMgr->bg[9];
+	menu->sprites[0]->ai.at = AT_CENTER;
+
+	menu->sprites[1] = new_sprite(textureMgr->iconTex, new_rect(0, 0, 128, 128));
+	menu->sprites[1]->ai.offset = (Offset){-300, 10};
+	menu->sprites[1]->ai.size = (Size){300, 300};
+	menu->sprites[1]->ai.at = AT_CENTER;
+
+	menu->sprites[2] = new_sprite(textureMgr->iconTex, new_rect(0, 0, 128, 128));
+	menu->sprites[2]->ai.offset = (Offset){300, 10};
+	menu->sprites[2]->ai.size = (Size){300, 300};
+	menu->sprites[2]->ai.at = AT_CENTER;
+
+	menu->texts[0] = new_text("Sélection du voyageur", 0, 0, 0, 1);
+	menu->texts[0]->sprite->ai.offset = (Offset){0, 50};
 	menu->texts[0]->sprite->ai.at = AT_TOP_CENTER;
 
-	menu->buttons[0] = new_button("Retour",  0.5, ACTION_NONE,   MENU_MAIN);
+	menu->buttons[0] = new_button("voyageur_1",  0.5, ACTION_START_SOLO_1,   MENU_BOARD);
+	menu->buttons[0]->bg.ai.at = AT_CENTER;
+	menu->buttons[0]->bg.ai.offset.x = -300;
+	menu->buttons[0]->bg.ai.offset.y = 300;
 
-	int y = 100;
-	for (int i = 0; i < menu->buttonCount; i++)
-	{
-		menu->buttons[i]->bg.ai.at = AT_CENTER;
-		menu->buttons[i]->bg.ai.offset.y = y;
-		y += menu->buttons[i]->bg.ai.size.h + 30;
-	}
+	menu->buttons[1] = new_button("voyageur_2",  0.5, ACTION_START_SOLO_2,   MENU_BOARD);
+	menu->buttons[1]->bg.ai.at = AT_CENTER;
+	menu->buttons[1]->bg.ai.offset.x = 300;
+	menu->buttons[1]->bg.ai.offset.y = 300;
 
 	return menu;
 }
@@ -285,6 +315,20 @@ void button_action(Button* button, MenuId* menuId)
 		case ACTION_END_TURN:
 			end_turn();
 			break;
+		case ACTION_START_SOLO_1:
+			break; // géré dans main.c
+		case ACTION_START_SOLO_2:
+			break; // géré dans main.c
+		case ACTION_LOGIN:
+			break; // géré dans main.c
+		case ACTION_LOGOUT:
+			break; // géré dans main.c
+		case ACTION_SIGNUP:
+			break; // géré dans main.c
+		case ACTION_DEL_ACC:
+			break; // géré dans main.c
+		case ACTION_TEMPLE:
+			break; // géré dans board.c
 	}
 
 	if (button->nextMenuId != MENU_NONE)

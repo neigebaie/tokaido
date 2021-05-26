@@ -3,9 +3,9 @@
 
 #include <stdlib.h>
 
-void init_inn(Food** foods);
-void init_shop(Item** items);
-int init_encounter(Player* player);
-int init_hot_spring();
+void init_inn(Food** foods); // initialise les repas du relai
+void init_shop(Item** items); // initialise les souvenirs de l'échoppe
+int init_encounter(Player* player); // choix aléatoire de rencontre
+int init_hot_spring(); // nomre aléatoire de pts de victoires obtenus (entre 2 et 3)
 
 #endif

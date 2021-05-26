@@ -9,16 +9,17 @@
 
 #define TEXT_LEN 512
 
+// action des boutons
 typedef enum
 {
 	ACTION_NONE,
 	ACTION_QUIT,
-	ACTION_START_SOLO,
-	ACTION_START_LAN,
+	ACTION_START_SOLO_1,
+	ACTION_START_SOLO_2,
 	ACTION_LOGIN,
+	ACTION_LOGOUT,
 	ACTION_SIGNUP,
-	ACTION_JOIN_LAN,
-	ACTION_BUY,
+	ACTION_DEL_ACC,
 	ACTION_TEMPLE,
 	ACTION_END_TURN
 } Action;
@@ -29,13 +30,12 @@ typedef enum
 	MENU_MAIN,
 	MENU_LOGIN,
 	MENU_SIGNUP,
-	MENU_ACCOUNT,
-	MENU_LOAD,
-	MENU_SAVE,
+	// MENU_ACCOUNT,
+	// MENU_LOAD,
+	// MENU_SAVE,
 	MENU_CHAR_SEL,
-	MENU_RULES,
+	// MENU_RULES,
 	MENU_ARCHIVES,
-	MENU_SETTINGS,
 	MENU_BOARD
 } MenuId;
 
@@ -56,6 +56,7 @@ typedef struct
 	MenuId nextMenuId;
 } Button;
 
+// zone de saisie
 typedef struct
 {
 	Sprite bg;
@@ -81,17 +82,19 @@ typedef struct
 	int       buttonCount;
 } Menu;
 
+// regroupe tous les menus qui n'ont pas d'élements du jeu
 typedef struct
 {
 	Menu* mainMenu;
 	Menu* loginMenu;
 	Menu* signupMenu;
 	Menu* archivesMenu;
-	Menu* settingsMenu;
+	Menu* charSelMenu;
 
 	Menu* menus[MENU_BOARD];
 } Gui;
 
+// initialise tous les menus
 Gui* init_gui();
 
 // MENU
@@ -101,8 +104,9 @@ Menu* new_main_menu();
 Menu* new_login_menu();
 Menu* new_signup_menu();
 Menu* new_archives_menu();
-Menu* new_settings_menu();
+Menu* new_char_sel_menu();
 
+// affichage / mise à jour / destruction 
 void draw_menu(Menu* menu);
 void update_menu(Menu* menu);
 void destroy_menu(Menu* menu);
